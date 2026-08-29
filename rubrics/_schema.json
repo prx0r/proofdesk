@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ProofDesk Hackathon Validation Rubric",
+  "description": "Machine-readable, deterministic validation criteria for each hackathon entry",
+  "type": "object",
+  "properties": {
+    "hackathon": { "type": "string" },
+    "sponsor_track": { "type": "string" },
+    "entry_name": { "type": "string" },
+    "one_line_pitch": { "type": "string" },
+    "criteria": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "category", "description", "check_type", "check_params", "pass_condition", "sponsor_quote", "demo_script_step", "weight"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[A-Z]{2,3}-[0-9]{3}$" },
+          "category": { "type": "string", "enum": ["core", "demo", "submission", "stretch"] },
+          "description": { "type": "string" },
+          "check_type": {
+            "type": "string",
+            "enum": [
+              "api_call",
+              "api_response_field",
+              "state_machine_check",
+              "hash_chain_check",
+              "code_inspection",
+              "file_exists",
+              "ui_element",
+              "demo_script",
+              "audit_trail",
+              "receipt_check",
+              "negative_test",
+              "deterministic_output"
+            ]
+          },
+          "check_params": { "type": "object" },
+          "pass_condition": { "type": "string" },
+          "fail_condition": { "type": "string" },
+          "sponsor_quote": { "type": "string" },
+          "demo_script_step": { "type": "string" },
+          "weight": { "type": "integer", "minimum": 1, "maximum": 10 },
+          "automatable": { "type": "boolean" },
+          "notes": { "type": "string" }
+        }
+      }
+    }
+  }
+}

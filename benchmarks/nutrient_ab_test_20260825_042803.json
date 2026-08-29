@@ -1,0 +1,849 @@
+{
+  "timestamp": "2026-08-25T04:28:03Z",
+  "nutrient_api_key": "pdf_live_hAAUR0ppmrz...",
+  "results": [
+    {
+      "pdf": "procurement_01_request.pdf",
+      "schema": "procurement_request",
+      "extracted": {
+        "vendor_legal_name": "Northstar Data Systems Ltd.",
+        "requested_spend": 42500,
+        "contract_start": "2026-10-01",
+        "required_coverage_until": "2027-10-01",
+        "payment_terms": "Net 60"
+      },
+      "comparisons": [
+        {
+          "field": "vendor_legal_name",
+          "verdict": "SUPPORTED",
+          "extracted": "Northstar Data Systems Ltd.",
+          "expected": "Northstar Data Systems Ltd.",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "requested_spend",
+          "verdict": "SUPPORTED",
+          "extracted": 42500,
+          "expected": 42500,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        },
+        {
+          "field": "contract_start",
+          "verdict": "SUPPORTED",
+          "extracted": "2026-10-01",
+          "expected": "2026-10-01",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "required_coverage_until",
+          "verdict": "SUPPORTED",
+          "extracted": "2027-10-01",
+          "expected": "2027-10-01",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "payment_terms",
+          "verdict": "SUPPORTED",
+          "extracted": "Net 60",
+          "expected": "Net 60",
+          "confidence": 0.95,
+          "page": 1
+        }
+      ],
+      "verdict": {
+        "overall": "SUPPORTED",
+        "support_rate": 1.0,
+        "supported": 5,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 5
+      },
+      "latency": 4.014117002487183,
+      "credits": 15.0
+    },
+    {
+      "pdf": "procurement_02_quote.pdf",
+      "schema": "procurement_quote",
+      "extracted": {
+        "vendor_legal_name": "Northstar Data Systems Limited",
+        "quote_total": 42500,
+        "platform_price": 35000,
+        "support_price": 7500,
+        "payment_terms": "Net 30",
+        "quote_valid_until": "2026-12-15"
+      },
+      "comparisons": [
+        {
+          "field": "vendor_legal_name",
+          "verdict": "SUPPORTED",
+          "extracted": "Northstar Data Systems Limited",
+          "expected": "Northstar Data Systems Limited",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "quote_total",
+          "verdict": "SUPPORTED",
+          "extracted": 42500,
+          "expected": 42500,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        },
+        {
+          "field": "platform_price",
+          "verdict": "SUPPORTED",
+          "extracted": 35000,
+          "expected": 35000,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        },
+        {
+          "field": "support_price",
+          "verdict": "SUPPORTED",
+          "extracted": 7500,
+          "expected": 7500,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        },
+        {
+          "field": "payment_terms",
+          "verdict": "SUPPORTED",
+          "extracted": "Net 30",
+          "expected": "Net 30",
+          "confidence": 0.95,
+          "page": 1
+        }
+      ],
+      "verdict": {
+        "overall": "SUPPORTED",
+        "support_rate": 1.0,
+        "supported": 5,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 5
+      },
+      "latency": 3.4131641387939453,
+      "credits": 15.0
+    },
+    {
+      "pdf": "procurement_03_insurance.pdf",
+      "schema": "procurement_insurance",
+      "extracted": {
+        "insured_name": "Northstar Data Systems Ltd.",
+        "policy_type": "Commercial General Liability",
+        "policy_number": "CGL-2026-88421",
+        "effective_date": "2026-01-01",
+        "expiry_date": "2027-08-31",
+        "coverage_limit": 2000000
+      },
+      "comparisons": [
+        {
+          "field": "insured_name",
+          "verdict": "SUPPORTED",
+          "extracted": "Northstar Data Systems Ltd.",
+          "expected": "Northstar Data Systems Ltd.",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "policy_type",
+          "verdict": "SUPPORTED",
+          "extracted": "Commercial General Liability",
+          "expected": "Commercial General Liability",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "expiry_date",
+          "verdict": "SUPPORTED",
+          "extracted": "2027-08-31",
+          "expected": "2027-08-31",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "coverage_limit",
+          "verdict": "SUPPORTED",
+          "extracted": 2000000,
+          "expected": 2000000,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        }
+      ],
+      "verdict": {
+        "overall": "SUPPORTED",
+        "support_rate": 1.0,
+        "supported": 4,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 4
+      },
+      "latency": 3.8239850997924805,
+      "credits": 15.0
+    },
+    {
+      "pdf": "procurement_04_security.pdf",
+      "schema": "procurement_security",
+      "extracted": {
+        "company_name": "Northstar Data Systems Ltd.",
+        "data_retention_days": 30,
+        "subprocessor_count": 3,
+        "encryption_at_rest": true,
+        "soc2_type2": true
+      },
+      "comparisons": [
+        {
+          "field": "company_name",
+          "verdict": "SUPPORTED",
+          "extracted": "Northstar Data Systems Ltd.",
+          "expected": "Northstar Data Systems Ltd.",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "data_retention_days",
+          "verdict": "SUPPORTED",
+          "extracted": 30,
+          "expected": 30,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        },
+        {
+          "field": "subprocessor_count",
+          "verdict": "SUPPORTED",
+          "extracted": 3,
+          "expected": 3,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        },
+        {
+          "field": "encryption_at_rest",
+          "verdict": "SUPPORTED",
+          "extracted": true,
+          "expected": true,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        },
+        {
+          "field": "soc2_type2",
+          "verdict": "SUPPORTED",
+          "extracted": true,
+          "expected": true,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        }
+      ],
+      "verdict": {
+        "overall": "SUPPORTED",
+        "support_rate": 1.0,
+        "supported": 5,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 5
+      },
+      "latency": 3.745793581008911,
+      "credits": 15.0
+    },
+    {
+      "pdf": "kyc_01_drivers_license.pdf",
+      "schema": "kyc_id",
+      "extracted": {
+        "full_name": "Sarah Chen",
+        "date_of_birth": "1990-03-15",
+        "license_number": "D1234567",
+        "address": "1847 Mission St, San Francisco, CA 94103",
+        "expiry_date": "2028-03-15"
+      },
+      "comparisons": [
+        {
+          "field": "full_name",
+          "verdict": "SUPPORTED",
+          "extracted": "Sarah Chen",
+          "expected": "Sarah Chen",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "date_of_birth",
+          "verdict": "SUPPORTED",
+          "extracted": "1990-03-15",
+          "expected": "1990-03-15",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "license_number",
+          "verdict": "SUPPORTED",
+          "extracted": "D1234567",
+          "expected": "D1234567",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "expiry_date",
+          "verdict": "SUPPORTED",
+          "extracted": "2028-03-15",
+          "expected": "2028-03-15",
+          "confidence": 0.95,
+          "page": 1
+        }
+      ],
+      "verdict": {
+        "overall": "SUPPORTED",
+        "support_rate": 1.0,
+        "supported": 4,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 4
+      },
+      "latency": 3.511566162109375,
+      "credits": 15.0
+    },
+    {
+      "pdf": "kyc_02_proof_of_address.pdf",
+      "schema": "kyc_address",
+      "extracted": {
+        "account_holder": "Sarah M Chen",
+        "service_address": "1847 Mission St, San Francisco, CA 94103",
+        "billing_period": "August 2026",
+        "amount_due": 142.37
+      },
+      "comparisons": [
+        {
+          "field": "account_holder",
+          "verdict": "SUPPORTED",
+          "extracted": "Sarah M Chen",
+          "expected": "Sarah M Chen",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "service_address",
+          "verdict": "SUPPORTED",
+          "extracted": "1847 Mission St, San Francisco, CA 94103",
+          "expected": "1847 Mission St, San Francisco, CA 94103",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "amount_due",
+          "verdict": "SUPPORTED",
+          "extracted": 142.37,
+          "expected": 142.37,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        }
+      ],
+      "verdict": {
+        "overall": "SUPPORTED",
+        "support_rate": 1.0,
+        "supported": 3,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 3
+      },
+      "latency": 3.513723611831665,
+      "credits": 15.0
+    },
+    {
+      "pdf": "kyc_03_bank_statement.pdf",
+      "schema": "kyc_bank",
+      "extracted": {
+        "account_holder": "Sarah Chen",
+        "statement_period": "2026-08-01 to 2026-08-31",
+        "opening_balance": 12847.52,
+        "closing_balance": 14203.18,
+        "account_type": "Checking"
+      },
+      "comparisons": [
+        {
+          "field": "account_holder",
+          "verdict": "SUPPORTED",
+          "extracted": "Sarah Chen",
+          "expected": "Sarah Chen",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "opening_balance",
+          "verdict": "SUPPORTED",
+          "extracted": 12847.52,
+          "expected": 12847.52,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        },
+        {
+          "field": "closing_balance",
+          "verdict": "SUPPORTED",
+          "extracted": 14203.18,
+          "expected": 14203.18,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        },
+        {
+          "field": "account_type",
+          "verdict": "SUPPORTED",
+          "extracted": "Checking",
+          "expected": "Checking",
+          "confidence": 0.95,
+          "page": 1
+        }
+      ],
+      "verdict": {
+        "overall": "SUPPORTED",
+        "support_rate": 1.0,
+        "supported": 4,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 4
+      },
+      "latency": 4.000009298324585,
+      "credits": 15.0
+    },
+    {
+      "pdf": "invoice_01_vendor_invoice.pdf",
+      "schema": "invoice",
+      "extracted": {
+        "invoice_number": "INV-2026-7891",
+        "invoice_date": "2026-08-20",
+        "due_date": "2026-10-19",
+        "vendor_name": "GlobalTech Manufacturing Co.",
+        "customer_name": "Pacific Imports Ltd.",
+        "total_amount": 315700,
+        "payment_terms": "Net 60",
+        "origin_country": "China"
+      },
+      "comparisons": [
+        {
+          "field": "invoice_number",
+          "verdict": "SUPPORTED",
+          "extracted": "INV-2026-7891",
+          "expected": "INV-2026-7891",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "vendor_name",
+          "verdict": "SUPPORTED",
+          "extracted": "GlobalTech Manufacturing Co.",
+          "expected": "GlobalTech Manufacturing Co.",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "customer_name",
+          "verdict": "SUPPORTED",
+          "extracted": "Pacific Imports Ltd.",
+          "expected": "Pacific Imports Ltd.",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "total_amount",
+          "verdict": "SUPPORTED",
+          "extracted": 315700,
+          "expected": 315700,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        },
+        {
+          "field": "origin_country",
+          "verdict": "SUPPORTED",
+          "extracted": "China",
+          "expected": "China",
+          "confidence": 0.95,
+          "page": 1
+        }
+      ],
+      "verdict": {
+        "overall": "SUPPORTED",
+        "support_rate": 1.0,
+        "supported": 5,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 5
+      },
+      "latency": 4.321038484573364,
+      "credits": 15.0
+    },
+    {
+      "pdf": "trade_01_invoice.pdf",
+      "schema": "trade_invoice",
+      "extracted": {
+        "invoice_number": "INV-2026-7891",
+        "shipper": "GlobalTech Manufacturing Co.",
+        "consignee": "Pacific Imports Ltd.",
+        "origin": "China",
+        "incoterm": "FOB Shanghai",
+        "quantity": "240 units",
+        "total_value": 300000
+      },
+      "comparisons": [
+        {
+          "field": "invoice_number",
+          "verdict": "SUPPORTED",
+          "extracted": "INV-2026-7891",
+          "expected": "INV-2026-7891",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "shipper",
+          "verdict": "SUPPORTED",
+          "extracted": "GlobalTech Manufacturing Co.",
+          "expected": "GlobalTech Manufacturing Co.",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "consignee",
+          "verdict": "SUPPORTED",
+          "extracted": "Pacific Imports Ltd.",
+          "expected": "Pacific Imports Ltd.",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "origin",
+          "verdict": "SUPPORTED",
+          "extracted": "China",
+          "expected": "China",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "incoterm",
+          "verdict": "SUPPORTED",
+          "extracted": "FOB Shanghai",
+          "expected": "FOB Shanghai",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "total_value",
+          "verdict": "SUPPORTED",
+          "extracted": 300000,
+          "expected": 300000,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        }
+      ],
+      "verdict": {
+        "overall": "SUPPORTED",
+        "support_rate": 1.0,
+        "supported": 6,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 6
+      },
+      "latency": 3.607680559158325,
+      "credits": 15.0
+    },
+    {
+      "pdf": "trade_02_bill_of_lading.pdf",
+      "schema": "trade_bol",
+      "extracted": {
+        "bl_number": "COSU6280034100",
+        "shipper": "GlobalTech Manufacturing Co.",
+        "consignee": "Pacific Imports Ltd.",
+        "port_of_loading": "Shanghai, China",
+        "port_of_discharge": "Long Beach, CA",
+        "quantity": "240 cartons",
+        "freight": "Freight Prepaid"
+      },
+      "comparisons": [
+        {
+          "field": "bl_number",
+          "verdict": "SUPPORTED",
+          "extracted": "COSU6280034100",
+          "expected": "COSU6280034100",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "shipper",
+          "verdict": "SUPPORTED",
+          "extracted": "GlobalTech Manufacturing Co.",
+          "expected": "GlobalTech Manufacturing Co.",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "consignee",
+          "verdict": "SUPPORTED",
+          "extracted": "Pacific Imports Ltd.",
+          "expected": "Pacific Imports Ltd.",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "freight",
+          "verdict": "SUPPORTED",
+          "extracted": "Freight Prepaid",
+          "expected": "Freight Prepaid",
+          "confidence": 0.95,
+          "page": 1
+        }
+      ],
+      "verdict": {
+        "overall": "SUPPORTED",
+        "support_rate": 1.0,
+        "supported": 4,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 4
+      },
+      "latency": 3.761410713195801,
+      "credits": 15.0
+    },
+    {
+      "pdf": "trade_03_certificate_origin.pdf",
+      "schema": "trade_certificate",
+      "extracted": {
+        "certificate_number": "H-4412",
+        "country_of_origin": "China",
+        "invoice_reference": "INV-2026-7891",
+        "hs_code": "8501.53",
+        "quantity": "240 units"
+      },
+      "comparisons": [
+        {
+          "field": "country_of_origin",
+          "verdict": "SUPPORTED",
+          "extracted": "China",
+          "expected": "China",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "invoice_reference",
+          "verdict": "SUPPORTED",
+          "extracted": "INV-2026-7891",
+          "expected": "INV-2026-7891",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "hs_code",
+          "verdict": "SUPPORTED",
+          "extracted": "8501.53",
+          "expected": "8501.53",
+          "confidence": 0.95,
+          "page": 1
+        }
+      ],
+      "verdict": {
+        "overall": "SUPPORTED",
+        "support_rate": 1.0,
+        "supported": 3,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 3
+      },
+      "latency": 3.6236276626586914,
+      "credits": 15.0
+    },
+    {
+      "pdf": "mortgage_01_appraisal.pdf",
+      "schema": "mortgage_appraisal",
+      "extracted": {
+        "property_address": "742 Evergreen Terrace, Springfield, IL 62704",
+        "appraiser": "James Mitchell",
+        "property_type": "Single Family Residence",
+        "year_built": 1998,
+        "square_footage": 2340,
+        "appraised_value": 387500,
+        "bedrooms": 4
+      },
+      "comparisons": [
+        {
+          "field": "property_address",
+          "verdict": "SUPPORTED",
+          "extracted": "742 Evergreen Terrace, Springfield, IL 62704",
+          "expected": "742 Evergreen Terrace, Springfield, IL 62704",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "property_type",
+          "verdict": "SUPPORTED",
+          "extracted": "Single Family Residence",
+          "expected": "Single Family Residence",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "year_built",
+          "verdict": "SUPPORTED",
+          "extracted": 1998,
+          "expected": 1998,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        },
+        {
+          "field": "square_footage",
+          "verdict": "SUPPORTED",
+          "extracted": 2340,
+          "expected": 2340,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        },
+        {
+          "field": "appraised_value",
+          "verdict": "SUPPORTED",
+          "extracted": 387500,
+          "expected": 387500,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        },
+        {
+          "field": "bedrooms",
+          "verdict": "SUPPORTED",
+          "extracted": 4,
+          "expected": 4,
+          "confidence": 0.9696927825876808,
+          "page": 1
+        }
+      ],
+      "verdict": {
+        "overall": "SUPPORTED",
+        "support_rate": 1.0,
+        "supported": 6,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 6
+      },
+      "latency": 4.264825105667114,
+      "credits": 15.0
+    },
+    {
+      "pdf": "redaction_01_intake_form.pdf",
+      "schema": "redaction_intake",
+      "extracted": {
+        "patient_name": "Robert Johnson",
+        "date_of_birth": "1975-06-22",
+        "ssn": "123-45-6789",
+        "phone": "(555) 234-5678",
+        "email": "r.johnson@email.com",
+        "insurance_id": "BC-9928371",
+        "chief_complaint": "Lower back pain, 3 weeks duration"
+      },
+      "comparisons": [
+        {
+          "field": "patient_name",
+          "verdict": "SUPPORTED",
+          "extracted": "Robert Johnson",
+          "expected": "Robert Johnson",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "date_of_birth",
+          "verdict": "SUPPORTED",
+          "extracted": "1975-06-22",
+          "expected": "1975-06-22",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "ssn",
+          "verdict": "SUPPORTED",
+          "extracted": "123-45-6789",
+          "expected": "123-45-6789",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "phone",
+          "verdict": "SUPPORTED",
+          "extracted": "(555) 234-5678",
+          "expected": "(555) 234-5678",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "email",
+          "verdict": "SUPPORTED",
+          "extracted": "r.johnson@email.com",
+          "expected": "r.johnson@email.com",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "insurance_id",
+          "verdict": "SUPPORTED",
+          "extracted": "BC-9928371",
+          "expected": "BC-9928371",
+          "confidence": 0.95,
+          "page": 1
+        },
+        {
+          "field": "chief_complaint",
+          "verdict": "SUPPORTED",
+          "extracted": "Lower back pain, 3 weeks duration",
+          "expected": "Lower back pain, 3 weeks duration",
+          "confidence": 0.95,
+          "page": 1
+        }
+      ],
+      "verdict": {
+        "overall": "SUPPORTED",
+        "support_rate": 1.0,
+        "supported": 7,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 7
+      },
+      "latency": 4.679303884506226,
+      "credits": 15.0
+    }
+  ],
+  "summary": {
+    "use_cases": {
+      "procurement": {
+        "supported": 19,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 19
+      },
+      "kyc": {
+        "supported": 11,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 11
+      },
+      "invoice": {
+        "supported": 5,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 5
+      },
+      "trade": {
+        "supported": 13,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 13
+      },
+      "mortgage": {
+        "supported": 6,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 6
+      },
+      "redaction": {
+        "supported": 7,
+        "refuted": 0,
+        "insufficient": 0,
+        "total": 7
+      }
+    },
+    "total_fields": 61,
+    "total_supported": 61,
+    "total_refuted": 0,
+    "total_insufficient": 0
+  }
+}

@@ -1,0 +1,175 @@
+{
+  "hackathon": "DevNetwork API + Cloud + AI 2026",
+  "sponsor_track": "Doctavian",
+  "entry_name": "ProofDesk",
+  "one_line_pitch": "Evidence-gated document execution for high-stakes business workflows",
+  "submission_line": "Doctavian converts ProofDesk's approved structured record into the final conditional approval packet, including repeated line items, calculated values, and branch-specific clauses.",
+  "acceptance_gate": "Modify fixture data and regenerate. Loops, totals, conditional clauses, and exception appendix must change correctly.",
+  "criteria": [
+    {
+      "id": "DOC-001",
+      "category": "core",
+      "description": "Actual Doctavian generation API called (not mocked or free-written by LLM)",
+      "check_type": "api_call",
+      "check_params": {
+        "endpoint": "POST /v1/cases/{id}/generate",
+        "expected_state_after": "GENERATED",
+        "response_must_contain": ["artifact_id", "content_hash"]
+      },
+      "pass_condition": "Generate endpoint returns artifact_id and content_hash, state becomes GENERATED",
+      "fail_condition": "Generate returns mocked data or LLM-free-written content",
+      "sponsor_quote": "actually call Doctavian's generation API to shape a real document",
+      "demo_script_step": "1:45-2:15 — Call Doctavian, show generated artifact with template ID",
+      "weight": 10,
+      "automatable": true
+    },
+    {
+      "id": "DOC-002",
+      "category": "core",
+      "description": "Generated document contains LOOP — repeated line items from structured record",
+      "check_type": "deterministic_output",
+      "check_params": {
+        "output_field": "generated_document",
+        "loop_pattern": "Platform License|Support Services",
+        "min_repetitions": 2
+      },
+      "pass_condition": "Document contains at least 2 repeated line items (Platform $35,000 + Support $7,500)",
+      "fail_condition": "No repeated elements or all items hardcoded",
+      "sponsor_quote": "loop: quote line items or obligations",
+      "demo_script_step": "1:55 — Show line items in generated approval memo",
+      "weight": 9,
+      "automatable": true
+    },
+    {
+      "id": "DOC-003",
+      "category": "core",
+      "description": "Generated document contains BRANCHING — different output based on approval status (approve / conditional / reject)",
+      "check_type": "deterministic_output",
+      "check_params": {
+        "output_field": "generated_document",
+        "branch_indicators": ["APPROVED", "CONDITIONALLY APPROVED", "REJECTED"],
+        "conditional_clauses": ["condition", "obligation", "requirement"]
+      },
+      "pass_condition": "Document contains approval status branch and conditional clause (e.g. 'renewed insurance required')",
+      "fail_condition": "Static document regardless of data, no branching",
+      "sponsor_quote": "branch: approve / conditional approve / reject",
+      "demo_script_step": "1:50 — Show 'CONDITIONALLY APPROVED' with insurance renewal obligation",
+      "weight": 9,
+      "automatable": true
+    },
+    {
+      "id": "DOC-004",
+      "category": "core",
+      "description": "Generated document contains CALCULATIONS — derived values (totals, counts, derived dates)",
+      "check_type": "deterministic_output",
+      "check_params": {
+        "output_field": "generated_document",
+        "calculation_indicators": ["42500", "35000", "7500"],
+        "math_check": "35000 + 7500 == 42500"
+      },
+      "pass_condition": "Document shows calculated total ($42,500) derived from components ($35,000 + $7,500)",
+      "fail_condition": "Totals not computed or hardcoded without derivation",
+      "sponsor_quote": "calculation: totals / derived dates / risk count",
+      "demo_script_step": "1:55 — Show calculated quote total in document",
+      "weight": 8,
+      "automatable": true
+    },
+    {
+      "id": "DOC-005",
+      "category": "core",
+      "description": "Generated document contains optional EXCEPTION-RESOLUTION APPENDIX when resolutions exist",
+      "check_type": "deterministic_output",
+      "check_params": {
+        "output_field": "generated_document",
+        "appendix_indicators": ["EXCEPTION", "RESOLUTION", "CONDITIONAL"],
+        "appendix_present_if": "resolutions exist"
+      },
+      "pass_condition": "When resolutions exist, document includes exception/resolution section; when none, section omitted",
+      "fail_condition": "No appendix section or appendix always present regardless of data",
+      "sponsor_quote": "optional exception-resolution appendix",
+      "demo_script_step": "2:00 — Show insurance resolution appendix in generated memo",
+      "weight": 7,
+      "automatable": true
+    },
+    {
+      "id": "DOC-006",
+      "category": "core",
+      "description": "Generated document contains THRESHOLD-DEPENDENT CLAUSES (e.g. insurance renewal obligation)",
+      "check_type": "deterministic_output",
+      "check_params": {
+        "output_field": "generated_document",
+        "threshold_clauses": ["renewed insurance", "before current policy expires", "required before"]
+      },
+      "pass_condition": "Document contains threshold-dependent clause tied to insurance date gap",
+      "fail_condition": "No conditional obligations based on data thresholds",
+      "sponsor_quote": "threshold-dependent clause",
+      "demo_script_step": "2:00 — Show 'Renewed insurance certificate required before current policy expires'",
+      "weight": 7,
+      "automatable": true
+    },
+    {
+      "id": "DOC-007",
+      "category": "core",
+      "description": "Generated document contains EVIDENCE/RESOLUTION REFERENCES back to source facts",
+      "check_type": "deterministic_output",
+      "check_params": {
+        "output_field": "generated_document",
+        "reference_indicators": ["source", "evidence", "fact", "assertion", "resolution"]
+      },
+      "pass_condition": "Document references source facts, assertions, or resolutions (not just free text)",
+      "fail_condition": "No references to underlying evidence or audit trail",
+      "sponsor_quote": "evidence/resolution references",
+      "demo_script_step": "2:05 — Show evidence appendix referencing extracted facts",
+      "weight": 6,
+      "automatable": true
+    },
+    {
+      "id": "DOC-008",
+      "category": "core",
+      "description": "Document is generated from STRUCTURED RECORD, not free-written by LLM",
+      "check_type": "code_inspection",
+      "check_params": {
+        "flow_must_be": "source evidence -> approved typed record -> template logic -> generated artifact",
+        "must_not_be": "LLM reads source -> free-writes document -> Doctavian renders"
+      },
+      "pass_condition": "Data flow is: facts/assertions -> StructuredRecord -> template -> output",
+      "fail_condition": "LLM generates document content directly, Doctavian used only as renderer",
+      "sponsor_quote": "Do not let an LLM free-write the final document and use Doctavian merely as a renderer",
+      "demo_script_step": "1:45 — Show structured record hash, then generate from that hash",
+      "weight": 10,
+      "automatable": true
+    },
+    {
+      "id": "DOC-009",
+      "category": "core",
+      "description": "Modifying fixture data deterministically changes the generated document",
+      "check_type": "deterministic_output",
+      "check_params": {
+        "test": "change_quote_total -> regenerate -> verify document changes",
+        "specific_check": "different total appears in output"
+      },
+      "pass_condition": "Changing input data produces different output (different totals, different status, different clauses)",
+      "fail_condition": "Same output regardless of input data",
+      "sponsor_quote": "Modify fixture data and regenerate. Loops, totals, conditional clauses, and exception appendix must change correctly.",
+      "demo_script_step": "N/A — validation test, not demo step",
+      "weight": 8,
+      "automatable": true
+    },
+    {
+      "id": "DOC-010",
+      "category": "submission",
+      "description": "One-line statement: where Doctavian did the real work",
+      "check_type": "code_inspection",
+      "check_params": {
+        "file": "README.md",
+        "must_contain": "Doctavian"
+      },
+      "pass_condition": "README contains explicit attribution to Doctavian",
+      "fail_condition": "No mention of Doctavian in README",
+      "sponsor_quote": "one-line 'where Doctavian did the real work'",
+      "demo_script_step": "N/A — submission text",
+      "weight": 3,
+      "automatable": true
+    }
+  ]
+}

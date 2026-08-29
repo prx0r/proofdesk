@@ -1,0 +1,197 @@
+{
+  "hackathon": "DevNetwork API + Cloud + AI 2026",
+  "sponsor_track": "Foxit",
+  "entry_name": "ProofDesk",
+  "one_line_pitch": "Evidence-gated document execution for high-stakes business workflows",
+  "submission_line": "Your Agent Shouldn't Sign That — ProofDesk separates reversible PDF work from irreversible signature through a server-side authority gate.",
+  "acceptance_gate": "Demo a premature signature attempt that fails, resolve the blocker, then show the same path becoming authorized and reaching Foxit eSign with a human signer.",
+  "criteria": [
+    {
+      "id": "FOX-001",
+      "category": "core",
+      "description": "End-to-end flow starts from a plain-language prompt, not a form or config",
+      "check_type": "api_call",
+      "check_params": {
+        "endpoint": "POST /v1/cases",
+        "body_field": "prompt",
+        "min_length": 20
+      },
+      "pass_condition": "Case created with natural language prompt (>= 20 chars), no structured config required",
+      "fail_condition": "Case requires JSON config, form fields, or template selection as input",
+      "sponsor_quote": "starts from a plain prompt and ends with a signed document",
+      "demo_script_step": "0:00-0:20 — Enter plain prompt: 'Prepare Northstar Data Systems for a $42,500 annual software procurement...'",
+      "weight": 8,
+      "automatable": true
+    },
+    {
+      "id": "FOX-002",
+      "category": "core",
+      "description": "Foxit PDF Services used through MCP for meaningful reversible work (merge, compare, compress, or convert)",
+      "check_type": "audit_trail",
+      "check_params": {
+        "events_endpoint": "GET /v1/cases/{id}/events",
+        "required_detail_fields": ["operation", "provider"],
+        "accepted_operations": ["merge_and_compress", "compare_revisions", "convert", "compress"],
+        "provider_must_contain": "foxit"
+      },
+      "pass_condition": "Audit event with Foxit PDF operation (merge/compress/convert) visible in timeline",
+      "fail_condition": "No Foxit PDF operation in audit trail or only signature operation",
+      "sponsor_quote": "use Foxit PDF Services through MCP for meaningful reversible work, e.g. merge approval memo + evidence appendix; compare revisions; compress/convert final packet",
+      "demo_script_step": "2:15-2:40 — Show Foxit MCP merge/compress in execution timeline",
+      "weight": 9,
+      "automatable": true
+    },
+    {
+      "id": "FOX-003",
+      "category": "core",
+      "description": "Signature is NOT exposed as an unrestricted agent tool — it is gated server-side",
+      "check_type": "code_inspection",
+      "check_params": {
+        "files": ["src/state/machine.py"],
+        "must_contain": ["can_request_signature"],
+        "must_not_contain": ["agent.*sign", "tool.*sign"]
+      },
+      "pass_condition": "SignatureGate function exists in server code, not callable as agent tool",
+      "fail_condition": "Signature exposed as unrestricted tool or no server-side gate",
+      "sponsor_quote": "Signature is not exposed as an unrestricted tool",
+      "demo_script_step": "1:20 — Show premature signature attempt blocked by server-side gate",
+      "weight": 10,
+      "automatable": true
+    },
+    {
+      "id": "FOX-004",
+      "category": "core",
+      "description": "SignatureGate checks zero unresolved blockers",
+      "check_type": "negative_test",
+      "check_params": {
+        "endpoint": "GET /v1/cases/{id}/signature-gate",
+        "precondition": "case has unresolved BLOCKER assertion",
+        "expected_allowed": false,
+        "expected_reason_code": "UNRESOLVED_BLOCKER"
+      },
+      "pass_condition": "Gate returns allowed=false with UNRESOLVED_BLOCKER reason when blockers exist",
+      "fail_condition": "Gate allows signature with unresolved blockers",
+      "sponsor_quote": "zero unresolved blockers",
+      "demo_script_step": "0:55-1:20 — Attempt signature, gate denies with UNRESOLVED_BLOCKER",
+      "weight": 10,
+      "automatable": true
+    },
+    {
+      "id": "FOX-005",
+      "category": "core",
+      "description": "SignatureGate checks human approval is present",
+      "check_type": "negative_test",
+      "check_params": {
+        "endpoint": "GET /v1/cases/{id}/signature-gate",
+        "precondition": "case state=PREPARED but no human approval",
+        "expected_allowed": false,
+        "expected_reason_code": "NO_HUMAN_APPROVAL"
+      },
+      "pass_condition": "Gate returns allowed=false with NO_HUMAN_APPROVAL when no approval exists",
+      "fail_condition": "Gate allows signature without human approval",
+      "sponsor_quote": "human approval present",
+      "demo_script_step": "1:00 — Gate shows NO_HUMAN_APPROVAL in denial reasons",
+      "weight": 9,
+      "automatable": true
+    },
+    {
+      "id": "FOX-006",
+      "category": "core",
+      "description": "SignatureGate checks structured record hash matches approval hash",
+      "check_type": "hash_chain_check",
+      "check_params": {
+        "gate_check": "approval.structured_record_hash == case.structured_record_hash",
+        "failure_code": "ARTIFACT_HASH_MISMATCH"
+      },
+      "pass_condition": "Gate compares record hash at approval time vs current record hash",
+      "fail_condition": "No hash comparison or gate skips this check",
+      "sponsor_quote": "structured record hash matches approval",
+      "demo_script_step": "1:10 — Gate checks hash integrity",
+      "weight": 8,
+      "automatable": true
+    },
+    {
+      "id": "FOX-007",
+      "category": "core",
+      "description": "SignatureGate checks artifact hash is frozen/current (not stale)",
+      "check_type": "hash_chain_check",
+      "check_params": {
+        "gate_check": "artifact.hash == case.approved_artifact_hash",
+        "failure_code": "ARTIFACT_HASH_MISMATCH"
+      },
+      "pass_condition": "Gate verifies generated artifact hash matches what was approved",
+      "fail_condition": "No artifact hash check or stale artifact accepted",
+      "sponsor_quote": "artifact hash is frozen/current",
+      "demo_script_step": "1:10 — Gate verifies artifact integrity",
+      "weight": 8,
+      "automatable": true
+    },
+    {
+      "id": "FOX-008",
+      "category": "core",
+      "description": "SignatureGate checks signer is supplied",
+      "check_type": "negative_test",
+      "check_params": {
+        "endpoint": "GET /v1/cases/{id}/signature-gate",
+        "precondition": "all other conditions met but no signer",
+        "expected_allowed": false
+      },
+      "pass_condition": "Gate requires signer field before allowing signature",
+      "fail_condition": "Gate allows signature without signer",
+      "sponsor_quote": "signer is supplied",
+      "demo_script_step": "1:10 — Signer field required",
+      "weight": 6,
+      "automatable": true
+    },
+    {
+      "id": "FOX-009",
+      "category": "core",
+      "description": "Foxit eSign called directly after gate passes, with human signer",
+      "check_type": "api_call",
+      "check_params": {
+        "endpoint": "POST /v1/cases/{id}/signature-request",
+        "body_field": "signer",
+        "expected_state_after": "SIGNATURE_REQUESTED"
+      },
+      "pass_condition": "Foxit eSign API called with human signer email after gate passes",
+      "fail_condition": "eSign called without gate passing or no signer",
+      "sponsor_quote": "Only then call Foxit eSign directly. Human performs signature.",
+      "demo_script_step": "2:15-2:40 — Foxit eSign sent to human signer",
+      "weight": 9,
+      "automatable": true
+    },
+    {
+      "id": "FOX-010",
+      "category": "core",
+      "description": "Signature status becomes an audit event in the receipt",
+      "check_type": "audit_trail",
+      "check_params": {
+        "events_endpoint": "GET /v1/cases/{id}/events",
+        "required_event_types": ["STATE_TRANSITION"],
+        "states_included": ["SIGNATURE_AUTHORIZED", "SIGNATURE_REQUESTED", "SIGNED"],
+        "detail_must_contain": ["signer", "signed_at"]
+      },
+      "pass_condition": "SIGNATURE_REQUESTED and SIGNED events exist with signer and timestamp",
+      "fail_condition": "No signature events in audit trail",
+      "sponsor_quote": "Signature status becomes an audit event",
+      "demo_script_step": "2:40-3:00 — Show signature events in receipt timeline",
+      "weight": 7,
+      "automatable": true
+    },
+    {
+      "id": "FOX-011",
+      "category": "submission",
+      "description": "Authority handoff from reversible to irreversible is explicitly defended in demo/narration",
+      "check_type": "demo_script",
+      "check_params": {
+        "narration_must_contain": ["reversible", "irreversible", "authority", "commitment"]
+      },
+      "pass_condition": "Demo narration explicitly distinguishes reversible PDF work from irreversible signature",
+      "fail_condition": "No distinction made between PDF prep and signature",
+      "sponsor_quote": "Signing is not a document transformation. It is an authority transition.",
+      "demo_script_step": "2:15-2:40 — Narrate: 'PDF prep is reversible. Signature creates commitment.'",
+      "weight": 5,
+      "automatable": false
+    }
+  ]
+}

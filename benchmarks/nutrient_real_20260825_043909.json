@@ -1,0 +1,465 @@
+{
+  "timestamp": "2026-08-25T04:39:09Z",
+  "sroie": {
+    "results": [
+      {
+        "id": "000",
+        "extracted": {
+          "company": "\u0406\u0430\u044c \u043c\u043e\u043e\u043f \u0443\u0430\u0444\u0444 / \u0412\u041e\u041e\u041a \u0422\u0410-\u041a (\u0422\u0410\u041c\u0410\u041c \u0411\u0410\u0423\u0410) \u041e\u0410\u0423\u0410)5\u042f\u041d \u0412\u051e\u041e\u042c",
+          "date": "25/1/0188 11 8 1 \u0420\u0418 \u0417\u0430 \u041c\u0410\u04a55 \u0420\u0418",
+          "address": "\u041d\u039f 5 58,57459, \u0408\u0410\u0413\u0410\u041c \u0424\u0410\u0421\u0424 1, \u0422\u0410\u041c\u0410\u0427 \u0420\u0410\u0422\u0410.",
+          "total": "00"
+        },
+        "ground_truth": {
+          "company": "BOOK TA .K (TAMAN DAYA) SDN BHD",
+          "date": "25/12/2018",
+          "address": "NO.53 55,57 & 59, JALAN SAGU 18, TAMAN DAYA, 81100 JOHOR BAHRU, JOHOR.",
+          "total": "9.00"
+        },
+        "field_verdicts": {
+          "company": "REFUTED",
+          "date": "REFUTED",
+          "total": "SUPPORTED",
+          "address": "REFUTED"
+        },
+        "accuracy": 0.25,
+        "latency": 6.098275184631348
+      },
+      {
+        "id": "001",
+        "extracted": {
+          "company": "\u00ab\u0430\u043f \u043c\u043e\u043e\u043f \u0443\u0430\u043f\u043f",
+          "date": "1",
+          "address": "\u0433-",
+          "total": "~\" --"
+        },
+        "ground_truth": {
+          "company": "INDAH GIFT & HOME DECO",
+          "date": "19/10/2018",
+          "address": "27, JALAN DEDAP 13, TAMAN JOHOR JAYA, 81100 JOHOR BAHRU, JOHOR.",
+          "total": "60.30"
+        },
+        "field_verdicts": {
+          "company": "REFUTED",
+          "date": "SUPPORTED",
+          "total": "REFUTED",
+          "address": "REFUTED"
+        },
+        "accuracy": 0.25,
+        "latency": 5.10683012008667
+      },
+      {
+        "id": "002",
+        "extracted": {
+          "company": "ME D.I.Y. (JOHOR) SON BHO",
+          "date": "12-01-19",
+          "address": "LOT 1851-A & 1853-B, JALAN KPB 6, KAWASAN PERINDUSTRIAN BALAKONG, 43300 SERI KEMBANGAN, SELANGOR",
+          "total": "RM 33.90"
+        },
+        "ground_truth": {
+          "company": "MR D.I.Y. (JOHOR) SDN BHD",
+          "date": "12-01-19",
+          "address": "LOT 1851-A & 1851-B, JALAN KPB 6, KAWASAN PERINDUSTRIAN BALAKONG, 43300 SERI KEMBANGAN, SELANGOR (MR DIY TESCO TERBAU)",
+          "total": "33.90"
+        },
+        "field_verdicts": {
+          "company": "REFUTED",
+          "date": "SUPPORTED",
+          "total": "SUPPORTED",
+          "address": "REFUTED"
+        },
+        "accuracy": 0.5,
+        "latency": 10.246559858322144
+      },
+      {
+        "id": "003",
+        "extracted": {
+          "company": "\u045c\u0430\u043f \u043c\u043e\u043e\u043f \u0443\u0430\u043f\u043f",
+          "date": "\u0421\u0410\u0422",
+          "address": "(\u041c\u043e\u0442, \u0453\u0435\u0431) \u041d\u043e \u0422\u043e \u0422\u0430\u0414 \u0408\u0410\u041b \u0410\u041d \u0411\u0415\u041e\u0410\u0420 14 84100 \u0408\u041e\u041d\u041e\u041a \u0412\u0410\u041d\u041a\u040f",
+          "total": "80.91"
+        },
+        "ground_truth": {
+          "company": "YONGFATT ENTERPRISE",
+          "date": "25/12/2018",
+          "address": "NO 122.124. JALAN DEDAP 13 81100 JOHOR BAHRU",
+          "total": "80.90"
+        },
+        "field_verdicts": {
+          "company": "REFUTED",
+          "date": "REFUTED",
+          "total": "SUPPORTED",
+          "address": "REFUTED"
+        },
+        "accuracy": 0.25,
+        "latency": 5.624454498291016
+      },
+      {
+        "id": "004",
+        "extracted": {
+          "company": "tan woon yann",
+          "date": "",
+          "address": "",
+          "total": ""
+        },
+        "ground_truth": {
+          "company": "MR D.I.Y. (M) SDN BHD",
+          "date": "18-11-18",
+          "address": "LOT 1851-A & 1851-B, JALAN KPB 6, KAWASAN PERINDUSTRIAN BALAKONG, 43300 SERI KEMBANGAN, SELANGOR (TESCO PUTRA NILAI)",
+          "total": "30.90"
+        },
+        "field_verdicts": {
+          "company": "REFUTED",
+          "date": "SUPPORTED",
+          "total": "SUPPORTED",
+          "address": "SUPPORTED"
+        },
+        "accuracy": 0.75,
+        "latency": 6.432117700576782
+      },
+      {
+        "id": "005",
+        "extracted": {
+          "company": "tan chay yee",
+          "date": "09/01/2019 8:01:11 PM",
+          "address": "ABC HO TRADING No.2&4, JALAN HARMONT 3/2, TAMAN DESA HARMONT. 81100 JOHOR BAHRUJOHOR 07-355 2616",
+          "total": "RM 31.00"
+        },
+        "ground_truth": {
+          "company": "ABC HO TRADING",
+          "date": "09/01/2019",
+          "address": "NO.2&4, JALAN HARMONI 3/2, TAMAN DESA HARMONI. 81100 JOHOR BAHRU JOHOR",
+          "total": "31.00"
+        },
+        "field_verdicts": {
+          "company": "REFUTED",
+          "date": "SUPPORTED",
+          "total": "SUPPORTED",
+          "address": "REFUTED"
+        },
+        "accuracy": 0.5,
+        "latency": 5.949457168579102
+      },
+      {
+        "id": "006",
+        "extracted": {
+          "company": "SOON HUAT MACHINERY ENTERPRISE",
+          "date": "11/01/2019",
+          "address": "NO.53 1\u0423\u041a) PUTRA 1, TAMAN SRI PUTRA. 81200 JOHOR BAHRU JOHOR",
+          "total": "327.00"
+        },
+        "ground_truth": {
+          "company": "SOON HUAT MACHINERY ENTERPRISE",
+          "date": "11/01/2019",
+          "address": "NO.53 JALAN PUTRA 1, TAMAN SRI PUTRA, 81200 JOHOR BAHRU JOHOR",
+          "total": "327.00"
+        },
+        "field_verdicts": {
+          "company": "SUPPORTED",
+          "date": "SUPPORTED",
+          "total": "SUPPORTED",
+          "address": "REFUTED"
+        },
+        "accuracy": 0.75,
+        "latency": 7.559353590011597
+      },
+      {
+        "id": "007",
+        "extracted": {
+          "company": "tan chay yee",
+          "date": "23-01-2019 13:14:15 PM",
+          "address": "No. 343, Jalan Kurau, Sungai Rengit, 81620 Pengerang, Johor.",
+          "total": "20.00"
+        },
+        "ground_truth": {
+          "company": "S.H.H. MOTOR (SUNGAI RENGIT) SDN. BHD.",
+          "date": "23-01-2019",
+          "address": "NO. 343, JALAN KURAU, SUNGAI RENGIT, 81620 PENGERANG, JOHOR.",
+          "total": "20.00"
+        },
+        "field_verdicts": {
+          "company": "REFUTED",
+          "date": "SUPPORTED",
+          "total": "SUPPORTED",
+          "address": "SUPPORTED"
+        },
+        "accuracy": 0.75,
+        "latency": 5.020977973937988
+      },
+      {
+        "id": "008",
+        "extracted": {
+          "company": "AXYWANS 159",
+          "date": "",
+          "address": "",
+          "total": "990"
+        },
+        "ground_truth": {
+          "company": "PERNIAGAAN ZHENG HUI",
+          "date": "12/02/2018",
+          "address": "NO.59 JALAN PERMAS 9/5 BANDAR BARU PERMAS JAYA 81760 JOHOR BAHRU",
+          "total": "112.45"
+        },
+        "field_verdicts": {
+          "company": "REFUTED",
+          "date": "SUPPORTED",
+          "total": "REFUTED",
+          "address": "SUPPORTED"
+        },
+        "accuracy": 0.5,
+        "latency": 8.615293502807617
+      },
+      {
+        "id": "009",
+        "extracted": {
+          "company": "Gerbang Alaf Restaurants Sdn Bhd (65351-M)",
+          "date": "18/01/2018",
+          "address": "Level 6, Bangunan TH, Damansara Uptown3\nNo.3, Jalan $$21/39,47400 Petaling Jaya Selangor",
+          "total": "26.60"
+        },
+        "ground_truth": {
+          "company": "GERBANG ALAF RESTAURANTS SDN BHD",
+          "date": "18/01/2018",
+          "address": "LEVEL 6, BANGUNAN TH, DAMANSARA UPTOWN3 NO.3, JALAN SS21/39,47400 PETALING JAYA SELANGOR",
+          "total": "26.60"
+        },
+        "field_verdicts": {
+          "company": "SUPPORTED",
+          "date": "SUPPORTED",
+          "total": "SUPPORTED",
+          "address": "REFUTED"
+        },
+        "accuracy": 0.75,
+        "latency": 6.16357159614563
+      }
+    ],
+    "field_summary": {
+      "company": {
+        "supported": 2,
+        "total": 10
+      },
+      "date": {
+        "supported": 8,
+        "total": 10
+      },
+      "total": {
+        "supported": 8,
+        "total": 10
+      },
+      "address": {
+        "supported": 3,
+        "total": 10
+      }
+    }
+  },
+  "cuad": {
+    "results": [
+      {
+        "id": "LohaCompanyltd_20191209_F-1_EX-10.16_11917878_EX-10.16_Supply Agreement",
+        "accuracy": 0.9024390243902439
+      },
+      {
+        "id": "CENTRACKINTERNATIONALINC_10_29_1999-EX-10.3-WEB SITE HOSTING AGREEMENT",
+        "accuracy": 0.8292682926829268
+      },
+      {
+        "id": "DovaPharmaceuticalsInc_20181108_10-Q_EX-10.2_11414857_EX-10.2_Promotion Agreement",
+        "accuracy": 0.4878048780487805
+      },
+      {
+        "id": "PACIRA PHARMACEUTICALS, INC. - A_R STRATEGIC LICENSING, DISTRIBUTION AND MARKETING AGREEMENT ",
+        "accuracy": 0.5121951219512195
+      },
+      {
+        "id": "ThriventVariableInsuranceAccountB_20190701_N-6_EX-99.D(IV)_11720968_EX-99.D(IV)_Endorsement Agreement",
+        "accuracy": 0.975609756097561
+      },
+      {
+        "id": "HERTZGLOBALHOLDINGS,INC_07_07_2016-EX-10.4-INTELLECTUAL PROPERTY AGREEMENT",
+        "accuracy": 0.8292682926829268
+      },
+      {
+        "id": "TUNIUCORP_03_06_2014-EX-10-COOPERATION AGREEMENT",
+        "accuracy": 0.8292682926829268
+      },
+      {
+        "id": "CYBERIANOUTPOSTINC_07_09_1998-EX-10.13-PROMOTION AGREEMENT",
+        "accuracy": 0.7073170731707317
+      },
+      {
+        "id": "MSCIINC_02_28_2008-EX-10.10-",
+        "accuracy": 0.9512195121951219
+      },
+      {
+        "id": "CHERRYHILLMORTGAGEINVESTMENTCORP_09_26_2013-EX-10.1-Strategic Alliance Agreement",
+        "accuracy": 0.926829268292683
+      }
+    ],
+    "label_summary": {
+      "Highlight the parts (if any) of this contract related to \"Document Name\" that should be reviewed by a lawyer. Details: The name of the contract": {
+        "correct": 10,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Parties\" that should be reviewed by a lawyer. Details: The two or more parties who signed the contract": {
+        "correct": 10,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Agreement Date\" that should be reviewed by a lawyer. Details: The date of the contract": {
+        "correct": 10,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Effective Date\" that should be reviewed by a lawyer. Details: The date when the contract is effective\u00a0": {
+        "correct": 8,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Expiration Date\" that should be reviewed by a lawyer. Details: On what date will the contract's initial term expire?": {
+        "correct": 3,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Renewal Term\" that should be reviewed by a lawyer. Details: What is the renewal term after the initial term expires? This includes automatic extensions and unilateral extensions with prior notice.": {
+        "correct": 8,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Notice Period To Terminate Renewal\" that should be reviewed by a lawyer. Details: What is the notice period required to terminate renewal?": {
+        "correct": 8,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Governing Law\" that should be reviewed by a lawyer. Details: Which state/country's law governs the interpretation of the contract?": {
+        "correct": 1,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Most Favored Nation\" that should be reviewed by a lawyer. Details: Is there a clause that if a third party gets better terms on the licensing or sale of technology/goods/services described in the contract, the buyer of such technology/goods/services under the contract shall be entitled to those better terms?": {
+        "correct": 10,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Non-Compete\" that should be reviewed by a lawyer. Details: Is there a restriction on the ability of a party to compete with the counterparty or operate in a certain geography or business or technology sector?\u00a0": {
+        "correct": 6,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Exclusivity\" that should be reviewed by a lawyer. Details: Is there an exclusive dealing\u00a0 commitment with the counterparty? This includes a commitment to procure all \u201crequirements\u201d from one party of certain technology, goods, or services or a prohibition on licensing or selling technology, goods or services to third parties, or a prohibition on\u00a0 collaborating or working with other parties), whether during the contract or\u00a0 after the contract ends (or both).": {
+        "correct": 8,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"No-Solicit Of Customers\" that should be reviewed by a lawyer. Details: Is a party restricted from contracting or soliciting customers or partners of the counterparty, whether during the contract or after the contract ends (or both)?": {
+        "correct": 10,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Competitive Restriction Exception\" that should be reviewed by a lawyer. Details: This category includes the exceptions or carveouts to Non-Compete, Exclusivity and No-Solicit of Customers above.": {
+        "correct": 8,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"No-Solicit Of Employees\" that should be reviewed by a lawyer. Details: Is there a restriction on a party\u2019s soliciting or hiring employees and/or contractors from the\u00a0 counterparty, whether during the contract or after the contract ends (or both)?": {
+        "correct": 9,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Non-Disparagement\" that should be reviewed by a lawyer. Details: Is there a requirement on a party not to disparage the counterparty?": {
+        "correct": 10,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Termination For Convenience\" that should be reviewed by a lawyer. Details: Can a party terminate this\u00a0 contract without cause (solely by giving a notice and allowing a waiting\u00a0 period to expire)?": {
+        "correct": 5,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Rofr/Rofo/Rofn\" that should be reviewed by a lawyer. Details: Is there a clause granting one party a right of first refusal, right of first offer or right of first negotiation to purchase, license, market, or distribute equity interest, technology, assets, products or services?": {
+        "correct": 10,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Change Of Control\" that should be reviewed by a lawyer. Details: Does one party have the right to terminate or is consent or notice required of the counterparty if such party undergoes a change of control, such as a merger, stock sale, transfer of all or substantially all of its assets or business, or assignment by operation of law?": {
+        "correct": 8,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Anti-Assignment\" that should be reviewed by a lawyer. Details: Is consent or notice required of a party if the contract is assigned to a third party?": {
+        "correct": 3,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Revenue/Profit Sharing\" that should be reviewed by a lawyer. Details: Is one party required to share revenue or profit with the counterparty for any technology, goods, or\u00a0services?": {
+        "correct": 7,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Price Restrictions\" that should be reviewed by a lawyer. Details: Is there a restriction on the\u00a0 ability of a party to raise or reduce prices of technology, goods, or\u00a0 services provided?": {
+        "correct": 10,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Minimum Commitment\" that should be reviewed by a lawyer. Details: Is there a minimum order size or minimum amount or units per-time period that one party must buy from the counterparty under the contract?": {
+        "correct": 8,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Volume Restriction\" that should be reviewed by a lawyer. Details: Is there a fee increase or consent requirement, etc. if one party\u2019s use of the product/services exceeds certain threshold?": {
+        "correct": 10,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Ip Ownership Assignment\" that should be reviewed by a lawyer. Details: Does intellectual property created\u00a0 by one party become the property of the counterparty, either per the terms of the contract or upon the occurrence of certain events?": {
+        "correct": 6,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Joint Ip Ownership\" that should be reviewed by a lawyer. Details: Is there any clause providing for joint or shared ownership of intellectual property between the parties to the contract?": {
+        "correct": 9,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"License Grant\" that should be reviewed by a lawyer. Details: Does the contract contain a license granted by one party to its counterparty?": {
+        "correct": 6,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Non-Transferable License\" that should be reviewed by a lawyer. Details: Does the contract limit the ability of a party to transfer the license being granted to a third party?": {
+        "correct": 8,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Affiliate License-Licensor\" that should be reviewed by a lawyer. Details: Does the contract contain a license grant by affiliates of the licensor or that includes intellectual property of affiliates of the licensor?\u00a0": {
+        "correct": 10,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Affiliate License-Licensee\" that should be reviewed by a lawyer. Details: Does the contract contain a license grant to a licensee (incl. sublicensor) and the affiliates of such licensee/sublicensor?": {
+        "correct": 9,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Unlimited/All-You-Can-Eat-License\" that should be reviewed by a lawyer. Details: Is there a clause granting one party an \u201centerprise,\u201d \u201call you can eat\u201d or unlimited usage license?": {
+        "correct": 10,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Irrevocable Or Perpetual License\" that should be reviewed by a lawyer. Details: Does the contract contain a\u00a0 license grant that is irrevocable or perpetual?": {
+        "correct": 9,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Source Code Escrow\" that should be reviewed by a lawyer. Details: Is one party required to deposit its source code into escrow with a third party, which can be released to the counterparty upon the occurrence of certain events (bankruptcy,\u00a0 insolvency, etc.)?": {
+        "correct": 10,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Post-Termination Services\" that should be reviewed by a lawyer. Details: Is a party subject to obligations after the termination or expiration of a contract, including any post-termination transition, payment, transfer of IP, wind-down, last-buy, or similar commitments?": {
+        "correct": 9,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Audit Rights\" that should be reviewed by a lawyer. Details: Does a party have the right to\u00a0 audit the books, records, or physical locations of the counterparty to ensure compliance with the contract?": {
+        "correct": 7,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Uncapped Liability\" that should be reviewed by a lawyer. Details: Is a party\u2019s liability uncapped upon the breach of its obligation in the contract? This also includes uncap liability for a particular type of breach such as IP infringement or breach of confidentiality obligation.": {
+        "correct": 8,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Cap On Liability\" that should be reviewed by a lawyer. Details: Does the contract include a cap on liability upon the breach of a party\u2019s obligation? This includes time limitation for the counterparty to bring claims or maximum amount for recovery.": {
+        "correct": 4,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Liquidated Damages\" that should be reviewed by a lawyer. Details: Does the contract contain a clause that would award either party liquidated damages for breach or a fee upon the termination of a contract (termination fee)?": {
+        "correct": 8,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Warranty Duration\" that should be reviewed by a lawyer. Details: What is the duration of any\u00a0 warranty against defects or errors in technology, products, or services\u00a0 provided under the contract?": {
+        "correct": 9,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Insurance\" that should be reviewed by a lawyer. Details: Is there a requirement for insurance that must be maintained by one party for the benefit of the counterparty?": {
+        "correct": 6,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Covenant Not To Sue\" that should be reviewed by a lawyer. Details: Is a party restricted from contesting the validity of the counterparty\u2019s ownership of intellectual property or otherwise bringing a claim against the counterparty for matters unrelated to the contract?": {
+        "correct": 8,
+        "total": 10
+      },
+      "Highlight the parts (if any) of this contract related to \"Third Party Beneficiary\" that should be reviewed by a lawyer. Details: Is there a non-contracting party who is a beneficiary to some or all of the clauses in the contract and therefore can enforce its rights against a contracting party?": {
+        "correct": 10,
+        "total": 10
+      }
+    }
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "sroie": {
+    "source": "ICDAR-2019-SROIE (receipts)",
+    "n_documents": 100,
+    "n_checks": 400,
+    "accuracy": 0.925,
+    "pass_rate": 0.925,
+    "checks_per_doc": 4.0
+  },
+  "cuad": {
+    "source": "CUAD (contracts)",
+    "n_documents": 100,
+    "n_checks": 4100,
+    "accuracy": 0.7841,
+    "pass_rate": 0.7841,
+    "checks_per_doc": 41.0,
+    "n_labels": 41,
+    "hardest_labels": [
+      {
+        "label": "Governing Law",
+        "accuracy": 0.19
+      },
+      {
+        "label": "Anti-Assignment",
+        "accuracy": 0.3
+      },
+      {
+        "label": "Expiration Date",
+        "accuracy": 0.34
+      },
+      {
+        "label": "Cap On Liability",
+        "accuracy": 0.58
+      },
+      {
+        "label": "License Grant",
+        "accuracy": 0.59
+      }
+    ]
+  },
+  "overall": {
+    "total_documents": 200,
+    "total_checks": 4500,
+    "overall_accuracy": 0.7966
+  }
+}

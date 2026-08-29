@@ -1,0 +1,54 @@
+# Secrets
+.env
+.env.keys
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Data (large files)
+data/datasets/
+data/test_pdfs/
+data/cord/
+data/funsd/
+data/realkie/
+
+# Logs
+*.log
+/tmp/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Foxit lab (separate)
+foxit/
+
+# Vendor (external)
+vendor/
+
+# Imported (external)
+imported/
+
+# Archive (stale)
+_archive/
+
+# Kaggle
+kaggle_kernel/
+
+# Benchmarks (large output)
+/tmp/proofdesk/
+.env
+.env.keys

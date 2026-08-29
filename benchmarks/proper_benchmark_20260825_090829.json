@@ -1,0 +1,22 @@
+{
+  "procurement": {
+    "docs": 4,
+    "accuracy": 1.0
+  },
+  "receipt": {
+    "docs": 20,
+    "accuracy": 0.0
+  },
+  "contract": {
+    "docs": 20
+  },
+  "overall": {
+    "correct": 14,
+    "total": 14,
+    "accuracy": 1.0
+  },
+  "confidence": {
+    "mean": 0.4995447936958551,
+    "std": 0.4656147301566526
+  }
+}

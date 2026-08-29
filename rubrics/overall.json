@@ -1,0 +1,179 @@
+{
+  "hackathon": "DevNetwork API + Cloud + AI 2026",
+  "sponsor_track": "overall",
+  "entry_name": "ProofDesk",
+  "one_line_pitch": "Evidence-gated document execution for high-stakes business workflows",
+  "criteria": [
+    {
+      "id": "DEV-001",
+      "category": "core",
+      "description": "PROGRESS: Full live path shown, not slides — prompt to extraction to review to generation to PDF to signature",
+      "check_type": "demo_script",
+      "check_params": {
+        "required_demo_steps": [
+          "prompt_entry",
+          "nutrient_extraction",
+          "evidence_review",
+          "human_resolution",
+          "document_generation",
+          "pdf_preparation",
+          "signature_gate",
+          "esign_request"
+        ]
+      },
+      "pass_condition": "All 8 demo steps visible in execution timeline with timestamps",
+      "fail_condition": "Any step missing or shown as slide/mockup",
+      "sponsor_quote": "How much progress did you make?",
+      "demo_script_step": "Full 3-minute demo",
+      "weight": 10,
+      "automatable": true
+    },
+    {
+      "id": "DEV-002",
+      "category": "core",
+      "description": "CONCEPT: Real problem clear in first 20 seconds — businesses cannot let uncertain model output become signed commitments",
+      "check_type": "demo_script",
+      "check_params": {
+        "opening_narration_must_contain": ["dangerous", "uncertain", "signed", "commitment"]
+      },
+      "pass_condition": "Opening narration articulates the problem of AI-generated signed documents",
+      "fail_condition": "No clear problem statement in first 20 seconds",
+      "sponsor_quote": "Does it solve a real problem?",
+      "demo_script_step": "0:00-0:20 — 'Agents can read and draft documents. The dangerous part is letting uncertain model output become a signed commitment.'",
+      "weight": 9,
+      "automatable": false
+    },
+    {
+      "id": "DEV-003",
+      "category": "core",
+      "description": "FEASIBILITY: Startup thesis clear in final 20 seconds — provider-neutral trust control plane for AI document workflows",
+      "check_type": "demo_script",
+      "check_params": {
+        "closing_narration_must_contain": ["trust", "control", "document", "workflows"],
+        "verticals_mentioned": ["procurement", "contracts", "insurance"]
+      },
+      "pass_condition": "Closing narration states startup thesis with at least 2 verticals",
+      "fail_condition": "No startup thesis or only procurement mentioned",
+      "sponsor_quote": "Could this become a startup or company?",
+      "demo_script_step": "2:40-3:00 — 'The product can generalize to procurement, contracts, insurance, financial operations...'",
+      "weight": 7,
+      "automatable": false
+    },
+    {
+      "id": "DEV-004",
+      "category": "submission",
+      "description": "Public repo with setup instructions, README, and working demo",
+      "check_type": "file_exists",
+      "check_params": {
+        "required_files": ["README.md", "requirements.txt", "demo.py"],
+        "readme_min_length": 500
+      },
+      "pass_condition": "All files exist, README has > 500 chars with setup instructions",
+      "fail_condition": "Missing files or no setup instructions",
+      "sponsor_quote": "public repo/shared link + setup",
+      "demo_script_step": "N/A",
+      "weight": 5,
+      "automatable": true
+    },
+    {
+      "id": "DEV-005",
+      "category": "submission",
+      "description": "2-4 minute end-to-end demo video",
+      "check_type": "file_exists",
+      "check_params": {
+        "video_file_patterns": ["*.mp4", "*.mov", "*.webm"],
+        "max_duration_seconds": 240,
+        "min_duration_seconds": 60
+      },
+      "pass_condition": "Demo video exists, 1-4 minutes long",
+      "fail_condition": "No video or video < 1 minute",
+      "sponsor_quote": "2–4 minute end-to-end demo",
+      "demo_script_step": "N/A",
+      "weight": 5,
+      "automatable": false
+    },
+    {
+      "id": "DEV-006",
+      "category": "submission",
+      "description": "All three sponsor tracks selected on Devpost",
+      "check_type": "code_inspection",
+      "check_params": {
+        "sponsor_tracks": ["Nutrient DWS", "Foxit", "Doctavian"]
+      },
+      "pass_condition": "Submission includes all three sponsor tracks",
+      "fail_condition": "Missing any sponsor track",
+      "sponsor_quote": "sponsor tracks selected",
+      "demo_script_step": "N/A",
+      "weight": 3,
+      "automatable": false
+    },
+    {
+      "id": "DEV-007",
+      "category": "submission",
+      "description": "Synthetic demo documents only — no real PII",
+      "check_type": "code_inspection",
+      "check_params": {
+        "fixture_file": "src/models/golden_fixture.py",
+        "must_not_contain": ["@", "SSN", "social security", "credit card", "real company"]
+      },
+      "pass_condition": "All demo data is synthetic with clearly fake company names",
+      "fail_condition": "Real PII or real company data in fixtures",
+      "sponsor_quote": "synthetic demo documents only",
+      "demo_script_step": "N/A",
+      "weight": 5,
+      "automatable": true
+    },
+    {
+      "id": "DEV-008",
+      "category": "submission",
+      "description": "No secrets in repo, video, or client code",
+      "check_type": "code_inspection",
+      "check_params": {
+        "scan_patterns": ["api_key", "secret", "password", "token", "bearer"],
+        "exclude_files": [".env.example", "rubrics/*"],
+        "gitignore_must_contain": [".env"]
+      },
+      "pass_condition": "No hardcoded secrets in source code or committed config",
+      "fail_condition": "API keys or secrets in codebase",
+      "sponsor_quote": "no secrets in repo/video/client code",
+      "demo_script_step": "N/A",
+      "weight": 5,
+      "automatable": true
+    },
+    {
+      "id": "DEV-009",
+      "category": "submission",
+      "description": "No claim of regulatory certification",
+      "check_type": "code_inspection",
+      "check_params": {
+        "must_not_contain": ["certified", "compliant with", "HIPAA certified", "SOC2 certified", "regulatory approval"]
+      },
+      "pass_condition": "No false compliance claims in README, demo, or code",
+      "fail_condition": "Claims regulatory certification that doesn't exist",
+      "sponsor_quote": "no claim of regulatory certification",
+      "demo_script_step": "N/A",
+      "weight": 3,
+      "automatable": true
+    },
+    {
+      "id": "DEV-010",
+      "category": "core",
+      "description": "Product invariant holds: No irreversible action depends on unresolved or provenance-less fact",
+      "check_type": "state_machine_check",
+      "check_params": {
+        "forbidden_transitions": [
+          ["REVIEW_REQUIRED", "GENERATED"],
+          ["CHECKED", "SIGNATURE_REQUESTED"],
+          ["GENERATED", "SIGNATURE_REQUESTED"]
+        ],
+        "signature_gate_conditions": 6
+      },
+      "pass_condition": "All 3 forbidden transitions blocked AND SignatureGate has 6 conditions",
+      "fail_condition": "Any forbidden transition allowed or gate has fewer than 6 checks",
+      "sponsor_quote": "No irreversible action may depend on an unresolved or provenance-less fact",
+      "demo_script_step": "1:20 — Premature signature blocked by gate",
+      "weight": 10,
+      "automatable": true
+    }
+  ]
+}

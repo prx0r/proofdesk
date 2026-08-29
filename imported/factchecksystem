@@ -1,0 +1,484 @@
+The fact-check system was already the first specialized MetaGraph.
+
+For FACT_CHECK:
+
+claim
+  ↓
+claim compiler
+  ↓
+typed DAG
+  ├─ support search
+  ├─ refute search
+  ├─ primary-source search
+  ├─ date/version check
+  ├─ relation reversal check
+  └─ numeric/unit check
+        ↓
+parallel fast retrieval
+        ↓
+Garak-style adversarial probes
+        ↓
+FactJudge
+        ↓
+verdict + evidence
+
+For AGENT_TASK, you generalize the exact same runtime:
+
+task
+  ↓
+task compiler
+  ↓
+choose graph/template
+  ↓
+typed DAG
+  ├─ SEARCH
+  ├─ EXTRACT
+  ├─ COMPARE
+  ├─ CALCULATE
+  ├─ VERIFY
+  └─ SYNTHESIZE
+        ↓
+cheap/fast executor per node
+        ↓
+deterministic/adversarial checks
+        ↓
+reducer
+        ↓
+completed result
+
+The interesting realization is that FACT_CHECK becomes one graph template / one node primitive inside the broader system, rather than a completely separate architecture.
+
+And this gives us a much better engineering plan: build the generic DAG runtime once, then plug in increasingly good graph programs.
+
+For example:
+
+FACT_CHECK
+COMPARE_OPTIONS
+INVESTIGATE
+FIND_AND_VERIFY
+RESEARCH_SYNTHESIS
+TROUBLESHOOT
+
+Each has a known topology instead of asking an LLM to invent a workflow every time.
+
+Then Spark-class models only do narrow fuzzy operations:
+
+classify task
+generate 3 search queries
+extract relevant claim
+summarize evidence
+fill schema
+
+while code does:
+
+dependency scheduling
+parallel execution
+deduplication
+dates
+numbers
+ranking
+thresholds
+timeouts
+retries
+
+and the stronger intelligence only gets invoked when needed.
+
+The Garak assault becomes particularly valuable because it gives every graph a cheap adversarial post-processing layer:
+
+result produced
+  ↓
+what could make this wrong?
+  ↓
+relation reversal?
+wrong entity?
+stale date?
+wrong number/unit?
+missing competitor?
+contradictory evidence?
+unsupported conclusion?
+  ↓
+targeted extra node(s)
+  ↓
+accept / repair / escalate
+
+So instead of a second expensive model saying “please critique this,” you're firing deterministic or tiny-model counterexample probes targeted to the actual output type.
+
+That makes the central hypothesis very clean:
+
+Reliable multi-step intelligence can be compiled into a DAG of cheap, fast, narrowly-scoped inference and deterministic verification, rather than requiring one large agent to reason through the entire task sequentially.
+
+And the best part is that our FACT_CHECK work is no longer sunk cost at all. It becomes the first mature graph program for the general runtime.
+
+Yes — with one important safeguard: freeze FactJudge and prevent Cogym from optimizing directly against the same examples used to build it. Otherwise the router can learn to exploit our judge rather than become a better fact checker.
+
+The clean setup is:
+
+                    FROZEN CLAIM
+                         │
+                         ▼
+                 evolving policy
+              "what should I do next?"
+                         │
+          ┌──────────────┼──────────────┐
+          ▼              ▼              ▼
+       Tavily        domain API      attack
+       search         OpenAlex       reversal
+                      GitHub          numeric
+                      etc.            temporal
+          └──────────────┼──────────────┘
+                         ▼
+                    evidence
+                         │
+                         ▼
+                FROZEN FACTJUDGE
+                         │
+                         ▼
+                 predicted verdict
+                         │
+                         ▼
+               KNOWN DATASET LABEL
+                         │
+                         ▼
+                       SCORE
+
+So Cogym mutates everything around FactJudge:
+
+claim decomposition;
+search-query generation;
+source/router choice;
+parallel vs sequential retrieval;
+attack ordering;
+number of searches;
+when to fetch full pages;
+when to use a browser;
+evidence deduplication;
+source-quality weighting;
+when to invoke X2/X5/specialists;
+stopping thresholds;
+abstention policy;
+cheap-model vs strong-model routing.
+
+FactJudge stays a fixed instrument.
+
+The objective should be hierarchical
+
+I wouldn't optimize a single blended number initially.
+
+First preserve/improve factual performance:
+
+PRIMARY
+final verdict correctness / Canonical-style score
+
+Then among policies within some tiny tolerance of the best accuracy:
+
+SECONDARY
+↓ latency
+↓ monetary cost
+↓ retrieval calls
+↓ tokens
+↓ browser launches
+
+So if:
+
+Policy	Score	p50	cost
+A	91.2	2.8s	$0.018
+B	91.1	0.9s	$0.006
+C	89.4	0.5s	$0.003
+
+B probably dominates A operationally.
+
+C doesn't, because it sacrificed too much accuracy.
+
+That prevents Cogym discovering the incredible optimization:
+
+never search
+always answer SUPPORTED
+
+because it's extremely fast and cheap.
+
+Then every verification is an episode
+
+Something like:
+
+{
+  "claim_id": "REL-S2-041",
+  "phenotype": "RELATION",
+  "trajectory": [
+    {
+      "action": "PRIMARY_SOURCE_SEARCH",
+      "provider": "tavily",
+      "latency_ms": 193
+    },
+    {
+      "action": "RELATION_REVERSAL_SEARCH",
+      "provider": "tavily",
+      "latency_ms": 181
+    },
+    {
+      "action": "STOP"
+    }
+  ],
+  "factjudge": {
+    "verdict": "REFUTED",
+    "confidence": 0.94
+  },
+  "ground_truth": "REFUTED",
+  "correct": true,
+  "total_latency_ms": 411,
+  "cost_usd": 0.002,
+  "searches": 2
+}
+
+HydraDB accumulates these episodes.
+
+Then Cogym can start discovering extremely concrete things like:
+
+For RELATION claims, firing the reversal attack in wave 1 increases accuracy by 8.2 points and costs 190 ms.
+
+Or:
+
+For NUMERIC claims, generic refutation search adds almost nothing after an authoritative structured value has been retrieved.
+
+Or:
+
+OpenAlex first is dramatically better than Tavily first for scholarly attribution claims.
+
+That's useful science.
+
+The anti-Goodhart setup is crucial
+
+I'd have four layers:
+
+TRAIN
+policy evolution allowed
+
+DEV
+hyperparameter decisions allowed
+
+VALIDATION
+candidate selection only
+
+SECRET
+one-shot final evaluation
+
+And parent claim + every mutation stays in the same split.
+
+Even better, have an evaluator firewall:
+
+Policy being evolved
+      X
+cannot see:
+ground-truth label
+FactJudge internals
+secret examples
+
+It only sees normal runtime state:
+
+claim
+retrieved evidence
+provider metadata
+confidence
+
+Otherwise Cogym may discover weird lexical exploits of FactJudge.
+
+And I would keep an independent metric based directly on the known dataset labels. FactJudge should produce the runtime verdict; ground truth should score whether the whole system actually succeeded.
+
+That's an important distinction.
+
+This also lets us compare architectures properly
+
+We can now run:
+
+P0  fixed 4-query retrieval
+P1  typed fixed policy
+P2  parallel typed attacks
+P3  HydraDB nearest-neighbour routing
+P4  contextual bandit
+P5  evolved sequential policy
+
+All through:
+
+same FactJudge
+same frozen test claims
+same provider snapshot/cache
+
+Then the experiment answers something meaningful.
+
+And later Cogym can separately evolve FactJudge v2, but you don't evolve the judge and retrieval policy simultaneously. That's an identification nightmare:
+
+better result
+→ better retrieval?
+→ easier judge?
+→ judge overfit?
+→ policy exploited judge?
+
+Alternate phases instead:
+
+FREEZE JUDGE
+→ evolve retrieval policy
+
+FREEZE RETRIEVAL
+→ improve judge
+
+FREEZE JUDGE
+→ evolve retrieval again
+
+Very similar to coordinate descent.
+
+So yes: FactJudge gives Cogym a stable verification runtime, while the existing labelled benchmark provides the external objective. Then HydraDB records which sequences achieve the same or better factual score with fewer milliseconds, dollars and actions.
+
+That turns our whole Track-1 miner into one giant measurable optimization surface.
+
+yeah it doesnt optimise for a higher factjudge score it optimises for a good enough score as baseline criteria for it to then be allowed to optimise firstly cost, then speed.. so accuracy is obviously the whole point and essential
+
+Exactly. The optimization should be constrained/lexicographic, not a weighted soup where enough cost savings can compensate for worse factual accuracy.
+
+Something like:
+
+mincost
+
+subject to:
+
+accuracy≥A
+baseline
+	​
+
+−ϵ
+
+and only among cost-equivalent survivors:
+
+minlatency
+
+So Cogym's selection procedure is:
+
+1. ACCURACY GATE
+   Does candidate meet the frozen quality floor?
+   NO  → kill it
+   YES → continue
+
+2. COST
+   Among accurate candidates, prefer lower expected $/claim.
+
+3. SPEED
+   Among similarly cheap candidates, prefer lower latency.
+
+4. OPTIONAL TIEBREAKERS
+   fewer external calls
+   fewer tokens
+   fewer browser launches
+   simpler policy
+   better reliability
+
+The important scientific detail is that the accuracy gate shouldn't just be:
+
+candidate = 91.0%
+baseline  = 91.2%
+close enough
+
+because sampling noise could hide a real regression.
+
+Use a non-inferiority test. Define beforehand, for example:
+
+baseline accuracy = A0
+maximum acceptable degradation ε = 0.5 percentage points
+
+A candidate survives only if the evaluation supports:
+
+A
+candidate
+	​
+
+≥A
+0
+	​
+
+−0.005
+
+with the chosen confidence criterion.
+
+And I'd make that gate slice-aware too. A policy cannot save money by quietly destroying one hard class:
+
+overall accuracy       PASS
+RELATION accuracy      PASS
+NUMERIC accuracy       PASS
+TEMPORAL accuracy      PASS
+OOD / real claims      PASS
+false-clear rate       PASS
+
+That last one is particularly important. A system that becomes cheaper by prematurely saying “SUPPORTED” is useless even if aggregate accuracy happens to look acceptable.
+
+So the true gate might be:
+
+QUALITY GATE
+├ overall ≥ baseline - ε
+├ each critical phenotype ≥ floor
+├ false-supported rate ≤ ceiling
+├ insufficient/abstention calibration acceptable
+└ secret/OOD set non-inferior
+
+Then Cogym gets to go wild.
+
+For example:
+
+BASELINE
+4 searches
+2 page fetches
+FactJudge
+$0.012
+1.8 sec
+91.4%
+
+MUTANT A
+2 searches
+1 fetch
+FactJudge
+$0.006
+0.9 sec
+91.5%
+→ ELITE
+
+MUTANT B
+1 search
+FactJudge
+$0.003
+0.4 sec
+89.7%
+→ DEAD despite being cheaper
+
+MUTANT C
+3 searches
+FactJudge
+$0.007
+0.7 sec
+91.4%
+→ beats A on speed but loses on cost
+
+And because you said cost first, then speed, the Pareto preference is explicit:
+
+ACCURACY = constraint
+COST     = primary optimization target
+LATENCY  = secondary optimization target
+
+That is actually very elegant for evolutionary search because most mutations die instantly at the quality gate.
+
+Then the interesting mutations become things like:
+
+remove redundant search
+replace Tavily with structured API
+change attack ordering
+run two attacks concurrently
+skip browser for this phenotype
+reuse verified graph evidence
+use smaller extraction model
+stop after authoritative source agreement
+change provider-specific query wording
+
+If accuracy survives, keep the saving.
+
+Over time you're effectively compressing the fact-checking computation while preserving behavior.
+
+I think that's the right framing:
+
+FactJudge defines the minimum acceptable epistemic quality. Cogym searches for the cheapest implementation that remains non-inferior, then minimizes latency within that feasible set.
+
+That's much more scientifically defensible than “maximize some accuracy-cost-speed score.”

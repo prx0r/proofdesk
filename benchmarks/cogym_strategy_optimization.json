@@ -1,0 +1,102 @@
+[
+  {
+    "id": "000",
+    "best_strategy": "direct",
+    "best_accuracy": 1.0
+  },
+  {
+    "id": "001",
+    "best_strategy": "direct",
+    "best_accuracy": 1.0
+  },
+  {
+    "id": "002",
+    "best_strategy": "direct",
+    "best_accuracy": 0.6666666666666666
+  },
+  {
+    "id": "003",
+    "best_strategy": "ocr_extract",
+    "best_accuracy": 0.6666666666666666
+  },
+  {
+    "id": "004",
+    "best_strategy": "ocr_extract",
+    "best_accuracy": 1.0
+  },
+  {
+    "id": "005",
+    "best_strategy": "ocr_extract",
+    "best_accuracy": 1.0
+  },
+  {
+    "id": "006",
+    "best_strategy": "direct",
+    "best_accuracy": 1.0
+  },
+  {
+    "id": "007",
+    "best_strategy": "direct",
+    "best_accuracy": 0.6666666666666666
+  },
+  {
+    "id": "008",
+    "best_strategy": "direct",
+    "best_accuracy": 1.0
+  },
+  {
+    "id": "009",
+    "best_strategy": "direct",
+    "best_accuracy": 1.0
+  },
+  {
+    "id": "010",
+    "best_strategy": "direct",
+    "best_accuracy": 1.0
+  },
+  {
+    "id": "011",
+    "best_strategy": "direct",
+    "best_accuracy": 1.0
+  },
+  {
+    "id": "012",
+    "best_strategy": "direct",
+    "best_accuracy": 0.6666666666666666
+  },
+  {
+    "id": "013",
+    "best_strategy": "direct",
+    "best_accuracy": 0.6666666666666666
+  },
+  {
+    "id": "014",
+    "best_strategy": "direct",
+    "best_accuracy": 1.0
+  },
+  {
+    "id": "015",
+    "best_strategy": "direct",
+    "best_accuracy": 0.6666666666666666
+  },
+  {
+    "id": "016",
+    "best_strategy": "direct",
+    "best_accuracy": 0.6666666666666666
+  },
+  {
+    "id": "017",
+    "best_strategy": "direct",
+    "best_accuracy": 0.3333333333333333
+  },
+  {
+    "id": "018",
+    "best_strategy": "direct",
+    "best_accuracy": 0.6666666666666666
+  },
+  {
+    "id": "019",
+    "best_strategy": "direct",
+    "best_accuracy": 0.0
+  }
+]

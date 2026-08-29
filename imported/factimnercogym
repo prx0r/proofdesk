@@ -1,0 +1,3307 @@
+Yes. After reading the current repo, I would make this the **Cogym v2 convergence project**: turn the trading-specific implementation into a genuinely world-agnostic optimization laboratory, then use **fact retrieval/verification as the first non-trading world that proves the abstraction is real**.
+
+The repo is already halfway there conceptually. `canonical/` is the active codebase, but its actual runtime is still coupled to trading: `TradingWorld`, `MarketPacket`, `Decision` with market-specific outcomes, and `run_world()` all assume a market.   Meanwhile the older `evolution_lab` already has the pieces we want to preserve: dev/validation/secret evaluation, successive halving, proposal provenance, fresh secret batches, per-metric elites and campaign persistence.
+
+The repo’s own Northstar actually anticipated this convergence into generic `core/`, `worlds/`, `evaluation/`, `evolution/`, etc.  So I would **finish that refactor rather than add yet another version directory**.
+
+One concrete bug to fix before we let Hydra learn anything: `PatternStore.record_result()` computes whether a pattern improved versus the matched control, but writes `mean_reward > 0` into the `improved` column instead of the computed `improved` variable. That can mislabel patterns right now.
+
+# COGYM v2 — World-Agnostic Optimization Laboratory
+
+## Mission
+
+> **Cogym searches for cheaper/faster/better computational policies while preserving a hard externally evaluated quality floor.**
+
+Cogym should not be:
+
+```text
+a trading framework
+an LLM-agent framework
+a prompt optimizer
+a HydraDB application
+```
+
+It should be:
+
+```text
+WORLD
+  +
+CANDIDATE POLICY
+  +
+OBJECTIVE / QUALITY GATES
+  +
+EXPERIMENTAL PROTOCOL
+  ↓
+controlled episodes
+  ↓
+hidden evaluation
+  ↓
+selection / mutation
+  ↓
+validated improvement
+```
+
+Trading becomes one world.
+
+Fact verification becomes another.
+
+Later:
+
+```text
+model routing
+retrieval routing
+coding
+resource allocation
+multi-agent coordination
+context compression
+tool selection
+research workflows
+```
+
+can become other worlds without changing the experiment engine.
+
+---
+
+# 0. Non-negotiable design principles
+
+The coding agent should preserve these throughout the refactor.
+
+### A. World ≠ policy ≠ evaluator
+
+Never let these collapse together.
+
+```text
+WORLD
+defines:
+state
+available actions
+transitions
+observable information
+
+POLICY
+decides:
+what action to take
+
+EXECUTOR
+performs:
+external action if required
+
+EVALUATOR
+decides:
+did the policy actually work?
+```
+
+This separation is particularly important for fact checking.
+
+```text
+Claim world
+    ↓
+Policy chooses SEARCH_REFUTE
+    ↓
+TavilyExecutor performs search
+    ↓
+World receives evidence
+    ↓
+Policy eventually chooses STOP
+    ↓
+FactJudge produces runtime verdict
+    ↓
+Frozen dataset label evaluates actual correctness
+```
+
+The policy must never see the hidden evaluator.
+
+### B. Quality is a constraint, not something cost can trade away
+
+This is central.
+
+Cogym does **not** maximize:
+
+[
+accuracy - 0.2(cost)-0.1(latency)
+]
+
+because that lets sufficiently cheap garbage survive.
+
+Instead:
+
+```text
+GATE 1: quality non-inferior to frozen baseline?
+NO → candidate dead
+
+YES
+ ↓
+minimize COST
+
+cost-equivalent?
+ ↓
+minimize LATENCY
+
+still equivalent?
+ ↓
+prefer simpler / more robust policy
+```
+
+For Fact Retrieval:
+
+```text
+QUALITY = hard constraint
+COST    = primary optimization objective
+SPEED   = secondary optimization objective
+```
+
+### C. Hermes/LLMs propose; deterministic evaluation disposes
+
+Preserve the repo's central rule.
+
+The README already states:
+
+> “Hermes proposes. Cogym disposes. No LLM grades itself.”
+
+Keep it.
+
+### D. Live worlds must become replayable
+
+Trading is already deterministic.
+
+Web search is not.
+
+Therefore every live external episode must create a **ReplayBundle**.
+
+```text
+live request
+→ provider request
+→ raw provider response
+→ normalized observation
+→ hashes
+→ timing
+→ cost
+→ stored tape
+```
+
+Later:
+
+```text
+same episode
+→ TapeExecutor
+→ byte-identical observations
+```
+
+This is how we scientifically optimize a web-connected system without the web changing underneath every candidate.
+
+### E. HydraDB is derived intelligence, never experiment truth
+
+The current `EvidenceGraph` already says this correctly: local append-oriented storage is authoritative and HydraDB is an optional projection.
+
+Keep that boundary.
+
+HydraDB can answer:
+
+> Which attack worked best on RELATION claims?
+
+It should not determine:
+
+> Did candidate X actually beat baseline?
+
+That comes from frozen experiment records.
+
+---
+
+# 1. First PR — Freeze the current system before refactoring
+
+Do not touch architecture until current behavior has a reproducible receipt.
+
+Create:
+
+```text
+docs/refactor-v2/
+├── BASELINE.md
+├── CURRENT-ARCHITECTURE.md
+├── MIGRATION-MAP.md
+└── invariants.json
+```
+
+Run:
+
+```bash
+cd canonical
+pytest tests/ -q
+```
+
+Record:
+
+```text
+git SHA
+Python version
+test count
+test results
+existing demo outputs
+known E01-E04 results
+existing world hashes
+```
+
+Also create a small golden fixture:
+
+```text
+tests/golden/trading_v1_episode.json
+```
+
+Run one deterministic rule-based trading episode.
+
+Freeze its:
+
+```text
+world ID
+observations
+actions
+scores
+episode hash
+```
+
+The genericized runner must reproduce it.
+
+### Fix immediately
+
+Fix the `PatternStore.improved` bug:
+
+```python
+int(improved)
+```
+
+instead of:
+
+```python
+int(mean_reward > 0)
+```
+
+Add regression test.
+
+Do not make any Hydra-derived routing decisions until this is fixed.
+
+---
+
+# 2. Rename the conceptual package, not the trading world
+
+The active package still calls itself `cogym-trading` and describes itself as deterministic trading worlds.
+
+Change package metadata to:
+
+```toml
+name = "cogym"
+
+description = """
+Deterministic experimental optimization laboratory
+for reasoning, routing and decision policies.
+"""
+```
+
+Trading moves from defining Cogym to being:
+
+```text
+cogym.worlds.trading
+```
+
+Do **not** immediately delete/move every existing file.
+
+Use compatibility imports during migration.
+
+---
+
+# 3. Target architecture
+
+I would converge toward this:
+
+```text
+canonical/
+└── cogym/
+    ├── core/
+    │   ├── ids.py
+    │   ├── values.py
+    │   ├── artifacts.py
+    │   ├── episode.py
+    │   ├── events.py
+    │   └── receipts.py
+    │
+    ├── worlds/
+    │   ├── protocol.py
+    │   ├── registry.py
+    │   ├── replay.py
+    │   │
+    │   ├── toy/
+    │   ├── trading/
+    │   └── factcheck/
+    │
+    ├── policies/
+    │   ├── protocol.py
+    │   ├── artifact.py
+    │   ├── static.py
+    │   └── mutation.py
+    │
+    ├── executors/
+    │   ├── protocol.py
+    │   ├── deterministic.py
+    │   ├── model.py
+    │   ├── search.py
+    │   ├── browser.py
+    │   └── replay.py
+    │
+    ├── runtime/
+    │   ├── runner.py
+    │   ├── scheduler.py
+    │   ├── budgets.py
+    │   └── instrumentation.py
+    │
+    ├── evaluation/
+    │   ├── metrics.py
+    │   ├── constraints.py
+    │   ├── scorer.py
+    │   ├── suite.py
+    │   ├── secret.py
+    │   ├── noninferiority.py
+    │   └── comparison.py
+    │
+    ├── optimization/
+    │   ├── campaign.py
+    │   ├── selection.py
+    │   ├── mutation.py
+    │   ├── archive.py
+    │   ├── proposal.py
+    │   └── halving.py
+    │
+    ├── storage/
+    │   ├── events.py
+    │   ├── episodes.py
+    │   ├── artifacts.py
+    │   ├── metrics.py
+    │   └── hydra.py
+    │
+    ├── integrations/
+    │   ├── factjudge/
+    │   ├── tavily/
+    │   ├── hydradb/
+    │   └── models/
+    │
+    └── cli.py
+```
+
+Do not introduce heavy frameworks merely to achieve this shape.
+
+Python protocols + frozen dataclasses are enough.
+
+---
+
+# 4. Define the generic Cogym world contract
+
+Don't copy Gymnasium exactly, but make Cogym conceptually compatible with it.
+
+Gymnasium's stable core abstraction is essentially:
+
+```text
+reset(seed)
+step(action)
+→ observation, reward, terminated, truncated, info
+```
+
+which is a useful external compatibility target. ([Gymnasium][1])
+
+Cogym needs more provenance and external-executor separation, so make ours richer.
+
+Something approximately like:
+
+```python
+from typing import Protocol, Generic, TypeVar
+
+StateT = TypeVar("StateT")
+ObservationT = TypeVar("ObservationT")
+ActionT = TypeVar("ActionT")
+
+
+class World(Protocol, Generic[StateT, ObservationT, ActionT]):
+
+    @property
+    def world_spec(self) -> "WorldSpec":
+        ...
+
+    def reset(
+        self,
+        *,
+        instance_id: str,
+        seed: int,
+    ) -> StateT:
+        ...
+
+    def observe(
+        self,
+        state: StateT,
+    ) -> ObservationT:
+        ...
+
+    def actions(
+        self,
+        state: StateT,
+    ) -> tuple["ActionSpec[ActionT]", ...]:
+        ...
+
+    def apply(
+        self,
+        state: StateT,
+        action: ActionT,
+        result: "ActionResult",
+    ) -> "Transition[StateT]":
+        ...
+
+    def terminal(
+        self,
+        state: StateT,
+    ) -> bool:
+        ...
+```
+
+Important:
+
+**World.apply() does not perform arbitrary network calls.**
+
+The executor does.
+
+That gives us:
+
+```text
+Policy
+ ↓
+Action
+ ↓
+Executor
+ ↓
+ActionResult
+ ↓
+World.apply()
+ ↓
+new State
+```
+
+This is the abstraction needed for both:
+
+```text
+Trading action
+→ deterministic market executor
+
+Fact action
+→ Tavily search executor
+```
+
+---
+
+# 5. Generic action/executor contract
+
+Define actions as typed artifacts.
+
+```python
+@dataclass(frozen=True)
+class ActionSpec:
+    kind: str
+    payload: dict
+    executor_kind: str
+    estimated_cost: float | None
+    timeout_ms: int | None
+    metadata: dict
+```
+
+Examples:
+
+```text
+trading:
+DECIDE_STANCE
+
+fact:
+SEARCH_SUPPORT
+SEARCH_REFUTE
+SEARCH_PRIMARY
+SEARCH_RELATION_REVERSE
+FETCH_URL
+JUDGE
+STOP
+
+routing:
+CALL_SMALL_MODEL
+CALL_LARGE_MODEL
+```
+
+Then:
+
+```python
+class Executor(Protocol):
+    executor_id: str
+
+    async def execute(
+        self,
+        action: ActionSpec,
+        context: ExecutionContext,
+    ) -> ActionResult:
+        ...
+```
+
+`ActionResult` includes:
+
+```text
+status
+payload
+started_ns
+finished_ns
+wall_ms
+cost_units
+provider
+request_hash
+response_hash
+cache_hit
+error
+```
+
+This becomes universal instrumentation.
+
+---
+
+# 6. Candidate artifact replaces AgentGenome as the generic optimization unit
+
+`AgentGenome` currently hardcodes things like:
+
+```text
+reasoning_policy
+representation
+memory_policy
+social_topology
+plasticity
+```
+
+and `Decision` hardcodes `LONG/FLAT/SHORT`.
+
+Keep `AgentGenome` as a trading/agent candidate type.
+
+Introduce generic:
+
+```python
+@dataclass(frozen=True)
+class CandidateArtifact:
+    kind: str
+    version: str
+    config: dict
+    parent_ids: tuple[str, ...] = ()
+    provenance: dict = field(default_factory=dict)
+
+    @property
+    def candidate_id(self) -> str:
+        ...
+```
+
+Examples:
+
+```text
+kind = trading_agent
+kind = fact_retrieval_policy
+kind = model_router
+kind = graph_scheduler
+kind = context_compressor
+```
+
+Cogym's campaign runner evaluates a `CandidateArtifact`.
+
+Individual worlds interpret its configuration through a policy adapter.
+
+---
+
+# 7. Generic policy contract
+
+```python
+class Policy(Protocol):
+
+    @property
+    def policy_id(self) -> str:
+        ...
+
+    def initialize(
+        self,
+        world_spec: WorldSpec,
+    ) -> PolicyState:
+        ...
+
+    async def act(
+        self,
+        observation,
+        available_actions,
+        policy_state,
+    ) -> PolicyDecision:
+        ...
+```
+
+A policy may be:
+
+```text
+deterministic Python
+lookup table
+finite state machine
+decision DAG
+small LLM
+large LLM
+contextual bandit
+Hydra-assisted router
+```
+
+Cogym shouldn't care.
+
+---
+
+# 8. Replace hardcoded benchmark metrics with MetricVector
+
+The existing `BenchmarkResult` contains:
+
+```text
+mean_reward
+downside_reward
+calibration_error
+max_drawdown
+adaptation_latency
+revision_gain
+```
+
+which makes every world look like trading.
+
+Replace generic evaluation with:
+
+```python
+@dataclass(frozen=True)
+class Metric:
+    name: str
+    value: float
+    direction: Literal["min", "max"]
+    unit: str | None = None
+    slice: str | None = None
+
+
+@dataclass(frozen=True)
+class MetricVector:
+    metrics: tuple[Metric, ...]
+```
+
+Trading emits:
+
+```text
+accuracy
+calibration_error
+paper_utility
+adaptation_latency
+```
+
+Fact verification emits:
+
+```text
+accuracy
+macro_f1
+false_support_rate
+evidence_recall
+evidence_precision
+cost_usd
+latency_ms
+search_calls
+browser_calls
+```
+
+Same campaign runner.
+
+---
+
+# 9. Implement first-class hard quality constraints
+
+Create:
+
+```text
+evaluation/constraints.py
+evaluation/noninferiority.py
+```
+
+Config:
+
+```yaml
+quality_gates:
+
+  - metric: accuracy
+    baseline: baseline_v1
+    mode: noninferior
+    margin: 0.005
+
+  - metric: relation_accuracy
+    min: 0.88
+
+  - metric: numeric_accuracy
+    min: 0.90
+
+  - metric: false_support_rate
+    max: 0.03
+```
+
+Then objectives:
+
+```yaml
+objectives:
+  - metric: cost_usd
+    direction: min
+
+  - metric: latency_ms
+    direction: min
+```
+
+Selection:
+
+```text
+candidate
+ ↓
+QUALITY GATES
+ ↓ fail
+REJECT
+
+ ↓ pass
+compare cost
+ ↓
+compare speed
+ ↓
+compare robustness
+```
+
+This must be implemented once in generic core.
+
+---
+
+# 10. Non-inferiority must use paired evaluation
+
+Don't simply compare:
+
+```text
+baseline accuracy = 91.2
+candidate accuracy = 90.9
+```
+
+Use matched world instances.
+
+For each candidate, baseline and candidate should receive the **same frozen instances**.
+
+For fact checks:
+
+```text
+same claim
+same frozen retrieval tape
+same evaluator
+```
+
+For trading:
+
+```text
+same world seed
+same time points
+```
+
+Store paired deltas.
+
+Initially implement:
+
+```text
+paired bootstrap CI
+```
+
+or another simple paired interval.
+
+Promotion condition:
+
+```text
+lower confidence bound of quality delta
+>= -allowed_margin
+```
+
+Keep statistical method configurable and frozen in campaign manifest.
+
+---
+
+# 11. Port the existing campaign engine into generic core
+
+Do not throw `evolution_lab/campaign.py` away.
+
+It already has valuable structure:
+
+```text
+DEV
+ ↓ successive halving
+VALIDATION
+ ↓
+SECRET
+ ↓
+promotion
+```
+
+and fresh secret seeds are generated after candidate freeze.
+
+Refactor:
+
+```text
+AgentGenome        → CandidateArtifact
+BenchmarkSuite     → EvaluationSuite
+BenchmarkResult    → MetricVector / EvaluationResult
+fitness()          → ConstraintGate + ObjectiveComparator
+```
+
+Delete assumptions such as:
+
+```text
+best_calibration
+best_downside
+fastest_adapter
+```
+
+from generic archive.
+
+Instead make archive niches config-driven:
+
+```yaml
+archive:
+  niches:
+    - cheapest_qualified
+    - fastest_qualified
+    - highest_quality
+    - most_robust
+```
+
+Worlds can add domain niches.
+
+---
+
+# 12. Make selection explicitly lexicographic
+
+Implement a comparator.
+
+Pseudo:
+
+```python
+def compare(a, b):
+
+    if not a.quality_pass and not b.quality_pass:
+        return compare_quality(a, b)
+
+    if a.quality_pass != b.quality_pass:
+        return a if a.quality_pass else b
+
+    if materially_different(a.cost, b.cost):
+        return lower_cost(a, b)
+
+    if materially_different(a.latency, b.latency):
+        return lower_latency(a, b)
+
+    return simpler_or_more_robust(a, b)
+```
+
+No magic fitness scalar.
+
+Still expose scalar projections for plotting if needed.
+
+---
+
+# 13. Build a trivial world to prove Cogym is actually generic
+
+Before fact checking, add:
+
+```text
+worlds/toy/search_game/
+```
+
+Example:
+
+There are 10 hidden boxes.
+
+One contains the answer.
+
+Actions have different costs.
+
+Policy must identify the correct box.
+
+This lets us test:
+
+```text
+world registration
+candidate evaluation
+quality constraint
+cost minimization
+latency simulation
+secret split
+mutation
+campaign runner
+Hydra projection
+```
+
+without LLMs, network calls, or trading.
+
+Acceptance test:
+
+```text
+same campaign runner
+runs toy + trading
+without if world == "..."
+```
+
+If the generic core requires:
+
+```python
+if isinstance(world, TradingWorld)
+```
+
+the refactor has failed.
+
+---
+
+# 14. Port trading as world plugin
+
+Once toy works, wrap current trading code.
+
+Existing:
+
+```text
+market/world.py
+market/schema.py
+trading/
+```
+
+becomes logically:
+
+```text
+worlds/trading/
+```
+
+but don't force file moves until interfaces are stable.
+
+Adapter:
+
+```python
+TradingWorldAdapter(World)
+TradingPolicyAdapter(Policy)
+TradingScorer(Scorer)
+```
+
+Golden trading fixture from Phase 0 must still match.
+
+Trading can retain all its domain-specific structures:
+
+```text
+MarketPacket
+Bar
+PaperTradingEngine
+regime world
+Alpaca historical source adapter
+```
+
+They just stop leaking into generic core.
+
+The recent Alpaca work then becomes a **data source for the trading world**, not another Cogym architecture. Your recent commits already show it was added as a trading variant. That is the right placement conceptually.
+
+---
+
+# 15. Fact Verification World — the second organism
+
+Now create:
+
+```text
+worlds/factcheck/
+├── schema.py
+├── dataset.py
+├── world.py
+├── phenotype.py
+├── actions.py
+├── policy.py
+├── attacks.py
+├── scorer.py
+├── replay.py
+└── baselines.py
+```
+
+This is the major proof of Cogym v2.
+
+## Claim state
+
+```python
+@dataclass(frozen=True)
+class Claim:
+    claim_id: str
+    text: str
+    expected_label: str | None
+    phenotype: str
+    atoms: tuple[ClaimAtom, ...]
+    metadata: dict
+```
+
+`expected_label` is hidden from the subject plane.
+
+Phenotypes:
+
+```text
+GENERAL
+RELATION
+NUMERIC
+TEMPORAL
+COMPARATIVE
+SUPERLATIVE
+CAUSAL
+QUANTIFIED
+SCHOLARLY_ATTRIBUTION
+SOFTWARE_VERSION
+```
+
+---
+
+# 16. Fact-check episode state
+
+```python
+@dataclass(frozen=True)
+class VerificationState:
+
+    claim: PublicClaim
+
+    atoms: tuple[ClaimAtom, ...]
+
+    evidence: tuple[EvidenceUnit, ...]
+
+    actions_taken: tuple[ActionReceipt, ...]
+
+    support_mass: float
+    refute_mass: float
+
+    cost_usd: float
+    elapsed_ms: float
+
+    terminated: bool
+```
+
+The policy sees:
+
+```text
+claim
+typed atoms
+evidence accumulated
+attacks already attempted
+budgets
+```
+
+It does **not** see:
+
+```text
+ground truth
+secret split
+future retrieval results
+FactJudge internals
+```
+
+---
+
+# 17. Fact-check action space
+
+Start finite.
+
+```text
+CACHE_LOOKUP
+
+SEARCH_GENERIC
+SEARCH_SUPPORT
+SEARCH_REFUTE
+SEARCH_PRIMARY
+
+SEARCH_RELATION_REVERSE
+SEARCH_ENTITY_SWAP
+SEARCH_NUMERIC_VALUE
+SEARCH_TEMPORAL
+SEARCH_SUPERSESSION
+SEARCH_COMPETITOR
+
+STRUCTURED_LOOKUP
+FETCH_URL
+EXTRACT_URL
+CRAWL_SITE
+BROWSER_INTERACT
+
+RUN_FACTJUDGE
+
+STOP_SUPPORTED
+STOP_REFUTED
+STOP_CONFLICTING
+STOP_INSUFFICIENT
+```
+
+Not every phenotype gets every action.
+
+Example:
+
+```text
+RELATION
+→ reversal useful
+
+NUMERIC
+→ numeric/value useful
+
+TEMPORAL
+→ supersession/date useful
+```
+
+That is where the game starts.
+
+---
+
+# 18. Garak-style attack library becomes an actual action generator
+
+Create:
+
+```text
+worlds/factcheck/attacks/
+├── relation.py
+├── entity.py
+├── numeric.py
+├── temporal.py
+├── negation.py
+├── quantifier.py
+├── comparative.py
+└── causal.py
+```
+
+Interface:
+
+```python
+class AttackGenerator(Protocol):
+
+    def applicable(
+        self,
+        claim: Claim,
+    ) -> bool:
+        ...
+
+    def actions(
+        self,
+        claim: Claim,
+        state: VerificationState,
+    ) -> tuple[ActionSpec, ...]:
+        ...
+```
+
+Example:
+
+```text
+claim:
+A acquired B
+
+attack:
+search:
+"B acquired A"
+```
+
+Or:
+
+```text
+claim:
+price = $3.8B
+
+attacks:
+"transaction value"
+"consideration"
+"$3.8 billion"
+"$3.8 million"
+```
+
+Cogym learns whether those attacks are worth paying for.
+
+---
+
+# 19. Existing FactJudge dataset becomes FactWorld v0
+
+Import the exact frozen splits already used for FactJudge.
+
+Do **not** copy/repartition ad hoc.
+
+Adapter should preserve:
+
+```text
+original ID
+parent ID
+mutation lineage
+split
+phenotype
+ground truth
+evidence metadata
+```
+
+Critical rule:
+
+```text
+parent + every mutation
+must live in same split
+```
+
+Otherwise the optimizer learns the parent and gets fake generalization on mutations.
+
+Create:
+
+```text
+data/factcheck/
+├── manifest.json
+├── train.jsonl
+├── dev.jsonl
+├── validation.jsonl
+└── secret/
+```
+
+Secret data should not be in proposer-visible runtime.
+
+---
+
+# 20. FactJudge integration
+
+FactJudge should be a **frozen versioned evaluator dependency**.
+
+Do not fork pieces casually into Cogym.
+
+Adapter:
+
+```python
+class FactJudgeAdapter:
+
+    version: str
+    artifact_hash: str
+
+    def judge(
+        claim,
+        evidence,
+    ) -> VerificationVerdict:
+        ...
+```
+
+Record:
+
+```text
+FactJudge model/version
+commit SHA
+WASM hash if relevant
+config
+```
+
+Important distinction:
+
+```text
+FactJudge
+= runtime verdict generator / frozen scoring component
+
+dataset ground truth
+= ultimate experiment oracle
+```
+
+This prevents Cogym learning a retrieval strategy that merely exploits quirks in FactJudge.
+
+---
+
+# 21. Quality metrics for FactWorld
+
+Hard quality metrics:
+
+```text
+accuracy
+macro F1
+SUPPORTED precision
+REFUTED recall
+false-supported rate
+
+relation accuracy
+numeric accuracy
+temporal accuracy
+OOD accuracy
+```
+
+Evidence metrics:
+
+```text
+evidence recall@k
+evidence directness
+authority
+source diversity
+coverage
+```
+
+Optimization metrics:
+
+```text
+cost_usd
+time_to_correct_verdict_ms
+p50_latency_ms
+p95_latency_ms
+search_calls
+fetch_calls
+crawl_calls
+browser_calls
+tokens
+```
+
+Primary quality gate:
+
+```text
+end-to-end verdict performance
+non-inferior to frozen baseline
+```
+
+Then:
+
+```text
+minimize $/claim
+then
+minimize latency
+```
+
+---
+
+# 22. Offline RetrievalTape — essential
+
+Before optimizing live web calls, make retrieval deterministic.
+
+Schema:
+
+```python
+@dataclass(frozen=True)
+class RetrievalTapeEntry:
+    action_hash: str
+    provider: str
+    request: dict
+    raw_response_hash: str
+    normalized_result: dict
+    observed_latency_ms: float
+    observed_cost_usd: float
+```
+
+A tape is:
+
+```text
+claim
+→ possible retrieval actions
+→ recorded resulting observations
+```
+
+`TapeExecutor` executes an action by lookup.
+
+This lets:
+
+```text
+100 candidate policies
+```
+
+explore the **same retrieval environment** without paying for 100× live Tavily calls and without search results changing mid-experiment.
+
+Live acquisition becomes dataset construction.
+
+Optimization uses frozen tape.
+
+This is hugely important.
+
+---
+
+# 23. Retrieval provider interface
+
+Create generic search integrations underneath the fact world.
+
+```python
+class RetrievalProvider(Protocol):
+
+    capabilities: ProviderCapabilities
+
+    async def search(...)
+    async def extract(...)
+    async def crawl(...)
+```
+
+Registry metadata:
+
+```text
+provider_id
+capabilities
+domain strengths
+estimated cost
+observed latency
+supports raw content
+freshness behavior
+rate limits
+```
+
+Initial:
+
+```text
+Tavily
+structured domain APIs
+direct HTTP extraction
+browser fallback
+```
+
+Later providers become plug-ins.
+
+Meta-policy should route to capability, not provider-specific code.
+
+---
+
+# 24. Fast retrieval pipeline
+
+Default production pipeline:
+
+```text
+L0 VERIFIED GRAPH CACHE
+    ↓ miss
+
+L1 STRUCTURED SOURCE and/or FAST SEARCH
+    ↓ insufficient
+
+L2 DIRECT EXTRACT top URLs
+    ↓ insufficient
+
+L3 TARGETED CRAWL
+    ↓ insufficient
+
+L4 HEADLESS BROWSER
+```
+
+Browser should almost never be first action.
+
+---
+
+# 25. Browser executor
+
+Implement as an optional executor.
+
+Use:
+
+```text
+async Playwright
+one warm browser process
+isolated context per task
+```
+
+Do not launch Chromium from cold for every fact.
+
+Default block expensive irrelevant resources where possible:
+
+```text
+images
+video
+fonts
+tracking
+```
+
+but preserve scripts on JS-dependent pages.
+
+Hard limits:
+
+```text
+page count
+wall time
+redirect count
+download prohibition
+max bytes
+```
+
+Return normalized text/evidence.
+
+Every browser action generates a normal `ActionReceipt`.
+
+Cogym can then discover:
+
+> Browser increases accuracy by 0.1 points but costs 4 seconds.
+
+and eliminate it from almost all trajectories.
+
+---
+
+# 26. Parallel execution
+
+Fact retrieval wants waves.
+
+Add scheduler concept:
+
+```python
+@dataclass(frozen=True)
+class ActionWave:
+    actions: tuple[ActionSpec, ...]
+```
+
+Execute independent actions via:
+
+```python
+asyncio.TaskGroup
+```
+
+Example:
+
+```text
+WAVE 1
+
+PRIMARY SEARCH
+REFUTE SEARCH
+RELATION REVERSAL
+NUMERIC SEARCH
+```
+
+all concurrently.
+
+Important reproducibility detail:
+
+Actual completion order must **not affect canonical episode identity**.
+
+Persist timings normally, but canonicalize completed wave records by:
+
+```text
+action_id
+```
+
+before computing episode hash.
+
+Otherwise scheduling noise destroys deterministic replay.
+
+---
+
+# 27. Baseline verification policies
+
+Implement these before evolution.
+
+### P0 — generic
+
+```text
+generic search
+→ FactJudge
+→ stop
+```
+
+### P1 — static assault
+
+```text
+support
+refute
+primary
+→ FactJudge
+```
+
+### P2 — typed static assault
+
+```text
+claim phenotype
+→ fixed phenotype-specific actions
+→ judge
+```
+
+### P3 — parallel typed
+
+Same as P2, but independent actions parallel.
+
+### P4 — adaptive stop
+
+```text
+wave 1
+→ judge
+→ sufficient?
+   yes stop
+   no wave 2
+```
+
+### P5 — source-aware router
+
+Selects:
+
+```text
+scholarly → scholarly APIs
+software → registry/GitHub
+general current → web
+etc.
+```
+
+Only after these work should we start evolutionary policy search.
+
+---
+
+# 28. SourceRouter
+
+Create a source capability ontology.
+
+Example:
+
+```text
+GENERAL_CURRENT
+  → WEB_SEARCH
+
+ACADEMIC_METADATA
+  → OPENALEX
+  → OPENAIRE
+  → CROSSREF
+
+STRUCTURED_ENTITY
+  → WIKIDATA
+
+SOFTWARE
+  → GITHUB
+  → PACKAGE_REGISTRY
+
+SECURITY
+  → AUTHORITATIVE_VULNERABILITY_SOURCE
+
+VENDOR_CAPABILITY
+  → OFFICIAL_DOCS
+
+INTERPRETIVE_SCHOLARSHIP
+  → SCHOLARLY_DISCOVERY
+  → PRIMARY/SECONDARY TEXT
+```
+
+Don't hardcode:
+
+```python
+if "Abhinavagupta" in claim:
+    use_openaire()
+```
+
+Infer domain/phenotype.
+
+Then route.
+
+---
+
+# 29. Verified graph cache
+
+Represent knowledge as:
+
+```text
+CLAIM
+  ↓ SUPPORTS / REFUTES
+EVIDENCE
+  ↓ FROM
+SOURCE
+```
+
+plus:
+
+```text
+VerificationRun
+retrieved_at
+valid_from
+valid_until
+source_version
+verification_policy
+FactJudge version
+```
+
+Never store:
+
+```text
+fact = TRUE
+```
+
+without provenance.
+
+Reuse condition:
+
+```text
+semantic claim match
++
+sufficient evidence
++
+freshness still valid
++
+no known supersession
+```
+
+---
+
+# 30. Generalize the existing EvidenceGraph
+
+The current SQLite `EvidenceGraph` already has:
+
+```text
+events
+nodes
+edges
+```
+
+and append-oriented event storage.
+
+Promote it out of `culture/` into:
+
+```text
+storage/evidence_graph.py
+```
+
+Generic event kinds:
+
+```text
+WORLD_REGISTERED
+CANDIDATE_REGISTERED
+EPISODE_STARTED
+ACTION_PROPOSED
+ACTION_EXECUTED
+OBSERVATION_RECEIVED
+VERDICT_PRODUCED
+EPISODE_COMPLETED
+EVALUATION_COMPLETED
+CANDIDATE_REJECTED
+CANDIDATE_PROMOTED
+```
+
+Then every derived table can be rebuilt.
+
+---
+
+# 31. HydraDB projection
+
+Hydra stays derived.
+
+The current `hydra.py` deliberately emits provider-neutral records instead of coupling core Cogym to unstable Hydra API shapes. That's a good design; preserve it.
+
+For FactWorld project:
+
+```text
+ClaimPhenotype
+Policy
+ActionType
+AttackType
+Provider
+SourceDomain
+FailureMode
+GraphTemplate
+EvaluationSlice
+```
+
+Edges:
+
+```text
+POLICY ─MUTATED_FROM→ POLICY
+
+POLICY ─USED→ ACTION
+
+ACTION ─USED_PROVIDER→ PROVIDER
+
+ATTACK ─EFFECTIVE_ON→ PHENOTYPE
+
+PROVIDER ─STRONG_ON→ DOMAIN
+
+POLICY ─IMPROVED_ON→ SLICE
+
+POLICY ─REGRESSED_ON→ SLICE
+
+POLICY ─DOMINATES→ POLICY
+
+FAILURE ─CAUSED_BY→ ACTION
+```
+
+Example learned structure:
+
+```text
+RELATION
+   ↓ EFFECTIVE_ATTACK
+RELATION_REVERSAL
+   ↓ BEST_PROVIDER
+Tavily-fast
+```
+
+---
+
+# 32. Hydra-assisted policy retrieval
+
+Only after sufficient episodes.
+
+Input:
+
+```text
+new claim phenotype
+current evidence state
+actions already tried
+```
+
+Query nearest historical situations.
+
+Return:
+
+```text
+historically useful next actions
+```
+
+But treat this as a **candidate policy**:
+
+```text
+HydraNearestNeighbourPolicy
+```
+
+It must compete against:
+
+```text
+StaticTypedPolicy
+AdaptivePolicy
+```
+
+Hydra does not get privileged truth status.
+
+---
+
+# 33. Evolution genome for Fact Retrieval
+
+A first genome can be simple:
+
+```yaml
+policy_family: typed_adaptive
+
+first_wave:
+  - PRIMARY
+  - REFUTE
+
+parallel_first_wave: true
+
+phenotype_actions:
+  relation:
+    - RELATION_REVERSE
+
+  numeric:
+    - NUMERIC_VALUE
+
+  temporal:
+    - SUPERSESSION
+
+judge_after_wave: true
+
+stop_threshold: 0.89
+
+max_searches: 4
+max_fetches: 2
+browser_policy: last_resort
+
+source_router: typed_v1
+
+query_generator: deterministic_v1
+
+model_executor: small_fast
+```
+
+Mutation operations:
+
+```text
+add action
+remove action
+reorder action
+move action to parallel wave
+change provider
+change query strategy
+change threshold
+change budget
+change escalation point
+change source route
+replace model
+replace LLM node with deterministic function
+```
+
+Hermes may propose these.
+
+Validator only accepts schema-legal changes.
+
+---
+
+# 34. Avoid unrestricted code mutation initially
+
+Don't let Hermes rewrite the entire fact checker.
+
+Start with a bounded search space.
+
+Otherwise it will mutate:
+
+```text
+evaluator
+dataset loading
+hidden labels
+metrics
+```
+
+which destroys scientific validity.
+
+Candidate writable surface:
+
+```text
+policies/
+generated/<candidate_id>.yaml
+```
+
+Potentially later:
+
+```text
+candidate plugins
+```
+
+but only in a sandbox with evaluator read prohibition.
+
+---
+
+# 35. Fact retrieval campaign
+
+First campaign:
+
+```text
+population = 20
+generations = 5
+```
+
+DEV:
+
+```text
+large cheap deterministic RetrievalTape
+```
+
+Validation:
+
+```text
+unseen claims
+unseen parent clusters
+```
+
+Secret:
+
+```text
+fresh hidden claims
+frozen retrieval tapes
+```
+
+Promotion:
+
+```text
+must pass accuracy gate
+```
+
+Then rank:
+
+```text
+$/claim
+latency
+```
+
+---
+
+# 36. First actual research experiment
+
+Preregister:
+
+> **Can claim-type-aware adaptive retrieval reduce cost while remaining statistically non-inferior to the fixed high-recall baseline?**
+
+Baseline:
+
+```text
+support
+refute
+primary
+typed attack
+all executed
+```
+
+Candidate:
+
+```text
+adaptive policy
+stops early when enough evidence exists
+```
+
+Primary constraint:
+
+```text
+accuracy non-inferior
+```
+
+Primary objective:
+
+```text
+cost reduction
+```
+
+Secondary:
+
+```text
+latency reduction
+```
+
+This is clean.
+
+---
+
+# 37. Second experiment — parallelism
+
+Hold action set fixed.
+
+Compare:
+
+```text
+sequential
+vs
+parallel waves
+```
+
+Same evidence.
+
+Same quality.
+
+Measure:
+
+```text
+wall time
+cost
+result
+```
+
+This isolates the value of parallel execution.
+
+---
+
+# 38. Third experiment — attack ordering
+
+Same maximum action budget.
+
+Policies:
+
+```text
+generic-first
+primary-first
+refute-first
+phenotype-specific-first
+learned-order
+```
+
+Measure:
+
+```text
+time/cost until correct terminal verdict
+```
+
+Hydra can then start storing:
+
+```text
+phenotype × attack order → utility
+```
+
+---
+
+# 39. Fourth experiment — source routing
+
+Example scholarly claims.
+
+Compare:
+
+```text
+generic web first
+vs
+scholarly API first
+vs
+parallel
+```
+
+Software claims:
+
+```text
+generic web
+vs
+structured registry/source
+```
+
+This directly tests your router hypothesis.
+
+---
+
+# 40. Fifth experiment — model strength routing
+
+Only after retrieval architecture works.
+
+Hold graph fixed.
+
+Compare node executors:
+
+```text
+deterministic
+small/fast model
+Spark-class model
+stronger model
+```
+
+At each node type.
+
+Then learn:
+
+```text
+QUERY_GENERATION
+→ small model sufficient
+
+CLAIM_DECOMPOSITION
+→ Spark required
+
+NUMERIC_NORMALIZATION
+→ deterministic code
+
+COMPLEX_INTERPRETATION
+→ strong model
+```
+
+This creates the generalized MetaGraph later.
+
+---
+
+# 41. Add Cogym model-executor abstraction
+
+Do not wire model providers into FactWorld directly.
+
+```python
+class ModelExecutor(Executor):
+    ...
+```
+
+Alias layer:
+
+```text
+TINY_JSON
+FAST_REASONER
+STRONG_REASONER
+TOOL_AGENT
+```
+
+Provider implementation can change underneath.
+
+Later LiteLLM can manage provider supply/fallback, but don't make generic Cogym depend on LiteLLM.
+
+Cogym decides:
+
+```text
+which capability class?
+```
+
+Provider layer decides:
+
+```text
+where is that class executed?
+```
+
+---
+
+# 42. Cost accounting must be first-class
+
+Every action receives:
+
+```text
+estimated_cost
+actual_cost
+```
+
+For free quota:
+
+```text
+actual_cost = 0
+economic_cost = provider-normalized shadow price
+```
+
+Why keep both?
+
+Because otherwise Cogym learns:
+
+> free temporary quota = universally optimal architecture.
+
+Store:
+
+```text
+cash_cost
+normalized_cost
+```
+
+This lets experiments ask either:
+
+```text
+cheapest for us today
+```
+
+or:
+
+```text
+cheapest sustainable architecture
+```
+
+---
+
+# 43. Latency accounting
+
+Record:
+
+```text
+queue_ms
+provider_ms
+network_ms
+processing_ms
+wall_ms
+critical_path_ms
+```
+
+Parallel waves should use:
+
+```text
+critical path
+```
+
+not sum of child latencies.
+
+Example:
+
+```text
+search A = 300ms
+search B = 350ms
+search C = 280ms
+```
+
+Parallel wall latency ≈ slowest branch + overhead, not 930 ms.
+
+---
+
+# 44. Cache accounting
+
+Cache must be observable.
+
+Every action:
+
+```text
+cache_hit
+cache_age
+cache_source
+```
+
+Policy can choose:
+
+```text
+CACHE_LOOKUP
+```
+
+Verified graph reuse then becomes an optimizable action.
+
+Measure:
+
+```text
+graph_hit_rate
+accuracy conditional on cache hit
+latency saved
+refresh failures
+```
+
+---
+
+# 45. Freshness policy
+
+Knowledge nodes need freshness classes.
+
+Example conceptual categories:
+
+```text
+STATIC
+historical text attribution
+
+SLOW
+company identity
+
+MEDIUM
+documentation/API behavior
+
+FAST
+prices/latest package version
+
+REALTIME
+service status
+```
+
+Do not hardcode TTL globally.
+
+Store per claim:
+
+```text
+freshness_class
+verified_at
+refresh_after
+```
+
+Hydra can later learn empirically useful refresh rates.
+
+---
+
+# 46. Proactive ingestion comes later
+
+Don't start crawling the internet indiscriminately.
+
+Eventually define:
+
+[
+value_of_precompute
+===================
+
+P(request)
+\times retrieval_cost_saved
+\times stability
+\times confidence
+-----------------
+
+refresh_cost
+]
+
+Then populate common high-value regions.
+
+Example:
+
+```text
+popular software versions
+current LLM provider pricing
+major API capabilities
+common entities
+frequent scholarly claims
+```
+
+But this is **post-hackathon optimization**.
+
+---
+
+# 47. General replay architecture
+
+Every world should support:
+
+```text
+LIVE
+REPLAY
+SYNTHETIC
+```
+
+Trading:
+
+```text
+synthetic → deterministic generator
+historical → frozen bars
+```
+
+Fact checking:
+
+```text
+live → web/API
+replay → RetrievalTape
+```
+
+This should be visible in `WorldSpec`.
+
+---
+
+# 48. WorldSpec
+
+Generic:
+
+```python
+@dataclass(frozen=True)
+class WorldSpec:
+    world_kind: str
+    version: str
+    instance_set_hash: str
+    environment_hash: str
+    oracle_hash: str
+    metadata: dict
+```
+
+No `instrument`, `bars_digest`, etc. in generic spec.
+
+Those move into:
+
+```text
+TradingWorldSpec
+```
+
+---
+
+# 49. Episode v2
+
+Current Episode still contains `world_name`, `world_seed` and trading-like `expected_return`.
+
+Replace generic episode with:
+
+```python
+@dataclass(frozen=True)
+class Episode:
+
+    episode_id: str
+
+    world_spec_id: str
+    instance_id: str
+
+    candidate_id: str
+    treatment_id: str | None
+
+    events: tuple[str, ...]
+
+    final_output_hash: str
+
+    metrics: MetricVector
+
+    started_at_ns: int
+    finished_at_ns: int
+
+    replay_bundle_id: str | None
+```
+
+Domain-specific decisions live in events/artifacts.
+
+---
+
+# 50. Event ledger
+
+The event ledger should become the actual universal experiment substrate.
+
+Suggested events:
+
+```text
+EPISODE_STARTED
+
+OBSERVATION
+POLICY_DECISION
+
+ACTION_STARTED
+ACTION_COMPLETED
+
+WORLD_TRANSITION
+
+VERDICT
+
+METRIC
+
+EPISODE_TERMINATED
+```
+
+Everything hash chained.
+
+This is the part that makes every world scientifically inspectable.
+
+---
+
+# 51. Sealed evaluator hardening
+
+Current `SealedEvaluator` is a useful skeleton, but it's primarily a canary/check contract and not yet actual technical isolation.
+
+For v2:
+
+Subject process receives only:
+
+```text
+candidate artifact
+world public observation
+allowed executor handles
+budget
+```
+
+Evaluator process owns:
+
+```text
+secret labels
+secret instances
+ground truth
+quality gates
+baseline results
+```
+
+At minimum use subprocess boundaries.
+
+Later container isolation.
+
+Do not let proposer process import secret dataset paths.
+
+---
+
+# 52. Compatibility adapters
+
+Don't depend on Gymnasium/PettingZoo internally, but add adapters.
+
+`GymnasiumAdapter`:
+
+```text
+Gymnasium Env
+→ Cogym World
+```
+
+This gives access to a large existing family of deterministic environments.
+
+Gymnasium's standard `reset/step` contract makes this straightforward. ([Gymnasium][1])
+
+Future `PettingZooAdapter` supports multi-agent simultaneous environments through its Parallel API. ([PettingZoo][2])
+
+This becomes a very strong proof that Cogym isn't merely a private collection of bespoke worlds.
+
+---
+
+# 53. CLI after convergence
+
+Target:
+
+```bash
+cogym worlds
+```
+
+Output:
+
+```text
+toy.search_game
+trading.synthetic
+trading.regime_shift
+factcheck.replay
+factcheck.live
+```
+
+Then:
+
+```bash
+cogym evaluate \
+  --world factcheck.replay \
+  --candidate policies/baseline.yaml
+```
+
+Campaign:
+
+```bash
+cogym evolve campaigns/factcheck-cost-v1.yaml
+```
+
+Replay:
+
+```bash
+cogym replay ep_abc123
+```
+
+Compare:
+
+```bash
+cogym compare candidate_A candidate_B
+```
+
+Inspect:
+
+```bash
+cogym episode ep_abc123
+```
+
+---
+
+# 54. Campaign YAML
+
+Generic campaign file:
+
+```yaml
+name: factcheck-cost-v1
+
+world:
+  kind: factcheck.replay
+  dataset: factjudge-v1
+
+candidate:
+  kind: retrieval_policy
+  baseline: policies/factcheck/baseline-high-recall.yaml
+
+splits:
+  dev: dev
+  validation: validation
+  secret: secret
+
+quality_gates:
+  - metric: accuracy
+    mode: noninferior
+    margin: 0.005
+
+  - metric: false_support_rate
+    max: 0.03
+
+objectives:
+  - metric: cash_cost_usd
+    direction: min
+
+  - metric: wall_latency_ms
+    direction: min
+
+evolution:
+  population: 20
+  generations: 5
+  proposal: hermes
+  successive_halving: true
+
+budgets:
+  max_actions: 8
+  max_cost_usd: 0.05
+  max_wall_ms: 5000
+```
+
+That is what “agnostic Cogym” should feel like.
+
+---
+
+# 55. Storage hierarchy
+
+Use boring reliable storage for truth.
+
+```text
+Git
+→ source/configs/protocols
+
+SQLite
+→ canonical local events/index
+
+JSONL
+→ portable immutable receipts
+
+Parquet
+→ large episode/action datasets later
+
+DuckDB
+→ analytical queries later
+
+HydraDB
+→ derived relationships and policy experience
+```
+
+This matches the repo's Northstar already.
+
+Do not make HydraDB availability a dependency for experiment execution.
+
+---
+
+# 56. Hydra rebuilding test
+
+Required test:
+
+```text
+1. run campaign
+2. produce canonical event store
+3. delete HydraDB projection
+4. regenerate Hydra projection
+5. graph IDs/results equal
+```
+
+If deleting Hydra destroys scientific evidence, architecture is wrong.
+
+---
+
+# 57. Test suite expansion
+
+The coding agent should add explicit categories.
+
+### Generic core
+
+```text
+test_world_protocol
+test_policy_protocol
+test_executor_protocol
+test_metric_vector
+test_constraint_gate
+test_lexicographic_selection
+```
+
+### Determinism
+
+```text
+test_same_seed_same_episode
+test_replay_byte_identical
+test_parallel_wave_canonical_order
+```
+
+### Anti-theatre
+
+```text
+test_candidate_cannot_read_secret
+test_proposer_cannot_read_secret
+test_secret_created_after_candidate_freeze
+test_evaluator_hash_committed
+```
+
+### Optimization
+
+```text
+test_cheaper_bad_candidate_rejected
+test_equal_quality_cheaper_wins
+test_equal_quality_equal_cost_faster_wins
+test_regression_on_slice_rejected
+```
+
+### FactWorld
+
+```text
+test_relation_attack_available
+test_numeric_attack_available
+test_temporal_attack_available
+test_hidden_label_not_in_observation
+test_tape_executor
+test_factjudge_adapter
+test_graph_cache_freshness
+```
+
+### Retrieval
+
+```text
+test_provider_failure
+test_provider_timeout
+test_parallel_search
+test_browser_last_resort
+test_cost_accounting
+```
+
+### Migration
+
+```text
+test_trading_golden_episode
+```
+
+---
+
+# 58. Scientific experiment registry
+
+Every experiment directory:
+
+```text
+experiments/<id>/
+├── PROTOCOL.md
+├── campaign.yaml
+├── baseline.json
+├── manifest.json
+├── candidate-freeze.json
+├── outputs/
+├── receipts/
+├── analysis/
+└── REVIEW.md
+```
+
+Keep the existing six-stage workflow from README.
+
+No experiment is “real” unless:
+
+```text
+protocol frozen
+splits frozen
+baseline frozen
+candidate frozen
+secret withheld
+review written
+```
+
+---
+
+# 59. Distinguish research modes
+
+Add explicit:
+
+```text
+PILOT
+CONFIRMATORY
+```
+
+Pilot may:
+
+```text
+inspect dev errors
+change hypotheses
+change metrics
+```
+
+Confirmatory may not.
+
+Every report displays mode prominently.
+
+This helps avoid repeating the STX pilot interpretation problems documented in the repo status/handover.
+
+---
+
+# 60. Do not evolve everything simultaneously
+
+For FactWorld:
+
+### Cycle A
+
+Freeze:
+
+```text
+FactJudge
+retrieval providers
+dataset
+```
+
+Evolve:
+
+```text
+retrieval policy
+```
+
+### Cycle B
+
+Freeze:
+
+```text
+best retrieval policy
+```
+
+Improve:
+
+```text
+FactJudge
+```
+
+### Cycle C
+
+Freeze new FactJudge.
+
+Re-evolve retrieval.
+
+This preserves causal attribution.
+
+---
+
+# 61. First optimization dimensions
+
+Start with things that can plausibly save cost without changing semantics:
+
+```text
+attack order
+number of searches
+parallel vs sequential
+provider selection
+source-type selection
+early stopping
+full-page extraction threshold
+browser escalation
+cache reuse
+small-vs-large model routing
+```
+
+Avoid early:
+
+```text
+fine-tuning
+RL
+arbitrary code generation
+complex social multi-agent systems
+self-modifying evaluator
+```
+
+---
+
+# 62. Evolution algorithm
+
+Use the existing evolutionary machinery first.
+
+Don't immediately add five optimizers.
+
+Initial:
+
+```text
+population
+→ mutation
+→ dev
+→ halve
+→ validation
+→ finalists
+→ secret
+→ archive
+```
+
+Later compare:
+
+```text
+random search
+evolutionary
+Bayesian optimization
+contextual bandit
+MAP-Elites
+```
+
+but **the optimizer itself should be pluggable**:
+
+```python
+class Optimizer(Protocol):
+
+    def propose(...)
+
+    def observe(...)
+
+    def state(...)
+```
+
+This lets Cogym later scientifically evaluate optimizers too.
+
+---
+
+# 63. Contextual bandit belongs inside the FactWorld policy, not necessarily the Cogym optimizer
+
+Important conceptual distinction:
+
+```text
+Cogym optimizer
+= searches for a better fact-checking policy
+
+fact-checking policy
+= may itself be a contextual bandit choosing next retrieval action
+```
+
+So eventually Cogym can compare:
+
+```text
+static policy
+vs
+Hydra nearest-neighbor
+vs
+contextual bandit
+vs
+learned sequential policy
+```
+
+under identical hidden evaluation.
+
+---
+
+# 64. Future sequential optimization
+
+Only after enough trajectories exist.
+
+State:
+
+```text
+claim phenotype
+current evidence
+attacks fired
+cost spent
+time elapsed
+FactJudge state
+```
+
+Action:
+
+```text
+next retrieval/attack
+or STOP
+```
+
+Then eventually test:
+
+```text
+learned policy
+MCTS
+offline RL
+```
+
+But don't touch this until thousands of reliable replay episodes exist.
+
+---
+
+# 65. Definition of Done for Cogym v2 core
+
+The refactor is complete when all of these hold:
+
+```text
+✓ package no longer conceptually requires trading
+
+✓ exact same CampaignRunner can run:
+    toy world
+    trading world
+    fact-verification world
+
+✓ generic core contains zero market concepts
+
+✓ no world-specific branches in evaluator
+
+✓ all candidate evaluation uses generic MetricVector
+
+✓ hard quality constraints dominate cost/speed
+
+✓ candidate results are paired against baseline
+
+✓ secret evaluator remains hidden
+
+✓ live external episodes can be replayed deterministically
+
+✓ parallel execution preserves canonical hashes
+
+✓ HydraDB can be deleted and rebuilt
+
+✓ trading golden fixture remains valid
+
+✓ FactWorld can execute existing FactJudge dataset
+
+✓ static baseline and adaptive policies can be compared
+
+✓ cost and latency are measured per action
+
+✓ browser is an executor, not embedded in world
+
+✓ provider failures generate ordinary recorded observations
+
+✓ all experiments produce immutable receipts
+```
+
+---
+
+# 66. Definition of Done for Fact Retrieval v1
+
+The actual Telegraph-facing research system should achieve:
+
+```text
+CLAIM
+ ↓
+phenotype/compiler
+ ↓
+graph/cache lookup
+ ↓
+source router
+ ↓
+parallel first-wave retrieval
+ ↓
+Garak-style targeted attacks
+ ↓
+selective escalation
+ ↓
+FactJudge
+ ↓
+verdict + evidence packet
+ ↓
+verified evidence graph
+```
+
+And Cogym proves:
+
+```text
+accuracy ≥ baseline quality floor
+```
+
+while minimizing:
+
+```text
+cost
+then latency
+```
+
+---
+
+# 67. Recommended PR/build sequence for the coding agent
+
+I would make the coding agent execute this in exactly this order:
+
+### PR 1 — Freeze + repair
+
+* baseline receipts
+* golden trading fixture
+* PatternStore `improved` bug
+* README current-state cleanup
+* tests green
+
+### PR 2 — Generic contracts
+
+* `World`
+* `Policy`
+* `Executor`
+* `ActionSpec`
+* `ActionResult`
+* generic `Episode`
+* `MetricVector`
+
+No behavior changes.
+
+### PR 3 — Generic evaluation
+
+* quality constraints
+* lexicographic comparator
+* paired non-inferiority
+* generic suites
+* secret evaluator boundary
+
+### PR 4 — Generic campaign
+
+Port strong parts from `evolution_lab/campaign.py`.
+
+Remove trading-specific metrics/genome assumptions.
+
+### PR 5 — Toy world
+
+Prove everything works with zero market code.
+
+### PR 6 — Trading adapter
+
+Port existing market runtime behind generic contracts.
+
+Golden behavior parity required.
+
+### PR 7 — Replay infrastructure
+
+* action tapes
+* executor replay
+* canonical parallel receipts
+* live→replay conversion
+
+### PR 8 — FactWorld offline
+
+* dataset adapter
+* claim phenotypes
+* attacks
+* frozen FactJudge adapter
+* static baselines
+* quality metrics
+
+### PR 9 — Retrieval providers
+
+* Tavily
+* direct extract
+* structured-provider registry
+* async parallel scheduler
+* instrumentation
+
+### PR 10 — Graph/cache
+
+* verified claim/evidence representation
+* freshness
+* cache lookup action
+* EvidenceGraph genericization
+* Hydra projection
+
+### PR 11 — Adaptive policies
+
+* typed routing
+* early stopping
+* query attack ordering
+* provider routing
+
+### PR 12 — Cogym campaign
+
+Run actual constrained optimization:
+
+```text
+maintain quality
+→ reduce cost
+→ reduce latency
+```
+
+### PR 13 — Live retrieval
+
+Take best frozen policies into real search.
+
+Capture all responses into replay tapes.
+
+### PR 14 — Telegraph adapter
+
+Wrap best fact-check policy as miner.
+
+Not before the policy is scientifically measured.
+
+---
+
+# 68. What the coding agent should explicitly NOT do
+
+Do not:
+
+```text
+create canonical_v2/ beside canonical/
+
+rewrite trading from scratch
+
+make HydraDB the source of truth
+
+add a dashboard before experiment APIs stabilize
+
+add RL immediately
+
+let Hermes edit evaluators
+
+use LLM judges for hidden ground truth
+
+optimize only FactJudge confidence
+
+mix secret data into Hydra
+
+randomly crawl the web to populate facts
+
+launch headless browser for every claim
+
+create one enormous generic JSON blob for every interface
+
+make every Cogym world an LLM agent
+
+merge live-web and replay evaluation
+
+replace existing working experiments without migration receipts
+```
+
+And especially:
+
+> **Do not produce another architecture variant directory. Converge the repo.**
+
+---
+
+# 69. The resulting conceptual model
+
+After this refactor, Cogym becomes:
+
+```text
+                        COGYM
+
+                      WORLD API
+                         │
+            ┌────────────┼────────────┐
+            ▼            ▼            ▼
+         TRADING      FACT CHECK    ROUTING
+         WORLD           WORLD       WORLD
+            │            │            │
+            └────────────┼────────────┘
+                         │
+                      POLICY
+                         │
+                    action graph
+                         │
+          ┌──────────────┼──────────────┐
+          ▼              ▼              ▼
+    deterministic      external        models
+        code          providers
+          │              │              │
+          └──────────────┼──────────────┘
+                         ▼
+                       STATE
+                         │
+                         ▼
+                    EVALUATOR
+                         │
+                hard quality gates
+                         │
+                    PASS / FAIL
+                         │
+                         ▼
+                    OPTIMIZER
+                         │
+           cost → speed → robustness
+                         │
+                         ▼
+                   new candidate
+```
+
+And Hydra sits underneath as:
+
+```text
+EXPERIMENT EXPERIENCE GRAPH
+
+which policy
+worked where
+using which actions
+against what world phenotype
+for what cost
+with what failures
+```
+
+---
+
+# 70. The first headline experiment
+
+Once this is built, I would make the first serious cross-domain Cogym result:
+
+> **Can the same world-agnostic evolutionary laboratory optimize two structurally different problems—sequential decision-making and factual verification—without domain-specific changes to its evaluator/campaign machinery?**
+
+Then the fact-specific result:
+
+> **Can adaptive adversarial retrieval preserve FactJudge-level factual accuracy while materially reducing retrieval cost and latency relative to a fixed high-recall retrieval pipeline?**
+
+That is substantially cleaner scientifically than the repo being “a trading thing, a school thing, an evolution thing, and an Alpaca hackathon variant.”
+
+The core insight is:
+
+> **Cogym should optimize programs/policies operating in worlds, not agents operating in markets.**
+
+Trading was just the first organism.
+
+Fact verification is the organism that proves Cogym actually became the lab envisioned in the Northstar.
+
+[1]: https://gymnasium.farama.org/api/env/?utm_source=chatgpt.com "Env - Gymnasium Documentation"
+[2]: https://pettingzoo.farama.org/main/api/parallel/?utm_source=chatgpt.com "Parallel API - PettingZoo Documentation"

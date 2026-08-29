@@ -1,0 +1,23 @@
+{
+  "receipt": "{\n  \"candidate_config\": {\n    \"auto_threshold\": 0.9239588113060522,\n    \"review_threshold\": 0.35105026792113214,\n    \"weights\": [\n      0.181618569709552,\n      0.043066529860918044,\n      0.15711685598261127,\n      0.0390397996396634,\n      0.08295206587988438,\n      0.496206178927371\n    ]\n  },\n  \"candidate_id\": \"cand_c54c3e5f853fb568a366c205b31a77d7\",\n  \"event_hashes\": [\n    \"receipt_hash\"\n  ],\n  \"events_root\": \"726563656970745f68617368\",\n  \"metrics\": [\n    {\n      \"direction\": \"max\",\n      \"name\": \"bas\",\n      \"value\": 0.71248\n    },\n    {\n      \"direction\": \"max\",\n      \"name\": \"accuracy\",\n      \"value\": 1.0\n    },\n    {\n      \"direction\": \"min\",\n      \"name\": \"ece\",\n      \"value\": 0.3047842793958748\n    },\n    {\n      \"direction\": \"max\",\n      \"name\": \"auto_sign_rate\",\n      \"value\": 0.0\n    }\n  ],\n  \"run_id\": \"run_6ed357e557114bd794c541367907ba37\",\n  \"scenario\": {\n    \"generations\": 20,\n    \"n_docs\": 500,\n    \"seed\": 42\n  },\n  \"seed\": 42,\n  \"worldpack_id\": \"wp_ee6ad32aa2bea43b1c8971f58ce4ac71\"\n}",
+  "best_policy": {
+    "auto_threshold": 0.9239588113060522,
+    "review_threshold": 0.35105026792113214,
+    "weights": [
+      0.181618569709552,
+      0.043066529860918044,
+      0.15711685598261127,
+      0.0390397996396634,
+      0.08295206587988438,
+      0.496206178927371
+    ]
+  },
+  "best_metrics": {
+    "bas": 0.71248,
+    "accuracy": 1.0,
+    "ece": 0.3047842793958748,
+    "auto": 0.0
+  },
+  "merkle_root": "dacd1139ba72bc5731d9862ebc730d71d918b4824ab2184342cf1748df64a6ff",
+  "generations": 20
+}

@@ -1,0 +1,11 @@
+{
+  "total_docs": 118,
+  "total_fields": 2176,
+  "accuracy": 0.3318014705882353,
+  "avg_confidence": 0.5228113979691922,
+  "elapsed_s": 0.009415388107299805,
+  "audit": {
+    "chain_valid": true,
+    "merkle_root": "e05efe1b0796f8736c5832356663c195ec5db5fc79cc15717197a13d027784cc"
+  }
+}

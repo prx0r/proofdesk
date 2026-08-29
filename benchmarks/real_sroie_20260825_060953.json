@@ -1,0 +1,332 @@
+{
+  "timestamp": "2026-08-25T06:09:53Z",
+  "dataset": "SROIE",
+  "documents": 10,
+  "avg_accuracy": 0.575,
+  "auto_sign_rate": 0.0,
+  "total_credits": 150.0,
+  "ece": 0.42474999999999996,
+  "brier": 0.3104237499999999,
+  "results": [
+    {
+      "id": "000",
+      "correct": 0.0,
+      "action": "HUMAN_REVIEW",
+      "avg_confidence": 0.6524999999999999,
+      "risk": 0.3475000000000001,
+      "fields": 4,
+      "cost": 15.0,
+      "latency_ms": 6105.794429779053,
+      "field_results": {
+        "company": {
+          "verdict": "REFUTED",
+          "action": "REJECT",
+          "correct": false
+        },
+        "date": {
+          "verdict": "REFUTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        },
+        "address": {
+          "verdict": "REFUTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        },
+        "total": {
+          "verdict": "REFUTED",
+          "action": "REJECT",
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "001",
+      "correct": 0.5,
+      "action": "HUMAN_REVIEW",
+      "avg_confidence": 0.66875,
+      "risk": 0.33125000000000004,
+      "fields": 4,
+      "cost": 15.0,
+      "latency_ms": 5299.735546112061,
+      "field_results": {
+        "company": {
+          "verdict": "REFUTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        },
+        "date": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        },
+        "address": {
+          "verdict": "SUPPORTED",
+          "action": "REJECT",
+          "correct": false
+        },
+        "total": {
+          "verdict": "REFUTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "002",
+      "correct": 0.5,
+      "action": "HUMAN_REVIEW",
+      "avg_confidence": 0.7849999999999999,
+      "risk": 0.21500000000000008,
+      "fields": 4,
+      "cost": 15.0,
+      "latency_ms": 7785.036325454712,
+      "field_results": {
+        "company": {
+          "verdict": "REFUTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        },
+        "date": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": true
+        },
+        "address": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        },
+        "total": {
+          "verdict": "REFUTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "003",
+      "correct": 0.25,
+      "action": "HUMAN_REVIEW",
+      "avg_confidence": 0.2575,
+      "risk": 0.7424999999999999,
+      "fields": 4,
+      "cost": 15.0,
+      "latency_ms": 5763.550043106079,
+      "field_results": {
+        "company": {
+          "verdict": "REFUTED",
+          "action": "REJECT",
+          "correct": false
+        },
+        "date": {
+          "verdict": "SUPPORTED",
+          "action": "REJECT",
+          "correct": false
+        },
+        "address": {
+          "verdict": "REFUTED",
+          "action": "REJECT",
+          "correct": false
+        },
+        "total": {
+          "verdict": "REFUTED",
+          "action": "REJECT",
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "004",
+      "correct": 0.5,
+      "action": "HUMAN_REVIEW",
+      "avg_confidence": 0.43624999999999997,
+      "risk": 0.56375,
+      "fields": 4,
+      "cost": 15.0,
+      "latency_ms": 6105.204343795776,
+      "field_results": {
+        "company": {
+          "verdict": "REFUTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        },
+        "date": {
+          "verdict": "SUPPORTED",
+          "action": "REJECT",
+          "correct": false
+        },
+        "address": {
+          "verdict": "SUPPORTED",
+          "action": "REJECT",
+          "correct": false
+        },
+        "total": {
+          "verdict": "REFUTED",
+          "action": "REJECT",
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "005",
+      "correct": 0.75,
+      "action": "HUMAN_REVIEW",
+      "avg_confidence": 0.8474999999999999,
+      "risk": 0.15250000000000008,
+      "fields": 4,
+      "cost": 15.0,
+      "latency_ms": 5879.018068313599,
+      "field_results": {
+        "company": {
+          "verdict": "REFUTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        },
+        "date": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": true
+        },
+        "address": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        },
+        "total": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "006",
+      "correct": 1.0,
+      "action": "HUMAN_REVIEW",
+      "avg_confidence": 0.9099999999999999,
+      "risk": 0.09000000000000008,
+      "fields": 4,
+      "cost": 15.0,
+      "latency_ms": 6932.57212638855,
+      "field_results": {
+        "company": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": true
+        },
+        "date": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": true
+        },
+        "address": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        },
+        "total": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "007",
+      "correct": 0.75,
+      "action": "HUMAN_REVIEW",
+      "avg_confidence": 0.8474999999999999,
+      "risk": 0.15250000000000008,
+      "fields": 4,
+      "cost": 15.0,
+      "latency_ms": 4814.8298263549805,
+      "field_results": {
+        "company": {
+          "verdict": "REFUTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        },
+        "date": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        },
+        "address": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": true
+        },
+        "total": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": true
+        }
+      }
+    },
+    {
+      "id": "008",
+      "correct": 0.5,
+      "action": "HUMAN_REVIEW",
+      "avg_confidence": 0.43624999999999997,
+      "risk": 0.56375,
+      "fields": 4,
+      "cost": 15.0,
+      "latency_ms": 8116.003036499023,
+      "field_results": {
+        "company": {
+          "verdict": "REFUTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        },
+        "date": {
+          "verdict": "SUPPORTED",
+          "action": "REJECT",
+          "correct": false
+        },
+        "address": {
+          "verdict": "SUPPORTED",
+          "action": "REJECT",
+          "correct": false
+        },
+        "total": {
+          "verdict": "REFUTED",
+          "action": "REJECT",
+          "correct": false
+        }
+      }
+    },
+    {
+      "id": "009",
+      "correct": 1.0,
+      "action": "HUMAN_REVIEW",
+      "avg_confidence": 0.9062499999999999,
+      "risk": 0.09375000000000008,
+      "fields": 4,
+      "cost": 15.0,
+      "latency_ms": 6011.310577392578,
+      "field_results": {
+        "company": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        },
+        "date": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": true
+        },
+        "address": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": false
+        },
+        "total": {
+          "verdict": "SUPPORTED",
+          "action": "HUMAN_REVIEW",
+          "correct": true
+        }
+      }
+    }
+  ]
+}

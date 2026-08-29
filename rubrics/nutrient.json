@@ -1,0 +1,143 @@
+{
+  "hackathon": "DevNetwork API + Cloud + AI 2026",
+  "sponsor_track": "Nutrient DWS",
+  "entry_name": "ProofDesk",
+  "one_line_pitch": "Evidence-gated document execution for high-stakes business workflows",
+  "submission_line": "Nutrient DWS turns messy source documents into source-grounded structured evidence and provides the review surface where humans resolve facts the automation is not allowed to guess.",
+  "acceptance_gate": "A judge must see a real extracted value, jump to source evidence, see a material mismatch routed to review, resolve it, and watch the downstream workflow unblock.",
+  "criteria": [
+    {
+      "id": "NUT-001",
+      "category": "core",
+      "description": "Real Nutrient DWS Data Extraction API call on actual PDF documents",
+      "check_type": "api_call",
+      "check_params": {
+        "endpoint": "POST /v1/cases/{id}/run",
+        "expected_facts_min": 5,
+        "provider_field": "extractor",
+        "expected_provider": "nutrient_dws"
+      },
+      "pass_condition": "At least 5 facts extracted with extractor='nutrient_dws' in response",
+      "fail_condition": "Zero facts returned or extractor is not 'nutrient_dws'",
+      "sponsor_quote": "must use Nutrient DWS ... for at least one core document operation, meaningfully",
+      "demo_script_step": "0:20-0:55 — Show extraction results with fact count and confidence scores",
+      "weight": 10,
+      "automatable": true
+    },
+    {
+      "id": "NUT-002",
+      "category": "core",
+      "description": "Each extracted fact retains value + page number + source document reference",
+      "check_type": "api_response_field",
+      "check_params": {
+        "endpoint": "GET /v1/cases/{id}/facts",
+        "required_fields": ["fact_id", "field", "value_raw", "value_normalized", "doc_id", "page", "confidence"],
+        "min_facts_with_page": 1
+      },
+      "pass_condition": "Every fact has non-null value_raw, doc_id, and page fields",
+      "fail_condition": "Any fact missing page or doc_id",
+      "sponsor_quote": "Retain value + page/source location + confidence",
+      "demo_script_step": "0:30 — Click insurance expiry fact, show source document + page number",
+      "weight": 9,
+      "automatable": true
+    },
+    {
+      "id": "NUT-003",
+      "category": "core",
+      "description": "Provenance is never discarded — original value_raw preserved alongside normalized value",
+      "check_type": "api_response_field",
+      "check_params": {
+        "endpoint": "GET /v1/cases/{id}/facts",
+        "condition": "value_raw != value_normalized for at least 2 facts"
+      },
+      "pass_condition": "At least 2 facts where value_raw differs from value_normalized (e.g. '$42,500' vs '42500')",
+      "fail_condition": "All facts have identical raw and normalized values",
+      "sponsor_quote": "Never discard provenance after extraction",
+      "demo_script_step": "0:35 — Show 'Northstar Data Systems Ltd.' raw vs 'Northstar Data Systems Ltd' normalized",
+      "weight": 8,
+      "automatable": true
+    },
+    {
+      "id": "NUT-004",
+      "category": "core",
+      "description": "Low-confidence or conflicting material facts are routed to human review",
+      "check_type": "state_machine_check",
+      "check_params": {
+        "case_must_reach_state": "REVIEW_REQUIRED",
+        "reason": "blocking_exceptions > 0",
+        "failing_assertion_min": 1
+      },
+      "pass_condition": "Case state becomes REVIEW_REQUIRED with at least 1 BLOCKER assertion",
+      "fail_condition": "Case goes directly to APPROVABLE without review",
+      "sponsor_quote": "Route low-confidence/conflicting material facts to review",
+      "demo_script_step": "0:55-1:20 — Show insurance date mismatch routed to review queue",
+      "weight": 10,
+      "automatable": true
+    },
+    {
+      "id": "NUT-005",
+      "category": "demo",
+      "description": "Nutrient DWS Viewer is embedded in the UI showing source document context",
+      "check_type": "ui_element",
+      "check_params": {
+        "element": "nutrient_viewer_iframe_or_component",
+        "visible_during": "fact_inspection"
+      },
+      "pass_condition": "DWS Viewer renders source PDF with highlighted extracted region",
+      "fail_condition": "No viewer embedded or viewer shows placeholder",
+      "sponsor_quote": "Embed DWS Viewer",
+      "demo_script_step": "0:30 — Click source chip, DWS Viewer opens at extraction location",
+      "weight": 7,
+      "automatable": false
+    },
+    {
+      "id": "NUT-006",
+      "category": "demo",
+      "description": "Clicking an exception opens its source context in the viewer",
+      "check_type": "ui_element",
+      "check_params": {
+        "interaction": "click_exception_row",
+        "result": "viewer_jumps_to_source_page_and_location"
+      },
+      "pass_condition": "Click on insurance date exception navigates viewer to insurance cert page",
+      "fail_condition": "Click does not open viewer or opens wrong location",
+      "sponsor_quote": "Clicking an exception opens its source context",
+      "demo_script_step": "0:40 — Click insurance expiry exception, viewer jumps to certificate page",
+      "weight": 6,
+      "automatable": false
+    },
+    {
+      "id": "NUT-007",
+      "category": "core",
+      "description": "Human resolution creates a new audit event; original extraction stays immutable",
+      "check_type": "audit_trail",
+      "check_params": {
+        "events_endpoint": "GET /v1/cases/{id}/events",
+        "required_event_types": ["STATE_TRANSITION", "EXCEPTION_RESOLVED"],
+        "immutable_check": "original facts unchanged after resolution"
+      },
+      "pass_condition": "EXCEPTION_RESOLVED event exists AND original facts are unchanged",
+      "fail_condition": "Facts modified during resolution or no audit event created",
+      "sponsor_quote": "Human resolution becomes a new event; original extraction stays immutable",
+      "demo_script_step": "1:20-1:45 — Resolve exception, show audit event, show original facts unchanged",
+      "weight": 9,
+      "automatable": true
+    },
+    {
+      "id": "NUT-008",
+      "category": "submission",
+      "description": "One-line statement: where DWS did the heavy lifting",
+      "check_type": "code_inspection",
+      "check_params": {
+        "file": "README.md",
+        "must_contain": "Nutrient"
+      },
+      "pass_condition": "README contains explicit attribution to Nutrient DWS",
+      "fail_condition": "No mention of Nutrient in README",
+      "sponsor_quote": "one-line 'where DWS did the heavy lifting'",
+      "demo_script_step": "N/A — submission text",
+      "weight": 3,
+      "automatable": true
+    }
+  ]
+}
