@@ -33,8 +33,7 @@ dist/
 build/
 *.egg-info/
 
-# Foxit lab (separate)
-foxit/
+
 
 # Vendor (external)
 vendor/
