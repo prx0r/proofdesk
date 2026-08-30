@@ -72,7 +72,7 @@ def act_evidence(case):
             val = pub.get("value_normalized", "N/A")[:24]
             conf = pub.get("confidence")
             conf_str = f"{conf:.0%}" if conf is not None else "N/A"
-            page = pub.get("source_page", "?")
+            page = pub.get("source_page") or pub.get("page") or "?"
             print(f"  {pub['field']:<30} {val:<25} {conf_str:>5}  page {page}")
     else:
         print("  (Using stub extraction — set NUTRIENT_API_KEY for live)")

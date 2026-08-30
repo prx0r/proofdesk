@@ -143,7 +143,9 @@ def select_for_review(
     candidates = []
     for f in facts:
         fname = f.get("field", "")
-        conf = f.get("confidence", 0.5)
+        conf = f.get("confidence")
+        if conf is None:
+            continue
         budget_key = "default"
         for bk in budget_thresholds:
             if bk in fname.lower():
@@ -174,7 +176,7 @@ def select_for_review(
                 if f.get("field") in a.get("predicate", ""):
                     candidates.append({
                         "field": f.get("field", ""),
-                        "confidence": f.get("confidence", 0.5),
+                        "confidence": f.get("confidence"),
                         "budget": 0.10,
                         "threshold": 0.90,
                         "distance_to_boundary": 0.0,
@@ -214,24 +216,33 @@ def classify_document(
     field_scores = []
     for f in facts:
         fname = f.get("field", "")
-        conf = f.get("confidence", 0.5)
+        conf = f.get("confidence")
         budget_key = "default"
         for bk in FIELD_BUDGETS:
             if bk in fname.lower():
                 budget_key = bk
                 break
         budget = FIELD_BUDGETS[budget_key]
-        within_budget = conf >= (1.0 - budget)
-        field_scores.append({
-            "field": fname,
-            "confidence": round(conf, 3),
-            "budget": budget,
-            "within_budget": within_budget,
-            "error_rate": round(1.0 - conf, 3),
-        })
+        if conf is None:
+            field_scores.append({
+                "field": fname,
+                "confidence": None,
+                "budget": budget,
+                "within_budget": False,
+                "status": "MISSING_CONFIDENCE",
+            })
+        else:
+            within_budget = conf >= (1.0 - budget)
+            field_scores.append({
+                "field": fname,
+                "confidence": round(conf, 3),
+                "budget": budget,
+                "within_budget": within_budget,
+                "error_rate": round(1.0 - conf, 3),
+            })
 
     # Step 4: Signal extraction for the confidence module
-    confidences = [f.get("confidence", 0.5) for f in facts if f.get("confidence")]
+    confidences = [f.get("confidence") for f in facts if f.get("confidence") is not None]
     hunter_score = sum(confidences) / len(confidences) if confidences else 0.5
     mapper_score = (sum(1 for a in assertions if a.get("result") == "PASS") /
                     max(len(assertions), 1)) if assertions else 0.5  # Fallback to 0.5 if no assertions
@@ -297,7 +308,10 @@ def classify_document(
             # Wire PerFieldRiskController for per-field thresholds
             for f in facts:
                 fname = f.get("field", "")
-                conf = f.get("confidence", 0.5)
+                conf = f.get("confidence")
+                if conf is None:
+                    per_field_thresholds[fname] = 0.60
+                    continue
                 
                 # Determine field risk level (lowered for demo)
                 if "amount" in fname.lower() or "total" in fname.lower():
@@ -324,7 +338,15 @@ def classify_document(
     per_field_violations = []
     for f in facts:
         fname = f.get("field", "")
-        conf = f.get("confidence", 0.5)
+        conf = f.get("confidence")
+        if conf is None:
+            per_field_violations.append({
+                "field": fname,
+                "confidence": None,
+                "threshold": per_field_thresholds.get(fname, 0.70),
+                "status": "MISSING_CONFIDENCE",
+            })
+            continue
         field_threshold = per_field_thresholds.get(fname, 0.70)
         if conf < field_threshold:
             per_field_violations.append({

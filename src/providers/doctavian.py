@@ -468,6 +468,9 @@ class DoctavianClient:
                             output_name=f"approval_memo_{record_data.get('case_id', 'unknown')}",
                             output_format="pdf",
                         )
+                        # Check for explicit provider failure — fall through to local renderer
+                        if doc.get("status") == "failed":
+                            raise DoctavianError(502, doc.get("error_code", "PROVIDER_FAILED"))
                         doc_urn = doc.get("urn", "")
                         content = json.dumps(doc, indent=2)
                         artifact = GeneratedArtifact(

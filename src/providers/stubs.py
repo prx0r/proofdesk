@@ -249,14 +249,17 @@ def doctavian_generate(record_data: dict, template_id: str = "approval_memo", co
 
 # --- Foxit stub ---
 
-def foxit_pdf_prepare(artifact: GeneratedArtifact, content: str) -> dict:
+def foxit_pdf_prepare(case, generated_artifact, content: str = "") -> dict:
     """Simulate Foxit PDF preparation."""
     return {
         "operation": "merge_and_compress",
-        "input_artifact": artifact.artifact_id,
-        "output_pdf": f"/tmp/proofdesk/{artifact.artifact_id}.pdf",
-        "pages": content.count("\n") + 1,
-        "size_bytes": len(content.encode()),
+        "source_ids": [d.doc_id for d in case.documents],
+        "memo_id": None,
+        "merge_task": None,
+        "compress_task": None,
+        "final_document_id": None,
+        "final_hash": None,
+        "input_artifact": generated_artifact.artifact_id,
         "provider": "foxit_pdf_services",
         "status": "prepared",
     }

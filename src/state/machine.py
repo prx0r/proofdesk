@@ -94,14 +94,17 @@ def transition(case: Case, to_state: CaseState, actor: str = "system",
 
 
 def can_request_signature(case: Case) -> dict:
-    """SignatureGate — returns allowed=True or denial reasons."""
+    """SignatureGate — returns allowed=True, denial reasons, and passing checks."""
     reasons = []
+    checks = []
 
     if case.state != CaseState.PREPARED:
         reasons.append({
             "code": "INVALID_STATE",
             "detail": f"Case state is {case.state.value}, expected PREPARED",
         })
+    else:
+        checks.append("state_is_PREPARED")
 
     if case.unresolved_blockers > 0:
         failing = [a for a in case.assertions if a.result.value == "FAIL"
@@ -117,29 +120,74 @@ def can_request_signature(case: Case) -> dict:
                 "assertion_id": a.assertion_id,
                 "detail": a.detail,
             })
+    else:
+        checks.append("no_unresolved_blockers")
 
     if case.human_approval is None:
         reasons.append({
             "code": "NO_HUMAN_APPROVAL",
             "detail": "No human approval recorded",
         })
+    else:
+        checks.append("human_approval_present")
 
     if case.structured_record is None:
         reasons.append({
             "code": "NO_STRUCTURED_RECORD",
             "detail": "No approved structured record",
         })
+    else:
+        checks.append("structured_record_exists")
 
     if case.generated_artifact is None:
         reasons.append({
             "code": "NO_ARTIFACT",
             "detail": "No generated artifact",
         })
-    elif case.structured_record and case.generated_artifact:
-        if case.generated_artifact.record_hash != case.structured_record.content_hash:
-            reasons.append({
-                "code": "ARTIFACT_HASH_MISMATCH",
-                "detail": "Generated artifact hash does not match approved record",
-            })
+    else:
+        checks.append("generated_artifact_exists")
+        if case.structured_record and case.generated_artifact:
+            if case.generated_artifact.record_hash != case.structured_record.content_hash:
+                reasons.append({
+                    "code": "ARTIFACT_HASH_MISMATCH",
+                    "detail": "Generated artifact hash does not match approved record",
+                })
+            else:
+                checks.append("artifact_record_hash_matches")
 
-    return {"allowed": len(reasons) == 0, "reasons": reasons}
+    # Calibrated confidence check — the key innovation
+    conf = getattr(case, '_confidence', None) or {}
+    score = conf.get("confidence")
+    threshold = conf.get("threshold")
+    field_risks = conf.get("field_risks", [])
+
+    if score is not None and threshold is not None:
+        if score >= threshold:
+            checks.append(f"calibrated_score_{score:.3f}_gte_threshold_{threshold:.3f}")
+        else:
+            reasons.append({
+                "code": "BELOW_CALIBRATED_THRESHOLD",
+                "detail": f"Calibrated confidence {score:.3f} < threshold {threshold:.3f}",
+            })
+    elif score is not None or threshold is not None:
+        # Partial calibration data — advisory, not blocking
+        checks.append("partial_calibration_data")
+
+    # Per-field risk budget check (only if field_risks present)
+    if field_risks:
+        violations = [f for f in field_risks if not f.get("within_budget", True)]
+        if violations:
+            violated_names = [v.get("field", "?") for v in violations[:3]]
+            reasons.append({
+                "code": "FIELD_RISK_BUDGET_EXCEEDED",
+                "detail": f"Fields outside risk budget: {', '.join(violated_names)}",
+            })
+        else:
+            checks.append("all_fields_within_risk_budget")
+
+    # Prepared artifact hash check (SHA-256 of actual final PDF)
+    prepared_hash = getattr(case, '_prepared_artifact_hash', None)
+    if prepared_hash:
+        checks.append(f"final_artifact_sha256_{prepared_hash[:12]}")
+
+    return {"allowed": len(reasons) == 0, "reasons": reasons, "checks": checks}

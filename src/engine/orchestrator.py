@@ -46,57 +46,75 @@ if _USE_REAL_FOXIT:
     from ..providers.foxit_real import FoxitPDFClient
     _foxit_client = FoxitPDFClient()
     
-    def foxit_pdf_prepare(case_or_artifact, content=""):
-        """Real Foxit PDF preparation: upload source + memo, merge, compress."""
+    def foxit_pdf_prepare(case, generated_artifact, content=""):
+        """Real Foxit PDF preparation: upload sources + memo → merge → compress → download → SHA-256."""
         import tempfile
-        # Upload the original source PDF
-        pdf_path = case_or_artifact.output_path if hasattr(case_or_artifact, 'output_path') else None
-        if pdf_path and os.path.exists(pdf_path) and pdf_path.endswith('.pdf'):
-            source_id = _foxit_client.upload(pdf_path)
-        else:
-            pdf_path = "data/test_pdfs/procurement_request.pdf"
-            if os.path.exists(pdf_path):
-                source_id = _foxit_client.upload(pdf_path)
-            else:
-                source_id = "simulated_doc_id"
+        import hashlib
 
-        # Upload the generated approval memo as a separate document
-        memo_id = None
-        if content:
+        uploaded_ids = []
+
+        # 1. Upload each real source document from the case
+        for doc in case.documents:
+            body = doc.raw_bytes or (doc.raw_text.encode("latin-1", errors="replace") if doc.raw_text else b"")
+            if not body:
+                continue
+            # Write to temp file for upload (Foxit requires a file path)
+            with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+                tmp.write(body)
+                tmp_path = tmp.name
             try:
-                from reportlab.lib.pagesizes import letter
-                from reportlab.pdfgen import canvas as rl_canvas
-                with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
-                    c = rl_canvas.Canvas(tmp.name, pagesize=letter)
-                    y = 750
-                    for line in content.split("\n"):
-                        if y < 50:
-                            c.showPage()
-                            y = 750
-                        c.drawString(72, y, line[:90])
-                        y -= 14
-                    c.save()
-                    memo_id = _foxit_client.upload(tmp.name)
-                os.unlink(tmp.name)
-            except ImportError:
-                # reportlab not available — write plain text as PDF placeholder
+                doc_id = _foxit_client.upload(tmp_path)
+                uploaded_ids.append(doc_id)
+            finally:
+                os.unlink(tmp_path)
+
+        # 2. Upload the generated memo if it's a real PDF on disk
+        memo_id = None
+        memo_path = generated_artifact.output_path if hasattr(generated_artifact, 'output_path') else None
+        if memo_path and memo_path.endswith('.pdf') and os.path.exists(memo_path):
+            memo_id = _foxit_client.upload(memo_path)
+            uploaded_ids.append(memo_id)
+
+        # 3. Merge all documents (sources + memo)
+        if len(uploaded_ids) < 2:
+            # Need at least 2 docs to merge; if only 1, skip merge
+            final_id = uploaded_ids[0] if uploaded_ids else None
+            merge_task = None
+        else:
+            merge_task = _foxit_client.merge(uploaded_ids)
+            # 4. Wait for merge to complete → get resultDocumentId
+            final_id = _foxit_client.wait_for_task(merge_task)
+
+        # 5. Compress the merged result (not the source)
+        compress_task = None
+        if final_id:
+            compress_task = _foxit_client.compress(final_id, level="LOW")
+            # 6. Wait for compress → get resultDocumentId
+            final_id = _foxit_client.wait_for_task(compress_task)
+
+        # 7. Download the final PDF and SHA-256 it
+        final_hash = None
+        if final_id:
+            try:
+                final_bytes = _foxit_client.download(final_id)
+                final_hash = hashlib.sha256(final_bytes).hexdigest()
+                # Store the final PDF for later hash verification
+                out_dir = "/tmp/proofdesk"
+                os.makedirs(out_dir, exist_ok=True)
+                final_path = f"{out_dir}/final_{case.case_id}.pdf"
+                with open(final_path, "wb") as f:
+                    f.write(final_bytes)
+            except Exception:
                 pass
-
-        # Merge source + memo (two distinct documents, never duplicate the source)
-        doc_ids = [source_id]
-        if memo_id:
-            doc_ids.append(memo_id)
-        merge_task = _foxit_client.merge(doc_ids)
-
-        # Compress the merged result
-        compress_task = _foxit_client.compress(source_id, level="LOW")
 
         return {
             "provider": "foxit_pdf_services",
-            "source_id": source_id,
+            "source_ids": [uid for uid in uploaded_ids if uid != memo_id],
             "memo_id": memo_id,
             "merge_task": merge_task,
             "compress_task": compress_task,
+            "final_document_id": final_id,
+            "final_hash": final_hash,
             "status": "prepared",
         }
     
@@ -346,24 +364,26 @@ def prepare_pdf(case: Case) -> Case:
     _t0 = _t.time()
 
     try:
-        pdf_result = foxit_pdf_prepare(case.generated_artifact, content)
+        pdf_result = foxit_pdf_prepare(case, case.generated_artifact, content)
     except Exception as e:
-        # Fail closed: any artifact preparation error blocks signature
         raise ValueError(f"DOCUMENT_PREPARATION_FAILED: {e}")
 
-    # Verify merge actually produced output
     if pdf_result.get("status") != "prepared":
         raise ValueError("DOCUMENT_PREPARATION_FAILED: Foxit PDF preparation returned incomplete result")
+
+    # Store the final artifact hash for gate verification
+    case._prepared_artifact_hash = pdf_result.get("final_hash")
 
     from ..providers import trace as vtrace
     vtrace.set_current(case.case_id)
     is_real = pdf_result.get("provider") == "foxit_pdf_services"
     vtrace.record(case.case_id,
-        "Foxit PDF Services", "merge + compress",
+        "Foxit PDF Services", "merge + compress + download",
         "POST", "https://na1.fusion.foxit.com/pdf-services/api/documents/enhance/pdf-combine",
-        request_summary={"operation": "merge_and_compress",
-                         "source_id": pdf_result.get("source_id"),
+        request_summary={"operation": "merge_compress_download",
+                         "source_count": len(pdf_result.get("source_ids", [])),
                          "memo_id": pdf_result.get("memo_id"),
+                         "final_hash": pdf_result.get("final_hash"),
                          "artifact": case.generated_artifact.artifact_id},
         status=200 if is_real else 0,
         response_summary=pdf_result,

@@ -80,6 +80,27 @@ class FoxitPDFClient:
         r.raise_for_status()
         return r.json()["taskId"]
 
+    def wait_for_task(self, task_id: str, timeout: int = 120) -> str:
+        """Poll async task until COMPLETED, return resultDocumentId."""
+        if not self.is_configured:
+            return "simulated_result_id"
+        deadline = time.time() + timeout
+        while time.time() < deadline:
+            r = requests.get(
+                f"{self.base_url}/api/tasks/{task_id}",
+                headers=self.headers,
+                timeout=30,
+            )
+            r.raise_for_status()
+            data = r.json()
+            status = data.get("status", "")
+            if status == "COMPLETED":
+                return data.get("resultDocumentId", data.get("documentId", task_id))
+            if status == "FAILED":
+                raise RuntimeError(f"Foxit task {task_id} failed: {data}")
+            time.sleep(2)
+        raise TimeoutError(f"Foxit task {task_id} timed out after {timeout}s")
+
     def download(self, doc_id: str) -> bytes:
         """Download document as bytes."""
         if not self.is_configured:
