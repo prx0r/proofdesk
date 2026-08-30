@@ -144,7 +144,7 @@ def nutrient_extract(document: Document) -> list[ExtractedFact]:
 
 # --- Document generation (deterministic local renderer) ---
 
-def _build_generation_payload(record_data: dict, confidence: dict | None = None) -> dict:
+def build_approval_payload(record_data: dict, confidence: dict | None = None) -> dict:
     """Deterministically map a StructuredRecord dict to generation payload.
 
     Includes risk band + per-field confidence failures so template branching
@@ -210,7 +210,7 @@ def _build_generation_payload(record_data: dict, confidence: dict | None = None)
     }
 
 
-def doctavian_generate(record_data: dict, template_id: str = "approval_memo", confidence: dict | None = None) -> tuple[GeneratedArtifact, str]:
+def render_approval_memo(record_data: dict, template_id: str = "approval_memo", confidence: dict | None = None) -> tuple[GeneratedArtifact, str]:
     """Generate approval memo from structured record (deterministic local renderer)."""
 
     lines = []
@@ -219,7 +219,7 @@ def doctavian_generate(record_data: dict, template_id: str = "approval_memo", co
     lines.append("=" * 60)
     lines.append("")
 
-    data = _build_generation_payload(record_data, confidence=confidence)
+    data = build_approval_payload(record_data, confidence=confidence)
     band_text = {
         "CLEARED": "APPROVED",
         "CONDITIONAL": "CONDITIONALLY APPROVED",

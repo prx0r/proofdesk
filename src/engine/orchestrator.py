@@ -26,14 +26,15 @@ from ..engine.reconciliation import run_checks
 # Decide: real API or stubs
 _USE_REAL_NUTRIENT = bool(os.environ.get("NUTRIENT_API_KEY"))
 _USE_REAL_FOXIT = bool(os.environ.get("FOXIT_CLOUD_API_CLIENT_ID"))
+_REQUIRE_LIVE = os.environ.get("DEMO_REQUIRE_LIVE_PROVIDERS", "").lower() == "true"
 
 if _USE_REAL_NUTRIENT:
     from ..providers.nutrient import extract_from_document_sync as nutrient_extract
 else:
     from ..providers.stubs import nutrient_extract
 
-# Document generation — always local (deterministic, same output as Doctavian template)
-from ..providers.stubs import doctavian_generate
+# Document generation — always local (deterministic, same output as cloud template)
+from ..providers.stubs import render_approval_memo
 
 # Foxit: real if configured, stubs otherwise
 if _USE_REAL_FOXIT:
@@ -193,8 +194,18 @@ def run_pipeline(case: Case, domain: str = "procurement", stop_after: str | None
             )
             # Store full classification as the canonical DecisionCertificate
             case._classification = cls
+            case._decision_certificate = {
+                "doc_type": cls["doc_type"],
+                "risk_level": cls["risk_level"],
+                "score": cls["calibrated_confidence"],
+                "threshold": cls["threshold"],
+                "decision": cls["decision"],
+                "field_scores": cls["field_scores"],
+                "violations": cls["per_field_violations"],
+                "engine": cls["engine"],
+            }
             case._confidence = {
-                "confidence": cls["calibrated_confidence"],
+                "score": cls["calibrated_confidence"],
                 "threshold": cls["threshold"],
                 "band": cls["risk_level"],
                 "field_risks": cls["per_field_violations"],
@@ -338,7 +349,7 @@ def approve_record(case: Case, actor_id: str = "user_demo") -> Case:
 
 
 def generate_document(case: Case) -> Case:
-    """Generate document from approved record via Doctavian."""
+    """Generate document from approved record via local renderer."""
     if case.state != CaseState.APPROVED:
         raise ValueError(f"Cannot generate in state {case.state.value}")
 
@@ -365,7 +376,7 @@ def generate_document(case: Case) -> Case:
     else:
         confidence = {"confidence": 0.5, "threshold": 0.7, "band": "high", "field_risks": []}
 
-    artifact, content = doctavian_generate(record_data, confidence=confidence)
+    artifact, content = render_approval_memo(record_data, confidence=confidence)
     case.generated_artifact = artifact
     case._confidence = confidence
 
@@ -378,7 +389,7 @@ def generate_document(case: Case) -> Case:
         "artifact_id": artifact.artifact_id,
         "content_hash": artifact.content_hash,
         "risk_band": confidence["band"],
-        "signing_confidence": confidence["confidence"],
+        "signing_confidence": confidence.get("score") or confidence.get("confidence", 0.5),
     })
     return case
 
@@ -433,7 +444,7 @@ def request_signature(case: Case, signer: str = "cfo@company.com") -> Case:
     case.signature_request = SignatureRequest(
         case_id=case.case_id,
         artifact_id=case.generated_artifact.artifact_id,
-        artifact_hash=case.generated_artifact.content_hash,
+        artifact_hash=getattr(case, '_prepared_artifact_hash', None) or case.generated_artifact.content_hash,
         approval_id=case.structured_record.record_id,
         signer=signer,
     )

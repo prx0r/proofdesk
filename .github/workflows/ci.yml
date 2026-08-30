@@ -23,7 +23,7 @@ jobs:
       - name: Integration tests
         run: python tests/test_integration.py
       - name: Generation tests
-        run: python tests/test_doctavian.py
+        run: python tests/test_generation.py
       - name: Frontier tests
         run: python tests/test_frontier.py
       - name: Learning tests

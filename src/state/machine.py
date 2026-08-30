@@ -156,12 +156,19 @@ def can_request_signature(case: Case) -> dict:
                 checks.append("artifact_record_hash_matches")
 
     # Calibrated confidence check — the key innovation
+    cert = getattr(case, '_decision_certificate', None)
     conf = getattr(case, '_confidence', None) or {}
-    score = conf.get("confidence")
+    score = conf.get("score") or conf.get("confidence")
     threshold = conf.get("threshold")
-    field_risks = conf.get("field_risks", [])
+    violations = cert.get("violations", []) if cert else conf.get("field_risks", [])
 
-    if score is not None and threshold is not None:
+    # Fail closed: no certificate = no signing
+    if cert is None and score is None:
+        reasons.append({
+            "code": "NO_DECISION_CERTIFICATE",
+            "detail": "No decision certificate available — cannot evaluate risk",
+        })
+    elif score is not None and threshold is not None:
         if score >= threshold:
             checks.append(f"calibrated_score_{score:.3f}_gte_threshold_{threshold:.3f}")
         else:
@@ -169,21 +176,16 @@ def can_request_signature(case: Case) -> dict:
                 "code": "BELOW_CALIBRATED_THRESHOLD",
                 "detail": f"Calibrated confidence {score:.3f} < threshold {threshold:.3f}",
             })
-    elif score is not None or threshold is not None:
-        # Partial calibration data — advisory, not blocking
-        checks.append("partial_calibration_data")
 
-    # Per-field risk budget check (only if field_risks present)
-    if field_risks:
-        violations = [f for f in field_risks if not f.get("within_budget", True)]
-        if violations:
-            violated_names = [v.get("field", "?") for v in violations[:3]]
-            reasons.append({
-                "code": "FIELD_RISK_BUDGET_EXCEEDED",
-                "detail": f"Fields outside risk budget: {', '.join(violated_names)}",
-            })
-        else:
-            checks.append("all_fields_within_risk_budget")
+    # Per-field risk violations block directly
+    if violations:
+        violated_fields = [v.get("field", "?") for v in violations[:5]]
+        reasons.append({
+            "code": "FIELD_RISK_BUDGET_EXCEEDED",
+            "detail": f"Fields outside risk budget: {', '.join(violated_fields)}",
+        })
+    else:
+        checks.append("all_fields_within_risk_budget")
 
     # Prepared artifact hash check — recompute and compare
     prepared_hash = getattr(case, '_prepared_artifact_hash', None)

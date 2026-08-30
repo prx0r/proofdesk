@@ -265,7 +265,7 @@ def test_008_gate_checks_list():
 
 def test_009_generation_local():
     print("\nTEST-009: Document generation produces artifact locally")
-    from src.providers.stubs import doctavian_generate
+    from src.providers.stubs import render_approval_memo as doctavian_generate
 
     record_data = {
         "case_id": "test", "record_id": "r1",

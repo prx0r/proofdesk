@@ -111,6 +111,7 @@ class ExtractedFact:
             "value_normalized": self.value_normalized,
             "doc_id": self.doc_id,
             "page": self.source_page,
+            "bounding_box": self.bounding_box,
             "confidence": self.confidence,
             "status": self.status.value,
         }

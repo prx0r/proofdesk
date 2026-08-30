@@ -85,8 +85,41 @@ def get_value(fact_index: dict, field: str, cast=str):
 
 # ─── PROCUREMENT CHECKS ───
 
+# Required fields for procurement domain — missing evidence is a blocker
+REQUIRED_FIELDS = {
+    "procurement": {
+        "vendor.legal_name",
+        "procurement.requested_spend",
+        "quote.total",
+        "insurance.expiry_date",
+        "procurement.required_coverage_until",
+    },
+}
+
+
 def check_procurement(fact_index: dict[str, list[ExtractedFact]]) -> list[Assertion]:
     assertions = []
+
+    # Required evidence completeness — missing fields are blockers
+    required = REQUIRED_FIELDS.get("procurement", set())
+    present = {f for f in fact_index if fact_index[f]}
+    missing = required - present
+    if missing:
+        assertions.append(Assertion(
+            predicate="required_evidence_present",
+            result=AssertionResult.FAIL,
+            detail=f"Missing required fields: {', '.join(sorted(missing))}",
+            rule_version="procurement-required-v1",
+            severity=ExceptionSeverity.BLOCKER,
+        ))
+    else:
+        assertions.append(Assertion(
+            predicate="required_evidence_present",
+            result=AssertionResult.PASS,
+            detail=f"All {len(required)} required fields present",
+            rule_version="procurement-required-v1",
+            severity=ExceptionSeverity.BLOCKER,
+        ))
 
     # Quote arithmetic
     p = get_value(fact_index, "quote.platform_price", float)

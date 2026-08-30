@@ -5,6 +5,10 @@ from __future__ import annotations
 import sys
 import os
 
+# Load .env before importing anything that reads env vars
+from dotenv import load_dotenv
+load_dotenv()
+
 # Ensure src is importable
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
@@ -90,6 +94,17 @@ class SpotAuditRequest(BaseModel):
 
 
 # --- Endpoints ---
+
+@app.get("/v1/providers/status")
+def provider_status():
+    """Show which providers are live vs simulated."""
+    return {
+        "nutrient": "LIVE" if os.environ.get("NUTRIENT_API_KEY") else "STUB",
+        "foxit_pdf": "LIVE" if os.environ.get("FOXIT_CLOUD_API_CLIENT_ID") else "STUB",
+        "foxit_esign": "LIVE" if os.environ.get("FOXIT_ESIGN_CLIENT_ID") else "SIMULATED",
+        "document_renderer": "LOCAL",
+    }
+
 
 @app.get("/health")
 def health():
@@ -250,10 +265,10 @@ def get_case(case_id: str):
         "created_at": case.created_at,
         "updated_at": case.updated_at,
         "risk_band": conf.get("band"),
-        "signing_confidence": conf.get("confidence"),
+        "signing_confidence": conf.get("score") or conf.get("confidence"),
         "field_risks": conf.get("field_risks", []),
         "record_hash": case.structured_record.content_hash if case.structured_record else None,
-        "artifact_hash": case.generated_artifact.content_hash if case.generated_artifact else None,
+        "artifact_hash": getattr(case, '_prepared_artifact_hash', None) or (case.generated_artifact.content_hash if case.generated_artifact else None),
         "classification": cls,
     }
 
@@ -454,7 +469,7 @@ def get_receipt(case_id: str):
         "assertions_checked": len(case.assertions),
         "resolutions": len(case.resolutions),
         "record_hash": case.structured_record.content_hash if case.structured_record else None,
-        "artifact_hash": case.generated_artifact.content_hash if case.generated_artifact else None,
+        "artifact_hash": getattr(case, '_prepared_artifact_hash', None) or (case.generated_artifact.content_hash if case.generated_artifact else None),
         "signature_status": case.signature_request.status if case.signature_request else None,
         "audit_events": len(case.audit_events),
     }
@@ -636,3 +651,44 @@ def serve_batch_dashboard():
     if os.path.exists(batch_path):
         return FileResponse(batch_path)
     return HTMLResponse("<h1>Batch Dashboard</h1><p>Not found</p>")
+
+
+# --- Demo tamper endpoints ---
+
+@app.post("/v1/cases/{case_id}/demo/tamper")
+def demo_tamper(case_id: str):
+    """Append one byte to the prepared PDF to demonstrate tamper detection."""
+    case = cases.get(case_id)
+    if not case:
+        raise HTTPException(404, "Case not found")
+    path = getattr(case, '_prepared_artifact_path', None)
+    if not path or not os.path.exists(path):
+        raise HTTPException(400, "No prepared artifact to tamper")
+    import shutil
+    backup = path + ".backup"
+    shutil.copy2(path, backup)
+    with open(path, "ab") as f:
+        f.write(b"\x00")
+    # Recompute hash
+    import hashlib
+    with open(path, "rb") as f:
+        case._prepared_artifact_hash = hashlib.sha256(f.read()).hexdigest()
+    return {"tampered": True, "path": path}
+
+
+@app.post("/v1/cases/{case_id}/demo/restore")
+def demo_restore(case_id: str):
+    """Restore the prepared PDF from backup."""
+    case = cases.get(case_id)
+    if not case:
+        raise HTTPException(404, "Case not found")
+    path = getattr(case, '_prepared_artifact_path', None)
+    backup = path + ".backup" if path else None
+    if not backup or not os.path.exists(backup):
+        raise HTTPException(400, "No backup to restore")
+    import shutil, hashlib
+    shutil.copy2(backup, path)
+    os.unlink(backup)
+    with open(path, "rb") as f:
+        case._prepared_artifact_hash = hashlib.sha256(f.read()).hexdigest()
+    return {"restored": True, "path": path}

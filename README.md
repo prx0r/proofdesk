@@ -72,7 +72,8 @@ src/
 tests/
 ├── test_all.py                   ← Core tests (38/38)
 ├── test_audit.py                 ← Audit tests (25/25)
-├── test_integration.py           ← Integration tests (26/26)
+├── test_generation.py            ← Generation tests (8/8)
+├── test_integration.py           ← Integration tests (33/33)
 ├── test_frontier.py              ← Frontier tests (16/16)
 └── test_learning.py             ← Convergence tests (3/3)
 ```
