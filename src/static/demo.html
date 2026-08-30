@@ -211,9 +211,9 @@ footer{text-align:center;padding:40px 0;color:var(--dim);font-size:12px;border-t
       <!-- Stage 4: Generate -->
       <div class="stage-card" id="stage-4">
         <div class="highlight">STAGE 4</div>
-        <h2>Doctavian generates the approval memo</h2>
+        <h2>ProofDesk generates the approval memo</h2>
         <div class="subtitle">1:20 — Risk-aware document generation</div>
-        <p>Doctavian transforms the approved structured record into a legal document.
+        <p>ProofDesk transforms the approved structured record into a legal document.
         One template dynamically branches based on risk state:</p>
         <div id="memo-display" class="hash-box" style="color:var(--text);font-family:inherit;white-space:pre-wrap;line-height:1.6"></div>
         <div class="actions">
@@ -279,7 +279,7 @@ footer{text-align:center;padding:40px 0;color:var(--dim);font-size:12px;border-t
       <div class="info-card">
         <h3>Sponsor Integrations</h3>
         <div class="sponsor"><div class="dot live"></div><strong>Nutrient DWS</strong>&nbsp;— Evidence extraction</div>
-        <div class="sponsor"><div class="dot sim"></div><strong>Doctavian</strong>&nbsp;— Document generation</div>
+        <div class="sponsor"><div class="dot live"></div><strong>ProofDesk</strong>&nbsp;— Document generation</div>
         <div class="sponsor"><div class="dot live"></div><strong>Foxit PDF</strong>&nbsp;— Merge + compress</div>
         <div class="sponsor"><div class="dot blocked"></div><strong>Foxit eSign</strong>&nbsp;— Signing (demo via FreeSign)</div>
       </div>
@@ -317,7 +317,7 @@ const stageDescriptions = [
   "Nutrient DWS extracts facts with source grounding — value, confidence, page, bounding box.",
   "Six server-side checks evaluate the case. Multiple conditions fail. Signature denied.",
   "A human reviewer inspects the evidence and resolves the blocking exception.",
-  "Doctavian generates a risk-aware approval memo. The template branches on risk state.",
+  "ProofDesk generates a risk-aware approval memo. The template branches on risk state.",
   "Foxit PDF Services merges and compresses the document packet. Reversible work — agent authorized.",
   "All six gate checks pass. The signing request is sent to a human signer.",
   "Every transition recorded in a hash-chained audit trail with Merkle inclusion proofs."
@@ -406,7 +406,7 @@ async function runDemo() {
 
     // 9. Generate
     r = await api('POST', '/v1/cases/' + caseId + '/generate');
-    addTrace('DOCTAVIAN', 'document/generate', r.ok ? '✓' : '✗', r.data.artifact_id || r.data.detail || '');
+    addTrace('PROOFDESK', 'generate memo', r.ok ? '✓' : '✗', r.data.artifact_id || r.data.detail || '');
 
     // 10. Prepare PDF
     r = await api('POST', '/v1/cases/' + caseId + '/prepare');

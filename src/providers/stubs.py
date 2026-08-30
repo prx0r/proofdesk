@@ -142,15 +142,76 @@ def nutrient_extract(document: Document) -> list[ExtractedFact]:
     return facts
 
 
-# --- Doctavian stub ---
+# --- Document generation (deterministic local renderer) ---
+
+def _build_generation_payload(record_data: dict, confidence: dict | None = None) -> dict:
+    """Deterministically map a StructuredRecord dict to generation payload.
+
+    Includes risk band + per-field confidence failures so template branching
+    renders the calibration decision.
+    """
+    facts = {f["field"]: f.get("value_normalized", "N/A") for f in record_data.get("facts", [])}
+    assertions = record_data.get("assertions", [])
+    resolutions = record_data.get("resolutions", [])
+
+    def g(field: str) -> str:
+        v = facts.get(field)
+        return "N/A" if v is None or v == "" else str(v)
+
+    failed = [a for a in assertions if a.get("result") == "FAIL"]
+    passed = [a for a in assertions if a.get("result") != "FAIL"]
+
+    band = (confidence or {}).get("band")
+    conf = (confidence or {}).get("confidence")
+    if band not in ("CLEARED", "CONDITIONAL", "ESCALATED"):
+        if not failed:
+            band, conf = "CLEARED", 0.95
+        elif resolutions:
+            band, conf = "CONDITIONAL", 0.62
+        else:
+            band, conf = "ESCALATED", 0.30
+
+    extra_conditions = [
+        {"predicate": f"confidence:{fr['field']}", "detail": fr.get("detail", "exceeds field risk budget"), "rule": "confidence-budget"}
+        for fr in (confidence or {}).get("field_risks", [])
+    ]
+    all_failed = failed + extra_conditions
+
+    return {
+        "case_id": record_data.get("case_id", ""),
+        "record_hash": record_data.get("content_hash", ""),
+        "generated_date": time.strftime("%Y-%m-%d"),
+        "vendor_name": g("vendor.legal_name"),
+        "platform_price": g("quote.platform_price"),
+        "support_price": g("quote.support_price"),
+        "quote_total": g("quote.total"),
+        "requested_spend": g("procurement.requested_spend"),
+        "contract_start": g("procurement.contract_start"),
+        "insurance_expiry": g("insurance.expiry_date"),
+        "required_coverage": g("procurement.required_coverage_until"),
+        "data_retention": g("security.data_retention_days"),
+        "subprocessors": g("security.subprocessors"),
+        "encryption": g("security.encryption_at_rest"),
+        "signing_confidence": str(conf),
+        "risk_band": band,
+        "has_conditions": "true" if all_failed else "false",
+        "condition_count": len(all_failed),
+        "passed_checks": [
+            {"predicate": a["predicate"], "detail": a.get("detail", "")} for a in passed
+        ],
+        "failed_checks": [
+            {"idx": i, "predicate": a["predicate"], "detail": a.get("detail", ""), "rule": a.get("rule_version", "")}
+            for i, a in enumerate(all_failed, 1)
+        ],
+        "resolutions": [
+            {"decision": r.get("decision", ""), "reason": r.get("reason", ""), "actor": r.get("actor_id", "")}
+            for r in resolutions
+        ],
+    }
+
 
 def doctavian_generate(record_data: dict, template_id: str = "approval_memo", confidence: dict | None = None) -> tuple[GeneratedArtifact, str]:
-    """Simulate Doctavian document generation from structured record.
-
-    Uses the canonical payload builder so fallback output matches the real
-    Doctavian branch logic (risk_band, numbered conditions).
-    """
-    from ..providers.doctavian import build_generation_payload
+    """Generate approval memo from structured record (deterministic local renderer)."""
 
     lines = []
     lines.append("=" * 60)
@@ -158,7 +219,7 @@ def doctavian_generate(record_data: dict, template_id: str = "approval_memo", co
     lines.append("=" * 60)
     lines.append("")
 
-    data = build_generation_payload(record_data, confidence=confidence)
+    data = _build_generation_payload(record_data, confidence=confidence)
     band_text = {
         "CLEARED": "APPROVED",
         "CONDITIONAL": "CONDITIONALLY APPROVED",

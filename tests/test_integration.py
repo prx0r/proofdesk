@@ -261,24 +261,22 @@ def test_008_gate_checks_list():
     test("Checks not empty when allowed", len(gate["checks"]) > 0 if gate["allowed"] else True)
 
 
-# ── TEST-009: Doctavian failure falls through to local renderer ──
+# ── TEST-009: Document generation produces artifact locally ──
 
-def test_009_doctavian_fallback():
-    print("\nTEST-009: Doctavian failure falls through to local renderer")
-    from src.providers.doctavian import DoctavianClient
+def test_009_generation_local():
+    print("\nTEST-009: Document generation produces artifact locally")
+    from src.providers.stubs import doctavian_generate
 
-    client = DoctavianClient()
-    # Not configured → should use local renderer
     record_data = {
         "case_id": "test", "record_id": "r1",
         "facts": [{"field": "vendor.legal_name", "value_normalized": "Test"}],
         "assertions": [], "resolutions": [],
         "content_hash": "abc123",
     }
-    artifact, content = client.generate_from_record(record_data)
-    test("Local renderer produces artifact", artifact is not None)
-    test("Local renderer produces content", len(content) > 0)
-    test("Artifact has output_path", artifact.output_path is not None)
+    artifact, content = doctavian_generate(record_data)
+    test("Generator produces artifact", artifact is not None)
+    test("Generator produces content", len(content) > 0)
+    test("Content contains VENDOR", "VENDOR" in content)
 
 
 # ── TEST-010: Requirements.txt has all dependencies ──
@@ -309,7 +307,7 @@ if __name__ == "__main__":
     test_006_full_pipeline()
     test_007_provider_failure_blocks()
     test_008_gate_checks_list()
-    test_009_doctavian_fallback()
+    test_009_generation_local()
     test_010_requirements()
 
     print(f"\n{'=' * 60}")

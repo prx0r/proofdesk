@@ -1,9 +1,9 @@
-"""Doctavian integration tests — payload builder, branch logic, gate/envelope boundary."""
+"""Document generation tests — payload builder, branch logic, gate boundary."""
 
 import sys, os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from src.providers.doctavian import build_generation_payload
+from src.providers.stubs import _build_generation_payload as build_generation_payload
 from src.models.domain import (
     Case, Document, ExtractedFact, Assertion, Resolution,
     CaseState, AssertionResult, ExceptionSeverity, ResolutionDecision,

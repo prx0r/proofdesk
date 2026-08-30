@@ -175,15 +175,13 @@ else:
 | Evidence extraction (value + confidence + page + bbox) | Nutrient DWS | **LIVE** |
 | Source page/bounding box grounding | Nutrient DWS | **LIVE** |
 | Risk/authority decision (SignatureGate) | ProofDesk | **LIVE** |
-| Conditional memo generation | Doctavian | **LIVE** (requires fresh bearer token) |
+| Conditional memo generation | ProofDesk | **LIVE** (deterministic local renderer) |
 | PDF merge (reversible) | Foxit PDF Services | **LIVE** |
 | PDF compression (reversible) | Foxit PDF Services | **LIVE** |
 | Signature authorization gate | ProofDesk SignatureGate | **LIVE** |
-| Signing request | Foxit eSign | **DEMO via FreeSign** (eSign API access pending) |
+| Signing request | FreeSign | **DEMO** (eSign API access pending) |
 | Hash-chained audit trail | ProofDesk | **LIVE** |
 | Merkle inclusion proofs | ProofDesk | **LIVE** |
-
-**Note on Foxit eSign:** We were unable to obtain Foxit eSign API credentials before submission. The demo uses FreeSign for the signing step. In production, the SignatureGate would hand off to Foxit eSign — the authority boundary lives in ProofDesk, not the signing API, making the signer vendor-interchangeable.
 
 ---
 

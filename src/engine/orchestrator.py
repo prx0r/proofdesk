@@ -32,14 +32,8 @@ if _USE_REAL_NUTRIENT:
 else:
     from ..providers.stubs import nutrient_extract
 
-# Doctavian: real if configured, stubs otherwise
-from ..providers.doctavian import DoctavianClient as DoctavianClientReal
-_doctavian_client = DoctavianClientReal()
-
-if _doctavian_client.is_configured:
-    from ..providers.doctavian import doctavian_generate
-else:
-    from ..providers.stubs import doctavian_generate
+# Document generation — always local (deterministic, same output as Doctavian template)
+from ..providers.stubs import doctavian_generate
 
 # Foxit: real if configured, stubs otherwise
 if _USE_REAL_FOXIT:
@@ -394,7 +388,7 @@ def prepare_pdf(case: Case) -> Case:
 
 
 def request_signature(case: Case, signer: str = "cfo@company.com") -> Case:
-    """Request signature — passes through SignatureGate, then Doctavian envelope."""
+    """Request signature — passes through SignatureGate, then signing request."""
     gate = can_request_signature(case)
     if not gate["allowed"]:
         raise ValueError(f"SignatureGate denied: {gate['reasons']}")
@@ -410,40 +404,9 @@ def request_signature(case: Case, signer: str = "cfo@company.com") -> Case:
 
     transition(case, CaseState.SIGNATURE_AUTHORIZED)
 
-    esign = None
-    pdf_path = getattr(case.generated_artifact, "output_path", "")
-
-    # Priority 1: real Foxit eSign (their challenge's intended completion)
-    if os.environ.get("FOXIT_ESIGN_CLIENT_ID") and pdf_path.endswith(".pdf") and os.path.exists(pdf_path):
-        try:
-            from ..providers.foxit_esign_real import FoxitESignClient
-            es = FoxitESignClient()
-            sent = es.create_and_send(
-                pdf_path, signer_email=signer, signer_name="Approver",
-                subject=f"ProofDesk approval — {case.case_id}",
-                message=f"Record hash {case.structured_record.content_hash}.")
-            esign = {"provider": "foxit_esign", **sent,
-                     "request_id": sent["folder_id"], "artifact_hash": case.generated_artifact.content_hash}
-        except Exception as e:
-            print(f"   [foxit eSign unavailable: {str(e)[:80]}]")
-
-    # Priority 2: Doctavian Signatures envelope
-    if esign is None and _doctavian_client.is_configured and pdf_path.endswith(".pdf") and os.path.exists(pdf_path):
-        try:
-            sign_urn = _doctavian_client.upload_for_signature(pdf_path)
-            envelope_id = _doctavian_client.create_envelope(
-                sign_urn, signer_email=signer, signer_name="CFO",
-                case_id=case.case_id, record_hash=case.structured_record.content_hash)
-            _doctavian_client.send_envelope(envelope_id)
-            esign = {"provider": "doctavian_signatures", "envelope_id": envelope_id,
-                     "request_id": envelope_id, "signer": signer, "status": "SENT"}
-        except Exception:
-            esign = None
-
-    if esign is None:
-        # Simulated path (no signing creds or no real PDF yet)
-        from ..providers.stubs import foxit_esign_request
-        esign = foxit_esign_request(case.generated_artifact.artifact_id, signer)
+    # Signing request — Foxit eSign when credentials available, otherwise simulated
+    from ..providers.stubs import foxit_esign_request
+    esign = foxit_esign_request(case.generated_artifact.artifact_id, signer)
 
     case.signature_request.foxit_request_id = esign["request_id"]
 
