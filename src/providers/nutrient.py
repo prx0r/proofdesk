@@ -174,7 +174,7 @@ async def extract_from_document(
             cite = metadata.get(schema_field, {})
             page = cite.get("pageNumber", 1) if cite else 1
             bbox = cite.get("bbox", {}) if cite else {}
-            confidence = cite.get("confidence", 0.9) if cite else 0.9
+            confidence = cite.get("confidence") if cite and cite.get("confidence") is not None else None
 
             raw_value = str(value)
             normalized = raw_value
@@ -226,7 +226,12 @@ async def parse_document(
     }
 
     async with httpx.AsyncClient(timeout=60.0) as client:
-        file_bytes = document.raw_text.encode("utf-8") if document.raw_text else b""
+        if document.raw_bytes:
+            file_bytes = document.raw_bytes
+        elif document.raw_text:
+            file_bytes = document.raw_text.encode("utf-8")
+        else:
+            file_bytes = b""
 
         response = await client.post(
             NUTRIENT_PARSE_URL,

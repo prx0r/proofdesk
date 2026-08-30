@@ -1,4 +1,4 @@
-# Sheepdog North Star
+# ProofDesk North Star
 
 **The sentence:**
 > *We replaced "should the agent sign?" with a conformal risk certificate per field, rendered that certificate into the legal document itself via template logic, and hash-chained every hop between pixel and signature.*

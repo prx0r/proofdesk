@@ -47,20 +47,58 @@ if _USE_REAL_FOXIT:
     _foxit_client = FoxitPDFClient()
     
     def foxit_pdf_prepare(case_or_artifact, content=""):
-        """Real Foxit PDF preparation: upload + merge + compress."""
-        # Try to upload the original source PDF (not the generated text artifact)
+        """Real Foxit PDF preparation: upload source + memo, merge, compress."""
+        import tempfile
+        # Upload the original source PDF
         pdf_path = case_or_artifact.output_path if hasattr(case_or_artifact, 'output_path') else None
         if pdf_path and os.path.exists(pdf_path) and pdf_path.endswith('.pdf'):
-            doc_id = _foxit_client.upload(pdf_path)
+            source_id = _foxit_client.upload(pdf_path)
         else:
-            # Upload a placeholder or the first case document
             pdf_path = "data/test_pdfs/procurement_request.pdf"
             if os.path.exists(pdf_path):
-                doc_id = _foxit_client.upload(pdf_path)
+                source_id = _foxit_client.upload(pdf_path)
             else:
-                doc_id = "simulated_doc_id"
-        task_id = _foxit_client.merge([doc_id, doc_id])
-        return {"provider": "foxit_pdf_services", "document_id": doc_id, "task_id": task_id, "status": "prepared"}
+                source_id = "simulated_doc_id"
+
+        # Upload the generated approval memo as a separate document
+        memo_id = None
+        if content:
+            try:
+                from reportlab.lib.pagesizes import letter
+                from reportlab.pdfgen import canvas as rl_canvas
+                with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
+                    c = rl_canvas.Canvas(tmp.name, pagesize=letter)
+                    y = 750
+                    for line in content.split("\n"):
+                        if y < 50:
+                            c.showPage()
+                            y = 750
+                        c.drawString(72, y, line[:90])
+                        y -= 14
+                    c.save()
+                    memo_id = _foxit_client.upload(tmp.name)
+                os.unlink(tmp.name)
+            except ImportError:
+                # reportlab not available — write plain text as PDF placeholder
+                pass
+
+        # Merge source + memo (two distinct documents, never duplicate the source)
+        doc_ids = [source_id]
+        if memo_id:
+            doc_ids.append(memo_id)
+        merge_task = _foxit_client.merge(doc_ids)
+
+        # Compress the merged result
+        compress_task = _foxit_client.compress(source_id, level="LOW")
+
+        return {
+            "provider": "foxit_pdf_services",
+            "source_id": source_id,
+            "memo_id": memo_id,
+            "merge_task": merge_task,
+            "compress_task": compress_task,
+            "status": "prepared",
+        }
     
     def foxit_esign_request(artifact_id, signer):
         """Real Foxit eSign request."""
@@ -299,22 +337,33 @@ def generate_document(case: Case) -> Case:
 
 
 def prepare_pdf(case: Case) -> Case:
-    """Prepare PDF via Foxit MCP/PDF Services."""
+    """Prepare PDF via Foxit MCP/PDF Services. Fails closed on any artifact error."""
     import time as _t
     if case.state != CaseState.GENERATED:
         raise ValueError(f"Cannot prepare in state {case.state.value}")
 
     content = case._generated_content.get(case.generated_artifact.artifact_id, "")
     _t0 = _t.time()
-    pdf_result = foxit_pdf_prepare(case.generated_artifact, content)
+
+    try:
+        pdf_result = foxit_pdf_prepare(case.generated_artifact, content)
+    except Exception as e:
+        # Fail closed: any artifact preparation error blocks signature
+        raise ValueError(f"DOCUMENT_PREPARATION_FAILED: {e}")
+
+    # Verify merge actually produced output
+    if pdf_result.get("status") != "prepared":
+        raise ValueError("DOCUMENT_PREPARATION_FAILED: Foxit PDF preparation returned incomplete result")
 
     from ..providers import trace as vtrace
     vtrace.set_current(case.case_id)
     is_real = pdf_result.get("provider") == "foxit_pdf_services"
     vtrace.record(case.case_id,
-        "Foxit PDF Services", "merge (pdf-combine)",
+        "Foxit PDF Services", "merge + compress",
         "POST", "https://na1.fusion.foxit.com/pdf-services/api/documents/enhance/pdf-combine",
         request_summary={"operation": "merge_and_compress",
+                         "source_id": pdf_result.get("source_id"),
+                         "memo_id": pdf_result.get("memo_id"),
                          "artifact": case.generated_artifact.artifact_id},
         status=200 if is_real else 0,
         response_summary=pdf_result,

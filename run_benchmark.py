@@ -228,7 +228,7 @@ def run_benchmark(max_files: int = 500, output_dir: str = "/tmp/proofdesk/benchm
 
 if __name__ == "__main__":
     import argparse
-    parser = argparse.ArgumentParser(description="Run Sheepdog benchmark")
+    parser = argparse.ArgumentParser(description="Run ProofDesk benchmark")
     parser.add_argument("--max-files", type=int, default=500, help="Max files to process")
     parser.add_argument("--output", type=str, default="/tmp/proofdesk/benchmark", help="Output directory")
     args = parser.parse_args()

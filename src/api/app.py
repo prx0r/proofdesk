@@ -471,6 +471,15 @@ def serve_index():
         return FileResponse(index_path)
     return HTMLResponse("<h1>ProofDesk</h1><p>Static files not found. Run the demo: python3 demo.py</p>")
 
+
+@app.get("/demo", response_class=HTMLResponse)
+def serve_demo():
+    """Interactive demo page for judges — click through the 8-stage transaction."""
+    demo_path = os.path.join(STATIC_DIR, "demo.html")
+    if os.path.exists(demo_path):
+        return FileResponse(demo_path)
+    return HTMLResponse("<h1>ProofDesk Demo</h1><p>demo.html not found.</p>")
+
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 

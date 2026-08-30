@@ -35,13 +35,13 @@ To: hello@doctavian.com — mention Team Trades, demo env, and that generate fai
 
 ```http
 Authorization: Bearer <NEW_TOKEN>
-X-Api-Key: edff22dbcc244bd0b709d7e632ce12e5
+X-Api-Key: (see .env.keys)
 Content-Type: application/json
 ```
 
 Optional but harmless:
 ```http
-X-Subscription-Key: badc239580c949cd8e9f14946fa20cef
+X-Subscription-Key: (see .env.keys)
 X-Origin: https://demo.portal.doctavian.com
 ```
 

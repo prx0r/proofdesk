@@ -1,4 +1,4 @@
-# Sheepdog Benchmark Report — Full Evaluation
+# ProofDesk Benchmark Report — Full Evaluation
 
 **Date:** 2026-08-27
 **Dataset:** 20 CUAD Contracts (real legal documents)

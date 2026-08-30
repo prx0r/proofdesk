@@ -9,7 +9,7 @@
 
 | API | Status | Notes |
 |-----|--------|-------|
-| Nutrient DWS | ✅ REAL | `pdf_live_hAAUR0ppmrzrIQcOqnPH29ea5z0uioX8pO9SGG6XYmk` |
+| Nutrient DWS | ✅ REAL | see `.env.keys` |
 | Doctavian | ⚠️ CONFIGURED | Bearer token expired (demo env limitation) |
 
 ---

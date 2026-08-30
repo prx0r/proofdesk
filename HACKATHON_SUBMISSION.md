@@ -46,7 +46,7 @@ Our **Mixture of Experts** architecture routes each document to its own calibrat
 
 ## Foxit Integration
 
-### Reversible (MCP tools):
+### Reversible (MCP tools — LIVE):
 - **pdf_merge** — Merge approval memo + evidence appendix
 - **pdf_compress** — Compress final packet
 - **pdf_upload** — Upload for processing
@@ -57,25 +57,24 @@ Our **Mixture of Experts** architecture routes each document to its own calibrat
 
 The agent can call MCP tools freely. It CANNOT call eSign directly — that's gated server-side.
 
+**Note on eSign:** We were unable to obtain Foxit eSign API credentials before the submission deadline (the PDF Services credentials don't work for eSign). The signing step is demonstrated via FreeSign. The architectural boundary is what matters — SignatureGate is vendor-interchangeable by design. In production, it would call Foxit eSign directly.
+
 ## Quick Start
 
 ```bash
 cd proofdesk
 pip install -r requirements.txt
+cp .env.example .env   # fill in your API keys
 
-# Run demo (no API keys needed)
-python3 demo_mvp.py
+# Run 3-minute demo (no API keys needed — uses test fixtures)
+python3 demo_2min.py
 
-# Run with real Foxit APIs
-export FOXIT_CLOUD_API_CLIENT_ID="your_id"
-export FOXIT_CLOUD_API_CLIENT_SECRET="your_secret"
-export FOXIT_ESIGN_CLIENT_ID="your_esign_id"
-export FOXIT_ESIGN_CLIENT_SECRET="your_esign_secret"
-python3 demo_mvp.py --live
+# Run with real Nutrient API
+export NUTRIENT_API_KEY="pdf_live_..."
+python3 demo_2min.py --live
 
 # Run benchmark
-python3 -m src.benchmark.confidence.runner --n 1000
-python3 -m src.benchmark.confidence.signing_bench --n 200
+python3 run_benchmark.py
 ```
 
 ## Architecture

@@ -1,4 +1,4 @@
-# Peer Review — Sheepdog (ProofDesk)
+# Peer Review — ProofDesk
 
 **Date:** 2026-08-27
 **Reviewer:** Internal assessment

@@ -1,8 +1,8 @@
-# Sheepdog — Evidence-Gated Document Execution
+# ProofDesk — Evidence-Gated Document Execution
 
 **DevNetwork API+Cloud+AI Hackathon 2026**
 
-> AI agents can prepare documents. Sheepdog ensures only verified, human-approved facts become signed commitments.
+> AI agents can prepare documents. ProofDesk ensures only verified, human-approved facts become signed commitments.
 
 ---
 
@@ -26,7 +26,7 @@ open http://localhost:8080/batch
 
 ## What Is This?
 
-Sheepdog is a **document execution system** that uses AI to verify facts before humans sign. It:
+ProofDesk is a **document execution system** that uses AI to verify facts before humans sign. It:
 
 1. **Extracts** facts from PDFs using Nutrient DWS (real API)
 2. **Verifies** facts across documents (cross-checks)
@@ -160,27 +160,30 @@ else:
 
 ## Results
 
-| Metric | Value | Source |
-|--------|-------|--------|
-| Documents processed | 20 CUAD contracts | Real Nutrient API |
-| Accuracy | 95% (19/20) | Binary rubric |
-| False Positive Rate | 5% (1/20) | Measured |
-| Auto-sign rate | 10% (2/20) | High confidence |
-| Deferred to human | 80% (16/20) | Correct |
-| Blocked | 10% (2/20) | High-risk |
-| Cost savings | $19,437 | Fraud prevention |
-| ROI | 3,239% | Cost analysis |
+| Question | Metric | Value |
+|----------|--------|-------|
+| Does the evidence pipeline work on real documents? | Real Nutrient API on CUAD contracts | 95% accuracy (19/20), 5% FPR |
+| Does calibrated abstention reduce bad decisions? | Auto-sign vs defer vs block | 10% auto, 80% defer, 10% block |
+| Is the audit mechanism valid? | Hash chain + Merkle verification | 85/85 tests passing, 100% replay |
 
 ---
 
-## Sponsor Integration
+## Sponsor Integration — Canonical Status
 
-| Provider | What It Does | Status |
-|----------|--------------|--------|
-| **Nutrient DWS** | Extracts facts with source grounding | ✅ Real API |
-| **Doctavian** | Template branching, loops, calculations | ⚠️ API works, generation fails |
-| **Foxit PDF** | Merge/compress documents | ✅ Real API |
-| **Foxit eSign** | Signing authority boundary | ❌ Simulated |
+| Capability | Provider | Status |
+|------------|----------|--------|
+| Evidence extraction (value + confidence + page + bbox) | Nutrient DWS | **LIVE** |
+| Source page/bounding box grounding | Nutrient DWS | **LIVE** |
+| Risk/authority decision (SignatureGate) | ProofDesk | **LIVE** |
+| Conditional memo generation | Doctavian | **LIVE** (requires fresh bearer token) |
+| PDF merge (reversible) | Foxit PDF Services | **LIVE** |
+| PDF compression (reversible) | Foxit PDF Services | **LIVE** |
+| Signature authorization gate | ProofDesk SignatureGate | **LIVE** |
+| Signing request | Foxit eSign | **DEMO via FreeSign** (eSign API access pending) |
+| Hash-chained audit trail | ProofDesk | **LIVE** |
+| Merkle inclusion proofs | ProofDesk | **LIVE** |
+
+**Note on Foxit eSign:** We were unable to obtain Foxit eSign API credentials before submission. The demo uses FreeSign for the signing step. In production, the SignatureGate would hand off to Foxit eSign — the authority boundary lives in ProofDesk, not the signing API, making the signer vendor-interchangeable.
 
 ---
 
@@ -195,7 +198,7 @@ python3 tests/test_frontier.py    # 16/16
 python3 tests/test_learning.py    # 3/3
 
 # Demo
-python3 demo_2min.py              # 2-minute demo
+python3 demo_2min.py              # 3-minute demo
 python3 run_benchmark.py          # Full benchmark
 python3 generate_visuals.py       # Generate charts
 python3 pitch_script.py           # Show pitch
@@ -210,7 +213,7 @@ uvicorn src.api.app:app --host 0.0.0.0 --port 8080
 
 > "AI does the reversible work. Evidence and people control the irreversible."
 
-Sheepdog uses 5 frontier algorithms to verify documents before signing. It correctly defers 80% of high-risk contracts to humans, catches 10% as blocked, and auto-signs only 10% with 97% confidence. The system saves $19K from fraud prevention with 3,239% ROI.
+ProofDesk uses 5 frontier algorithms to verify documents before signing. It correctly defers 80% of high-risk contracts to humans, catches 10% as blocked, and auto-signs only 10% with 97% confidence.
 
 ---
 

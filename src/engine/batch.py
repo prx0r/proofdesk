@@ -1,4 +1,4 @@
-"""Batch processing orchestrator for ProofDesk/Sheepdog.
+"""Batch processing orchestrator for ProofDesk.
 
 Processes multiple PDFs through the evidence-gated pipeline:
 upload → extract → verify → classify → route → (human review) → sign

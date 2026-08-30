@@ -317,10 +317,16 @@ class DoctavianClient:
             result = self._request("POST", "/v1/documents/document/generate", json=payload)
             return result.get("result", {}).get("data", {}).get("document", {})
         except DoctavianError as e:
-            # Demo environment: DELIVERY_PATH_RESOLUTION_FAILED is expected
-            # Return empty dict to trigger local fallback
-            if "DELIVERY_PATH_RESOLUTION_FAILED" in str(e) or "COPY_FILE_GOOGLEDRIVE_FAILED" in str(e):
-                return {}
+            error_msg = str(e)
+            if "DELIVERY_PATH_RESOLUTION_FAILED" in error_msg or "COPY_FILE_GOOGLEDRIVE_FAILED" in error_msg:
+                return {
+                    "provider": "doctavian",
+                    "mode": "live",
+                    "status": "failed",
+                    "error_code": "DELIVERY_PATH_RESOLUTION_FAILED",
+                    "detail": "Cloud generation failed — bearer token may lack drive.file scope. Falling back to local renderer.",
+                    "fallback_used": True,
+                }
             raise
 
     def download_document(self, document_urn: str) -> bytes:

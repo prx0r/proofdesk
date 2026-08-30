@@ -1,4 +1,4 @@
-# Sheepdog vs Frontier Literature — Honest Comparison
+# ProofDesk vs Frontier Literature — Honest Comparison
 
 **Date:** 2026-08-26
 **Status:** Pre-submission analysis

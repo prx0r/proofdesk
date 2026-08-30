@@ -33,7 +33,7 @@ THE QUESTION (0:15)
 THE SOLUTION (0:15 - 0:30)
 ════════════════════════════════════════════════════════════════════════════════
 
-  Sheepdog uses 5 frontier algorithms:
+  ProofDesk uses 5 frontier algorithms:
   
   1. ConformalRiskController (Angelopoulos et al., ICLR 2024)
      → Finite-sample quantile thresholds
@@ -146,7 +146,7 @@ SPONSOR INTEGRATION (2:30)
 END (2:45)
 ════════════════════════════════════════════════════════════════════════════════
 
-  "Sheepdog — Evidence-Gated Document Execution"
+  "ProofDesk — Evidence-Gated Document Execution"
   
   AI does the reversible work.
   Evidence and people control the irreversible.

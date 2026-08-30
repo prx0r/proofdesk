@@ -11,7 +11,7 @@
 | Item | Value | Source |
 |------|-------|--------|
 | Base URL | `https://demo.api.doctavian.com` | Hackathon email |
-| API key | `edff22dbcc244bd0b709d7e632ce12e5` | Hackathon email (`x-api-key` header) |
+| API key | see `.env.keys` | Hackathon email (`x-api-key` header) |
 | OAuth client ID | `11e71170-3499-43f3-b878-7df343f43d37` | Postman collection (preset) |
 | Scope | `api://40728276-52a7-4932-bf32-76737f1fd01a/.default offline_access` | Postman collection |
 

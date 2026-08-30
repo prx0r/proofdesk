@@ -1,4 +1,4 @@
-# AGENTS.md — Sheepdog (ProofDesk) Hackathon Project
+# AGENTS.md — ProofDesk Hackathon Project
 
 **Last updated:** 2026-08-27
 **Status:** Ready for handover
@@ -8,7 +8,7 @@
 
 ## Project Overview
 
-Sheepdog is an **evidence-gated document execution system** for the DevNetwork API+Cloud+AI Hackathon 2026. It uses AI to verify facts before humans sign documents.
+ProofDesk is an **evidence-gated document execution system** for the DevNetwork API+Cloud+AI Hackathon 2026. It uses AI to verify facts before humans sign documents.
 
 **Core thesis:** "AI does the reversible work. Evidence and people control the irreversible."
 
@@ -149,7 +149,7 @@ else:
 
 Stored in `.env.keys` (DO NOT COMMIT):
 
-- **Nutrient DWS:** `pdf_live_hAAUR0ppmrzrIQcOqnPH29ea5z0uioX8pO9SGG6XYmk`
+- **Nutrient DWS:** see `.env.keys`
 - **Doctavian:** API key + Bearer token (expired, needs refresh)
 - **Foxit PDF:** Client ID + Client Secret
 

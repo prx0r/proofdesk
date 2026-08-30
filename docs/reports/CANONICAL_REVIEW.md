@@ -1,4 +1,4 @@
-# Canonical Review — Sheepdog (ProofDesk)
+# Canonical Review — ProofDesk
 
 **Date:** 2026-08-26
 **Reviewer:** Peer assessment (judge's eye view)
