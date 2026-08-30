@@ -13,13 +13,13 @@
 pip install -r requirements.txt
 
 # 2. Configure API keys
-cp .env.keys .env
+cp .env.example .env
 
 # 3. Start the server
 uvicorn src.api.app:app --host 0.0.0.0 --port 8080
 
-# 4. Open dashboard
-open http://localhost:8080/batch
+# 4. Open interactive demo (for judges)
+open http://localhost:8080/demo
 ```
 
 ---
@@ -179,7 +179,7 @@ else:
 | PDF merge (reversible) | Foxit PDF Services | **LIVE** |
 | PDF compression (reversible) | Foxit PDF Services | **LIVE** |
 | Signature authorization gate | ProofDesk SignatureGate | **LIVE** |
-| Signing request | FreeSign | **DEMO** (eSign API access pending) |
+| Signing request | Foxit eSign | **SIMULATED** (credentials pending) |
 | Hash-chained audit trail | ProofDesk | **LIVE** |
 | Merkle inclusion proofs | ProofDesk | **LIVE** |
 

@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Core tests
+        run: python tests/test_all.py
+      - name: Audit tests
+        run: python tests/test_audit.py
+      - name: Integration tests
+        run: python tests/test_integration.py
+      - name: Generation tests
+        run: python tests/test_doctavian.py
+      - name: Frontier tests
+        run: python tests/test_frontier.py
+      - name: Learning tests
+        run: python tests/test_learning.py

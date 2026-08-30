@@ -6,8 +6,8 @@ Story arc (the 3-minute transaction):
   0:15-0:40  — Nutrient extracts grounded evidence
   0:40-1:00  — SignatureGate BLOCKS the unsafe signature
   1:00-1:20  — Human resolves the blocker, approves the record
-  1:20-1:45  — Doctavian generates the conditional approval memo
-  1:45-2:10  — Foxit MCP merges + compresses (reversible work)
+  1:20-1:45  — ProofDesk generates the conditional approval memo
+  1:45-2:10  — Foxit PDF Services merges + compresses (reversible work)
   2:10-2:35  — SignatureGate passes → signing request sent
   2:35-2:55  — Hash tamper detection → blocked again
   2:55-3:10  — Audit trail with Merkle proofs
@@ -157,11 +157,11 @@ def act_generate(case):
     pause()
 
 
-# ── 1:45-2:10 — Foxit MCP Reversible Work ───────────────────
+# ── 1:45-2:10 — Foxit PDF Services Reversible Work ───────────
 
 def act_prepare(case):
     print(f"\n{BANNER}")
-    print("  STAGE 5 — FOXIT MCP: Reversible PDF Preparation")
+    print("  STAGE 5 — FOXIT PDF SERVICES: Reversible PDF Preparation")
     print(f"{BANNER}\n")
     print("  REVERSIBLE WORK — AGENT AUTHORIZED\n")
 

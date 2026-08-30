@@ -86,29 +86,29 @@ if _USE_REAL_FOXIT:
             # 6. Wait for compress → get resultDocumentId
             final_id = _foxit_client.wait_for_task(compress_task)
 
-        # 7. Download the final PDF and SHA-256 it
-        final_hash = None
-        if final_id:
-            try:
-                final_bytes = _foxit_client.download(final_id)
-                final_hash = hashlib.sha256(final_bytes).hexdigest()
-                # Store the final PDF for later hash verification
-                out_dir = "/tmp/proofdesk"
-                os.makedirs(out_dir, exist_ok=True)
-                final_path = f"{out_dir}/final_{case.case_id}.pdf"
-                with open(final_path, "wb") as f:
-                    f.write(final_bytes)
-            except Exception:
-                pass
+        # 7. Download the final PDF and SHA-256 it — fatal on failure
+        if not final_id:
+            raise RuntimeError("Foxit: no final document after compress")
+        final_bytes = _foxit_client.download(final_id)
+        if not final_bytes:
+            raise RuntimeError("Foxit: download returned empty bytes")
+        final_hash = hashlib.sha256(final_bytes).hexdigest()
+        out_dir = "/tmp/proofdesk"
+        os.makedirs(out_dir, exist_ok=True)
+        final_path = f"{out_dir}/final_{case.case_id}.pdf"
+        with open(final_path, "wb") as f:
+            f.write(final_bytes)
 
         return {
             "provider": "foxit_pdf_services",
+            "mode": "live",
             "source_ids": [uid for uid in uploaded_ids if uid != memo_id],
             "memo_id": memo_id,
             "merge_task": merge_task,
             "compress_task": compress_task,
             "final_document_id": final_id,
             "final_hash": final_hash,
+            "final_path": final_path,
             "status": "prepared",
         }
     
@@ -170,6 +170,13 @@ def run_pipeline(case: Case, domain: str = "procurement", stop_after: str | None
                                  actor="system", detail={"docs": degraded})
                 evt.compute_hash(case.audit_events[-1].content_hash if case.audit_events else "")
                 case.audit_events.append(evt)
+            # Block if no facts extracted — missing evidence is a blocker
+            if len(case.facts) == 0:
+                from ..models.domain import AuditEvent
+                evt = AuditEvent(case_id=case.case_id, event_type="EVIDENCE_INCOMPLETE",
+                                 actor="system", detail={"reason": "No facts extracted from any document"})
+                evt.compute_hash(case.audit_events[-1].content_hash if case.audit_events else "")
+                case.audit_events.append(evt)
             transition(case, CaseState.EXTRACTED)
         elif s == CaseState.EXTRACTED:
             transition(case, CaseState.RECONCILED)
@@ -177,14 +184,22 @@ def run_pipeline(case: Case, domain: str = "procurement", stop_after: str | None
             case.assertions = run_checks(case.facts, domain=domain)
             # Live classification — the engine the dashboard renders
             from ..providers.classifier import classify_document
-            case._classification = classify_document(
+            cls = classify_document(
                 case.case_id,
                 [f.to_public() for f in case.facts],
                 [a.to_dict() for a in case.assertions],
                 [{"decision": r.decision.value, "reason": r.reason, "actor_id": r.actor_id}
                  for r in case.resolutions],
             )
-            cls = case._classification
+            # Store full classification as the canonical DecisionCertificate
+            case._classification = cls
+            case._confidence = {
+                "confidence": cls["calibrated_confidence"],
+                "threshold": cls["threshold"],
+                "band": cls["risk_level"],
+                "field_risks": cls["per_field_violations"],
+                "decision": cls["decision"],
+            }
             transition(case, CaseState.CHECKED, detail={
                 "classification": {
                     "doc_type": cls["doc_type"],
@@ -194,7 +209,17 @@ def run_pipeline(case: Case, domain: str = "procurement", stop_after: str | None
                     "decision": cls["decision"],
                 }})
         elif s == CaseState.CHECKED:
-            if case.blocking_exceptions > 0:
+            # Block if no facts were extracted — missing evidence
+            if len(case.facts) == 0:
+                from ..models.domain import AuditEvent
+                evt = AuditEvent(case_id=case.case_id, event_type="EVIDENCE_INCOMPLETE",
+                                 actor="system", detail={"reason": "No facts extracted — cannot evaluate"})
+                evt.compute_hash(case.audit_events[-1].content_hash if case.audit_events else "")
+                case.audit_events.append(evt)
+                transition(case, CaseState.REVIEW_REQUIRED, detail={
+                    "reason": "EVIDENCE_INCOMPLETE: no facts extracted from any document",
+                    "failing_assertions": []})
+            elif case.blocking_exceptions > 0:
                 transition(case, CaseState.REVIEW_REQUIRED, detail={
                     "reason": f"{case.blocking_exceptions} blocking exception(s)",
                     "failing_assertions": [a.assertion_id for a in case.assertions
@@ -349,7 +374,7 @@ def generate_document(case: Case) -> Case:
 
 
 def prepare_pdf(case: Case) -> Case:
-    """Prepare PDF via Foxit MCP/PDF Services. Fails closed on any artifact error."""
+    """Prepare PDF via Foxit PDF Services. Fails closed on any artifact error."""
     import time as _t
     if case.state != CaseState.GENERATED:
         raise ValueError(f"Cannot prepare in state {case.state.value}")
@@ -365,8 +390,9 @@ def prepare_pdf(case: Case) -> Case:
     if pdf_result.get("status") != "prepared":
         raise ValueError("DOCUMENT_PREPARATION_FAILED: Foxit PDF preparation returned incomplete result")
 
-    # Store the final artifact hash for gate verification
+    # Store the final artifact hash and path for gate verification
     case._prepared_artifact_hash = pdf_result.get("final_hash")
+    case._prepared_artifact_path = pdf_result.get("final_path")
 
     from ..providers import trace as vtrace
     vtrace.set_current(case.case_id)
@@ -404,9 +430,29 @@ def request_signature(case: Case, signer: str = "cfo@company.com") -> Case:
 
     transition(case, CaseState.SIGNATURE_AUTHORIZED)
 
-    # Signing request — Foxit eSign when credentials available, otherwise simulated
-    from ..providers.stubs import foxit_esign_request
-    esign = foxit_esign_request(case.generated_artifact.artifact_id, signer)
+    esign = None
+    # Priority 1: real Foxit eSign if credentials configured
+    if os.environ.get("FOXIT_ESIGN_CLIENT_ID"):
+        try:
+            from ..providers.foxit_real import FoxitESignClient
+            es = FoxitESignClient()
+            if es.is_configured:
+                pdf_path = getattr(case, '_prepared_artifact_path', '')
+                if pdf_path and os.path.exists(pdf_path):
+                    with open(pdf_path, "rb") as f:
+                        pdf_bytes = f.read()
+                    folder = es.create_folder(pdf_bytes, signer)
+                    esign = {"provider": "foxit_esign", "mode": "live",
+                             "folder_id": folder.get("folderId", ""),
+                             "request_id": folder.get("request_id", ""),
+                             "signer": signer, "status": "SENT"}
+        except Exception:
+            pass
+
+    # Priority 2: simulated signing
+    if esign is None:
+        from ..providers.stubs import foxit_esign_request
+        esign = foxit_esign_request(case.generated_artifact.artifact_id, signer)
 
     case.signature_request.foxit_request_id = esign["request_id"]
 

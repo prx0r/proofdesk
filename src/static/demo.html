@@ -225,7 +225,7 @@ footer{text-align:center;padding:40px 0;color:var(--dim);font-size:12px;border-t
       <!-- Stage 5: Prepare -->
       <div class="stage-card" id="stage-5">
         <div class="highlight">STAGE 5</div>
-        <h2>Foxit MCP prepares the PDF packet</h2>
+        <h2>Foxit PDF Services prepares the PDF packet</h2>
         <div class="subtitle">1:45 — Reversible work (agent authorized)</div>
         <div class="hash-box" style="color:var(--green);font-family:inherit;font-size:13px;text-align:center;padding:16px">
           REVERSIBLE WORK — AGENT AUTHORIZED
@@ -319,7 +319,7 @@ const stageDescriptions = [
   "A human reviewer inspects the evidence and resolves the blocking exception.",
   "ProofDesk generates a risk-aware approval memo. The template branches on risk state.",
   "Foxit PDF Services merges and compresses the document packet. Reversible work — agent authorized.",
-  "All six gate checks pass. The signing request is sent to a human signer.",
+  "      All six gate checks pass. The signing request is sent.",
   "Every transition recorded in a hash-chained audit trail with Merkle inclusion proofs."
 ];
 
@@ -412,9 +412,9 @@ async function runDemo() {
     r = await api('POST', '/v1/cases/' + caseId + '/prepare');
     if (r.ok) {
       const detail = r.data.state || '';
-      addTrace('FOXIT MCP', 'merge + compress + download', '✓', detail);
+      addTrace('FOXIT PDF', 'merge + compress + download', '✓', detail);
     } else {
-      addTrace('FOXIT MCP', 'merge + compress', '✗', r.data.detail || 'failed');
+      addTrace('FOXIT PDF', 'merge + compress', '✗', r.data.detail || 'failed');
     }
 
     // 11. Get updated case
@@ -432,7 +432,7 @@ async function runDemo() {
     // 13. Signature request
     r = await api('POST', '/v1/cases/' + caseId + '/signature-request', {signer: 'cfo@northstar.com'});
     addTrace('FOXIT eSIGN', 'signature request', r.ok ? '✓ SENT' : '✗ ' + (r.data.detail || r.status),
-      'signer: cfo@northstar.com (demo via FreeSign)');
+      'signer: cfo@northstar.com (simulated — eSign credentials pending)');
 
     // 14. Get receipt
     r = await api('GET', '/v1/cases/' + caseId + '/receipt');
@@ -526,7 +526,7 @@ function populateMemo(receipt) {
 function populateFoxit(caseData) {
   const el = document.getElementById('foxit-display');
   // Derive from actual trace data
-  const foxitEntries = trace.filter(t => t.section === 'FOXIT MCP' || t.section === 'FOXIT eSIGN');
+  const foxitEntries = trace.filter(t => t.section === 'FOXIT PDF' || t.section === 'FOXIT eSIGN');
   if (foxitEntries.length) {
     el.innerHTML = '<div style="margin:12px 0">' +
       foxitEntries.map(e => `<div class="gate-reason ${e.status.startsWith('✓') ? 'pass' : 'fail'}"><span class="icon">${e.status.startsWith('✓') ? '✓' : '✗'}</span>${esc(e.op)} — ${esc(e.detail)}</div>`).join('') +

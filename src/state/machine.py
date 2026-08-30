@@ -185,9 +185,27 @@ def can_request_signature(case: Case) -> dict:
         else:
             checks.append("all_fields_within_risk_budget")
 
-    # Prepared artifact hash check (SHA-256 of actual final PDF)
+    # Prepared artifact hash check — recompute and compare
     prepared_hash = getattr(case, '_prepared_artifact_hash', None)
-    if prepared_hash:
+    prepared_path = getattr(case, '_prepared_artifact_path', None)
+    if prepared_hash and prepared_path:
+        import hashlib
+        try:
+            with open(prepared_path, "rb") as f:
+                current_hash = hashlib.sha256(f.read()).hexdigest()
+            if current_hash == prepared_hash:
+                checks.append(f"final_artifact_sha256_verified_{current_hash[:12]}")
+            else:
+                reasons.append({
+                    "code": "ARTIFACT_HASH_MISMATCH",
+                    "detail": f"Expected {prepared_hash[:16]}..., got {current_hash[:16]}...",
+                })
+        except Exception:
+            reasons.append({
+                "code": "ARTIFACT_UNREADABLE",
+                "detail": "Cannot read prepared artifact for hash verification",
+            })
+    elif prepared_hash:
         checks.append(f"final_artifact_sha256_{prepared_hash[:12]}")
 
     return {"allowed": len(reasons) == 0, "reasons": reasons, "checks": checks}

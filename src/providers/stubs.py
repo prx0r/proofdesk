@@ -304,7 +304,31 @@ def doctavian_generate(record_data: dict, template_id: str = "approval_memo", co
         content_hash=_hash(content),
         provider_job_id=_id("job_"),
     )
-    artifact.output_path = f"/tmp/proofdesk/{artifact.artifact_id}.txt"
+
+    # Generate actual PDF using reportlab
+    import os
+    os.makedirs("/tmp/proofdesk", exist_ok=True)
+    pdf_path = f"/tmp/proofdesk/{artifact.artifact_id}.pdf"
+    try:
+        from reportlab.lib.pagesizes import letter
+        from reportlab.pdfgen import canvas as rl_canvas
+        c = rl_canvas.Canvas(pdf_path, pagesize=letter)
+        y = 750
+        for line in content.split("\n"):
+            if y < 50:
+                c.showPage()
+                y = 750
+            c.drawString(72, y, line[:90])
+            y -= 14
+        c.save()
+        artifact.output_path = pdf_path
+    except ImportError:
+        # reportlab not available — fall back to .txt
+        txt_path = f"/tmp/proofdesk/{artifact.artifact_id}.txt"
+        with open(txt_path, "w") as f:
+            f.write(content)
+        artifact.output_path = txt_path
+
     return artifact, content
 
 
@@ -313,6 +337,8 @@ def doctavian_generate(record_data: dict, template_id: str = "approval_memo", co
 def foxit_pdf_prepare(case, generated_artifact, content: str = "") -> dict:
     """Simulate Foxit PDF preparation."""
     return {
+        "provider": "foxit_pdf_services",
+        "mode": "stub",
         "operation": "merge_and_compress",
         "source_ids": [d.doc_id for d in case.documents],
         "memo_id": None,
@@ -321,7 +347,6 @@ def foxit_pdf_prepare(case, generated_artifact, content: str = "") -> dict:
         "final_document_id": None,
         "final_hash": None,
         "input_artifact": generated_artifact.artifact_id,
-        "provider": "foxit_pdf_services",
         "status": "prepared",
     }
 
@@ -330,10 +355,11 @@ def foxit_esign_request(artifact_id: str, signer: str) -> dict:
     """Simulate Foxit eSign request."""
     return {
         "provider": "foxit_esign",
+        "mode": "simulated",
         "request_id": _id("esign_"),
         "folder_id": _id("folder_"),
         "artifact_id": artifact_id,
         "signer": signer,
         "status": "SENT",
-        "message": f"Signature request sent to {signer}",
+        "message": f"Signature request sent to {signer} (simulated)",
     }

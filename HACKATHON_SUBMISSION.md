@@ -16,7 +16,7 @@ ProofDesk inserts a **calibrated authority gate** between reversible PDF work an
 2. **Route** — Document router selects the right expert (per-world calibration)
 3. **Calibrate** — Each expert has its own optimal threshold (isotonic regression)
 4. **Decide** — Expert signs if score ≥ threshold, refuses otherwise
-5. **Prepare** — Foxit MCP: merge approval memo + compress (reversible)
+5. **Prepare** — Foxit PDF Services: merge approval memo + compress (reversible)
 6. **Gate** — SignatureGate verifies: no blockers, human approval, hash integrity, score ≥ threshold
 7. **Sign** — Foxit eSign: send to human signer (irreversible)
 8. **Audit** — Every step recorded with hash-chained audit trail
@@ -57,7 +57,7 @@ Our **Mixture of Experts** architecture routes each document to its own calibrat
 
 The agent can call MCP tools freely. It CANNOT call eSign directly — that's gated server-side.
 
-**Note on eSign:** We were unable to obtain Foxit eSign API credentials before the submission deadline (the PDF Services credentials don't work for eSign). The signing step is demonstrated via FreeSign. The architectural boundary is what matters — SignatureGate is vendor-interchangeable by design. In production, it would call Foxit eSign directly.
+**Note on eSign:** We were unable to obtain Foxit eSign API credentials before the submission deadline (the PDF Services credentials don't work for eSign). The signing step is simulated. The architectural boundary is what matters — SignatureGate is vendor-interchangeable by design. In production, it would call Foxit eSign directly.
 
 ## Quick Start
 
@@ -110,7 +110,7 @@ Your Agent Shouldn't Sign That — ProofDesk separates reversible PDF work from 
 3. **0:40-1:00** — Show router selecting expert (per-world calibration)
 4. **1:00-1:20** — Show premature signature attempt BLOCKED by gate (UNRESOLVED_BLOCKER)
 5. **1:20-1:40** — Human resolves blocker, approves record
-6. **1:40-2:00** — Foxit MCP merge + compress (reversible)
+6. **1:40-2:00** — Foxit PDF Services merge + compress (reversible)
 7. **2:00-2:20** — SignatureGate passes (score ≥ threshold)
 8. **2:20-2:40** — Foxit eSign sent to human signer (irreversible)
 9. **2:40-3:00** — Show audit trail with hash chain
