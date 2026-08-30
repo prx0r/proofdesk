@@ -22,6 +22,8 @@ uvicorn src.api.app:app --host 0.0.0.0 --port 8080
 open http://localhost:8080/demo
 ```
 
+**Judge?** See `docs/JUDGE_GUIDE.md` (1 page) or `docs/TECHNICAL_DEPTH.md` (full research appendix).
+
 ---
 
 ## What Is This?

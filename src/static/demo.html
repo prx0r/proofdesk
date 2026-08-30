@@ -281,7 +281,7 @@ footer{text-align:center;padding:40px 0;color:var(--dim);font-size:12px;border-t
         <div class="sponsor"><div class="dot live"></div><strong>Nutrient DWS</strong>&nbsp;— Evidence extraction</div>
         <div class="sponsor"><div class="dot live"></div><strong>ProofDesk</strong>&nbsp;— Document generation</div>
         <div class="sponsor"><div class="dot live"></div><strong>Foxit PDF</strong>&nbsp;— Merge + compress</div>
-        <div class="sponsor"><div class="dot blocked"></div><strong>Foxit eSign</strong>&nbsp;— Signing (demo via FreeSign)</div>
+        <div class="sponsor"><div class="dot blocked"></div><strong>Foxit eSign</strong>&nbsp;— Signing (simulated)</div>
       </div>
       <div class="info-card">
         <h3>Key Idea</h3>
@@ -382,11 +382,44 @@ async function runDemo() {
     r = await api('GET', '/v1/cases/' + caseId + '/signature-gate');
     addTrace('SIGNATUREGATE', 'initial check', r.data.allowed ? '✓' : '✗', r.data.reasons?.map(x => x.code).join(', '));
 
+    // 6. Fetch provider trace
+    r = await api('GET', '/v1/cases/' + caseId + '/trace');
+    const providerCalls = r.data.calls || [];
+    providerCalls.forEach(c => addTrace(c.provider || 'API', c.operation || c.endpoint, '✓', `${c.status_code || ''} ${c.summary || ''}`.trim()));
+
     // Populate UI for stages 1-2
     populateFacts(facts);
     populateGateBlocked(r.data);
+    populateProviderTrace(providerCalls);
 
-    // 6. Resolve blockers
+    // Show "Resolve & Continue" button instead of auto-resolving
+    if (blocking.length > 0) {
+      btn.textContent = '⏸ BLOCKED — Click to resolve & continue';
+      btn.style.background = 'var(--yellow)';
+      btn.style.color = '#000';
+      btn.disabled = false;
+      btn.onclick = () => resolveAndContinue(blocking);
+    } else {
+      await continuePipeline();
+    }
+
+  } catch (err) {
+    addTrace('ERROR', err.message, '✗', '');
+    btn.textContent = '✗ Error: ' + err.message;
+    btn.style.background = 'var(--red)';
+    console.error(err);
+  }
+}
+
+async function resolveAndContinue(blocking) {
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true;
+  btn.textContent = '⏳ Resolving...';
+  btn.style.background = '';
+  btn.style.color = '';
+
+  try {
+    // Resolve each blocker
     for (const a of blocking) {
       const rr = await api('POST', '/v1/cases/' + caseId + '/resolve', {
         assertion_id: a.assertion_id,
@@ -394,72 +427,88 @@ async function runDemo() {
         reason: 'Human verified: updated evidence supplied',
         actor_id: 'procurement-reviewer'
       });
-      addTrace('HUMAN', `resolve ${a.assertion_id.substring(0,12)}...`, rr.ok ? '✓' : '✗', 'ACCEPT by procurement-reviewer');
+      addTrace('HUMAN', `resolve ${a.predicate || a.assertion_id}`, rr.ok ? '✓' : '✗', 'ACCEPT by procurement-reviewer');
     }
 
-    // 7. Re-run pipeline to advance
+    await continuePipeline();
+  } catch (err) {
+    addTrace('ERROR', err.message, '✗', '');
+    btn.textContent = '✗ Error: ' + err.message;
+    btn.style.background = 'var(--red)';
+  }
+}
+
+async function continuePipeline() {
+  const btn = document.getElementById('run-btn');
+  btn.textContent = '⏳ Continuing...';
+
+  try {
+    // Re-run pipeline to advance past resolution
     await api('POST', '/v1/cases/' + caseId + '/run', {domain: 'procurement'});
 
-    // 8. Approve
-    r = await api('POST', '/v1/cases/' + caseId + '/approve');
+    // Approve
+    let r = await api('POST', '/v1/cases/' + caseId + '/approve');
     addTrace('PROOFDESK', 'approve record', r.ok ? '✓' : '✗', r.data.record_hash || '');
 
-    // 9. Generate
+    // Generate
     r = await api('POST', '/v1/cases/' + caseId + '/generate');
     addTrace('PROOFDESK', 'generate memo', r.ok ? '✓' : '✗', r.data.artifact_id || r.data.detail || '');
 
-    // 10. Prepare PDF
+    // Prepare PDF
     r = await api('POST', '/v1/cases/' + caseId + '/prepare');
     if (r.ok) {
-      const detail = r.data.state || '';
-      addTrace('FOXIT PDF', 'merge + compress + download', '✓', detail);
+      addTrace('FOXIT PDF', 'merge + compress + download', '✓', r.data.state || '');
     } else {
       addTrace('FOXIT PDF', 'merge + compress', '✗', r.data.detail || 'failed');
     }
 
-    // 11. Get updated case
+    // Get updated case
     r = await api('GET', '/v1/cases/' + caseId);
     caseData = r.data;
 
-    // 12. Get gate (should pass now)
+    // Get gate (should pass now)
     r = await api('GET', '/v1/cases/' + caseId + '/signature-gate');
     addTrace('SIGNATUREGATE', 'final check', r.data.allowed ? '✓ ALLOW' : '✗ DENY',
       r.data.checks?.join(', ') || r.data.reasons?.map(x => x.code).join(', '));
 
-    // Populate gate pass
     populateGatePass(r.data);
 
-    // 13. Signature request (only if gate passed)
+    // Signature request (only if gate passed)
     if (r.data.allowed) {
       r = await api('POST', '/v1/cases/' + caseId + '/signature-request', {signer: 'cfo@northstar.com'});
       addTrace('FOXIT eSIGN', 'signature request', r.ok ? '✓ SENT' : '✗ ' + (r.data.detail || r.status),
-        'signer: cfo@northstar.com (simulated — eSign credentials pending)');
-    } else {
-      addTrace('SIGNATUREGATE', 'signing blocked', '✗', r.data.reasons?.map(x => x.code).join(', '));
+        'signer: cfo@northstar.com (simulated)');
     }
 
-    // 14. Get receipt
+    // Get receipt
     r = await api('GET', '/v1/cases/' + caseId + '/receipt');
     populateMemo(r.data);
 
-    // 15. Get events
+    // Get events
     r = await api('GET', '/v1/cases/' + caseId + '/events');
     addTrace('AUDIT', `${r.data.events?.length || 0} events`, '✓', 'chain + merkle');
 
-    // Populate all remaining stages
-    populateResolve(blocking);
+    // Fetch provider trace again
+    r = await api('GET', '/v1/cases/' + caseId + '/trace');
+    populateProviderTrace(r.data.calls || []);
+
+    // Populate remaining stages
+    populateResolve(blocking || []);
     populateFoxit(caseData);
     populateSign(caseData);
     populateAudit(r.data.events || [], caseData);
 
+    // Navigate to stage 3 (resolved)
+    showStage(3);
+
     btn.textContent = '✓ Demo Complete';
     btn.style.background = 'var(--green)';
+    btn.onclick = null;
 
   } catch (err) {
     addTrace('ERROR', err.message, '✗', '');
     btn.textContent = '✗ Error: ' + err.message;
     btn.style.background = 'var(--red)';
-    console.error(err);
   }
 }
 
