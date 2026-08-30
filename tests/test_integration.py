@@ -292,6 +292,74 @@ def test_010_requirements():
     test("httpx in requirements", "httpx" in reqs)
 
 
+# ── TEST-011: Zero extraction → EVIDENCE_INCOMPLETE blocks signing ──
+
+def test_011_evidence_incomplete():
+    print("\nTEST-011: Zero extraction → EVIDENCE_INCOMPLETE blocks signing")
+    case = Case(prompt="test empty extraction")
+    case.documents.append(Document(
+        case_id="test", doc_id="empty_doc", filename="empty.pdf",
+        content_type="application/pdf", raw_text="",
+    ))
+
+    # Run pipeline — should extract 0 facts and block
+    run_pipeline(case)
+    test("Pipeline blocks on empty extraction",
+         case.state == CaseState.REVIEW_REQUIRED,
+         f"state={case.state}")
+
+    # Gate should deny
+    gate = can_request_signature(case)
+    test("Gate denies with no facts", not gate["allowed"],
+         f"allowed={gate['allowed']}")
+    test("Reason includes INVALID_STATE or EVIDENCE_INCOMPLETE",
+         any("INVALID_STATE" in r.get("code", "") or "EVIDENCE" in r.get("detail", "")
+             for r in gate["reasons"]),
+         f"reasons={gate['reasons']}")
+
+
+# ── TEST-012: Full pipeline end-to-end with calibrated gate pass ──
+
+def test_012_full_pipeline_calibrated():
+    print("\nTEST-012: Full pipeline with calibrated gate")
+    from src.models.use_cases import get_use_case
+
+    uc = get_use_case("procurement")
+    case = Case(prompt=uc.prompt)
+    for d in uc.documents:
+        case.documents.append(Document(
+            doc_id=d["doc_id"], case_id=case.case_id,
+            filename=d["filename"], content_type=d["content_type"],
+            raw_text=d["source_text"],
+        ))
+
+    run_pipeline(case)
+
+    if case.state == CaseState.REVIEW_REQUIRED:
+        for a in case.assertions:
+            if a.result.value == "FAIL" and a.severity.value == "BLOCKER":
+                resolve_exception(case, a.assertion_id, ResolutionDecision.ACCEPT,
+                                  "verified", "test")
+        run_pipeline(case)
+
+    if case.state == CaseState.APPROVABLE:
+        approve_record(case, actor_id="test")
+        generate_document(case)
+        test("Generated artifact exists", case.generated_artifact is not None)
+
+        # Verify _confidence has threshold
+        conf = getattr(case, '_confidence', None) or {}
+        test("Classification has threshold", conf.get("threshold") is not None,
+             f"conf={conf}")
+
+        prepare_pdf(case)
+        test("Prepared state reached", case.state == CaseState.PREPARED)
+
+        gate = can_request_signature(case)
+        test("Gate passes with full pipeline", gate["allowed"],
+             f"reasons={gate['reasons']}, checks={gate['checks']}")
+
+
 # ── Main ──
 
 if __name__ == "__main__":
@@ -309,6 +377,8 @@ if __name__ == "__main__":
     test_008_gate_checks_list()
     test_009_generation_local()
     test_010_requirements()
+    test_011_evidence_incomplete()
+    test_012_full_pipeline_calibrated()
 
     print(f"\n{'=' * 60}")
     print(f"  {PASS} passed, {FAIL} failed out of {PASS + FAIL}")

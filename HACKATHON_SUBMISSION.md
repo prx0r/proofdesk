@@ -2,7 +2,7 @@
 
 **Evidence-gated document execution for high-stakes business workflows.**
 
-> Foxit gives agents 40 tools for reversible PDF work. We built the missing piece — the authority gate that decides when signing is allowed. The agent can't sign. Only humans can.
+> AI agents can prepare documents. ProofDesk ensures only verified, human-approved facts become signed commitments.
 
 ## The Problem
 
@@ -12,52 +12,53 @@ AI agents can prepare documents, merge PDFs, and compress files. But should they
 
 ProofDesk inserts a **calibrated authority gate** between reversible PDF work and irreversible signature:
 
-1. **Extract** — Nutrient DWS extracts fields with confidence signals
-2. **Route** — Document router selects the right expert (per-world calibration)
-3. **Calibrate** — Each expert has its own optimal threshold (isotonic regression)
-4. **Decide** — Expert signs if score ≥ threshold, refuses otherwise
-5. **Prepare** — Foxit PDF Services: merge approval memo + compress (reversible)
-6. **Gate** — SignatureGate verifies: no blockers, human approval, hash integrity, score ≥ threshold
-7. **Sign** — Foxit eSign: send to human signer (irreversible)
-8. **Audit** — Every step recorded with hash-chained audit trail
+1. **Extract** — Nutrient DWS extracts fields with confidence signals and source grounding
+2. **Reconcile** — Cross-document verification catches inconsistencies
+3. **Classify** — Risk-adaptive classification with per-field confidence scores
+4. **Decide** — SignatureGate enforces: no blockers, human approval, hash integrity, calibrated score ≥ threshold
+5. **Prepare** — Foxit PDF Services: merge source documents + approval memo, compress (reversible)
+6. **Gate** — SHA-256 of final artifact verified against stored hash — any tamper detected
+7. **Sign** — Human signer completes the irreversible commitment
+8. **Audit** — Every step recorded with hash-chained audit trail + Merkle inclusion proofs
 
-## Key Innovation: Per-World Calibration
+## Key Innovation: The Authority Gate
 
-Different document types have different risk profiles. A single threshold can't handle all of them:
+SignatureGate is a server-side, non-negotiable boundary between reversible and irreversible operations. It enforces six conditions before allowing any signing request:
 
-| Document Type | Optimal Threshold | False Positive Rate |
-|---------------|-------------------|---------------------|
-| Invoice (high fraud) | 0.603 | 10% |
-| Contract (confounded) | 0.759 | 31% |
-| Claim (regime flip) | 0.638 | 14% |
-| Procurement (costly evidence) | 0.759 | 37% |
-| Trade (difficulty weighted) | 0.707 | 23% |
+| Check | What it verifies |
+|-------|-----------------|
+| State is PREPARED | Pipeline completed all prior stages |
+| No unresolved blockers | All BLOCKER-severity assertions resolved by humans |
+| Human approval present | A human explicitly approved the record |
+| Structured record exists | Approved record with content hash |
+| Artifact hash verified | SHA-256 of final PDF matches stored hash |
+| Calibrated score ≥ threshold | Confidence meets risk-appropriate threshold |
 
-Our **Mixture of Experts** architecture routes each document to its own calibrated expert, achieving **5x fewer false positives** than a single-threshold approach.
+The agent can prepare everything. It cannot sign.
+
+## Live Integration Status
+
+| Capability | Provider | Status |
+|------------|----------|--------|
+| Evidence extraction (value + confidence + page + bbox) | Nutrient DWS | **LIVE** |
+| Source grounding with page coordinates | Nutrient DWS | **LIVE** |
+| Risk classification with per-field budgets | ProofDesk | **LIVE** |
+| Calibrated authority gate (6 conditions) | ProofDesk | **LIVE** |
+| Document generation (risk-branched memo) | ProofDesk | **LIVE** |
+| PDF merge (reversible) | Foxit PDF Services | **LIVE** |
+| PDF compression (reversible) | Foxit PDF Services | **LIVE** |
+| SHA-256 artifact integrity | ProofDesk | **LIVE** |
+| Hash-chained audit trail | ProofDesk | **LIVE** |
+| Merkle inclusion proofs | ProofDesk | **LIVE** |
+| Signing request | Foxit eSign | **SIMULATED** (credentials pending) |
 
 ## Results
 
-| Method | Utility | False Positive Rate | False Negative Rate |
-|--------|---------|---------------------|---------------------|
-| **Mixture of Experts** | **0.107** | **0.022** | 0.172 |
-| Single Expert | -0.116 | 0.095 | 0.086 |
-| Naive (conf > 0.5) | -1.208 | 0.296 | 0.109 |
-| Oracle | 0.396 | 0.000 | 0.000 |
-
-## Foxit Integration
-
-### Reversible (MCP tools — LIVE):
-- **pdf_merge** — Merge approval memo + evidence appendix
-- **pdf_compress** — Compress final packet
-- **pdf_upload** — Upload for processing
-
-### Irreversible (eSign API):
-- **create_folder** — Create signing folder with human signer
-- **send_folder** — Send to signer for signature
-
-The agent can call MCP tools freely. It CANNOT call eSign directly — that's gated server-side.
-
-**Note on eSign:** We were unable to obtain Foxit eSign API credentials before the submission deadline (the PDF Services credentials don't work for eSign). The signing step is simulated. The architectural boundary is what matters — SignatureGate is vendor-interchangeable by design. In production, it would call Foxit eSign directly.
+| Question | Metric | Value |
+|----------|--------|-------|
+| Does the evidence pipeline work on real documents? | Real Nutrient API on CUAD contracts | 95% accuracy (19/20), 5% FPR |
+| Does calibrated abstention reduce bad decisions? | Auto-sign vs defer vs block | 10% auto, 80% defer, 10% block |
+| Is the audit mechanism valid? | Hash chain + Merkle verification | 85+ tests passing, 100% replay |
 
 ## Quick Start
 
@@ -66,15 +67,20 @@ cd proofdesk
 pip install -r requirements.txt
 cp .env.example .env   # fill in your API keys
 
-# Run 3-minute demo (no API keys needed — uses test fixtures)
+# Open interactive demo (for judges)
+uvicorn src.api.app:app --host 0.0.0.0 --port 8080
+# Open http://localhost:8080/demo
+
+# Run 3-minute CLI demo
 python3 demo_2min.py
 
 # Run with real Nutrient API
 export NUTRIENT_API_KEY="pdf_live_..."
-python3 demo_2min.py --live
+python3 demo_2min.py
 
-# Run benchmark
-python3 run_benchmark.py
+# Run tests
+python3 tests/test_all.py
+python3 tests/test_integration.py
 ```
 
 ## Architecture
@@ -82,43 +88,30 @@ python3 run_benchmark.py
 ```
 proofdesk/
 ├── src/
-│   ├── benchmark/confidence/   ← Benchmark suite (cogym-style)
-│   │   ├── signing_world.py      Document + Decision + Scoring
-│   │   ├── signing_generator.py  Hard worlds (5 families)
-│   │   ├── experts.py            Mixture of Experts
-│   │   ├── calibration.py        Isotonic + Platt + Conformal
-│   │   ├── metrics.py            ECE, Brier, BAS, AURC
-│   │   └── plots.py              Risk-coverage + reliability diagrams
+│   ├── api/app.py              ← FastAPI server
+│   ├── engine/orchestrator.py  ← Pipeline orchestration
 │   ├── providers/
-│   │   ├── foxit.py              Foxit PDF + eSign API client
-│   │   └── foxit_pipeline.py     Full signing pipeline with gate
-│   └── state/
-│       └── machine.py            15-state machine + SignatureGate
-├── demo_mvp.py                   ← Full demo
-├── rubrics/foxit.json            ← Machine-readable rubric criteria
-└── validate_rubrics.py           ← Rubric checker
+│   │   ├── nutrient.py         ← Nutrient DWS (REAL API)
+│   │   ├── classifier.py       ← Risk classification + DecisionCertificate
+│   │   └── stubs.py            ← Deterministic stubs
+│   ├── state/machine.py        ← SignatureGate (6 conditions)
+│   └── audit/                  ← Hash chain + Merkle proofs
+├── tests/
+│   ├── test_all.py             ← 38 core tests
+│   ├── test_audit.py           ← 25 audit tests
+│   ├── test_integration.py     ← 26 integration tests
+│   └── ...
+└── .github/workflows/ci.yml   ← CI on every push
 ```
 
 ## One-Line Pitch
 
-Your Agent Shouldn't Sign That — ProofDesk separates reversible PDF work from irreversible signature through a server-side authority gate with per-world calibrated thresholds.
-
-## Demo Script (2-4 minutes)
-
-1. **0:00-0:20** — Enter prompt: "Prepare Northstar Data Systems for a $42,500 annual software procurement..."
-2. **0:20-0:40** — Show Nutrient extraction with confidence signals
-3. **0:40-1:00** — Show router selecting expert (per-world calibration)
-4. **1:00-1:20** — Show premature signature attempt BLOCKED by gate (UNRESOLVED_BLOCKER)
-5. **1:20-1:40** — Human resolves blocker, approves record
-6. **1:40-2:00** — Foxit PDF Services merge + compress (reversible)
-7. **2:00-2:20** — SignatureGate passes (score ≥ threshold)
-8. **2:20-2:40** — Foxit eSign sent to human signer (irreversible)
-9. **2:40-3:00** — Show audit trail with hash chain
+Your Agent Shouldn't Sign That — ProofDesk separates reversible PDF work from irreversible signature through a server-side authority gate with calibrated risk thresholds.
 
 ## Why This Wins
 
-1. **Addresses the core challenge**: Foxit left signing out of the MCP catalog on purpose. We built the authority gate.
-2. **Per-world calibration**: Different document types get different thresholds — not one-size-fits-all.
-3. **Reversible vs irreversible**: Explicitly narrated in demo. PDF prep is reversible, signature creates commitment.
-4. **Zero false positives**: Near-zero FPR across all hard world families.
-5. **Real Foxit integration**: PDF Services (MCP) for prep, eSign (direct API) for signing — exactly the architecture Foxit designed.
+1. **Addresses the core challenge**: Tool access is not authority. The agent can prepare documents but cannot create legal commitment.
+2. **Real Nutrient integration**: Evidence extraction with source grounding, confidence, and page coordinates — not just form-filling.
+3. **Real Foxit integration**: PDF Services merge + compress with task polling and resultDocumentId chaining.
+4. **Calibrated gate**: Per-field risk budgets, calibrated confidence vs threshold, SHA-256 artifact verification.
+5. **Honest submission**: Every integration is either LIVE or labeled SIMULATED. No fake demos.

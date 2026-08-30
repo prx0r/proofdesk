@@ -250,7 +250,7 @@ footer{text-align:center;padding:40px 0;color:var(--dim);font-size:12px;border-t
         </div>
         <p>Only after all six checks pass does ProofDesk allow the signing request.
         In production, this calls <strong>Foxit eSign</strong> to send a real signing link.
-        We demo with FreeSign due to API access constraints.</p>
+        We currently simulate this step — Foxit eSign credentials pending.</p>
         <div id="sign-display"></div>
         <div class="actions">
           <button class="btn btn-secondary" onclick="showStage(5)">← Back</button>
@@ -429,10 +429,14 @@ async function runDemo() {
     // Populate gate pass
     populateGatePass(r.data);
 
-    // 13. Signature request
-    r = await api('POST', '/v1/cases/' + caseId + '/signature-request', {signer: 'cfo@northstar.com'});
-    addTrace('FOXIT eSIGN', 'signature request', r.ok ? '✓ SENT' : '✗ ' + (r.data.detail || r.status),
-      'signer: cfo@northstar.com (simulated — eSign credentials pending)');
+    // 13. Signature request (only if gate passed)
+    if (r.data.allowed) {
+      r = await api('POST', '/v1/cases/' + caseId + '/signature-request', {signer: 'cfo@northstar.com'});
+      addTrace('FOXIT eSIGN', 'signature request', r.ok ? '✓ SENT' : '✗ ' + (r.data.detail || r.status),
+        'signer: cfo@northstar.com (simulated — eSign credentials pending)');
+    } else {
+      addTrace('SIGNATUREGATE', 'signing blocked', '✗', r.data.reasons?.map(x => x.code).join(', '));
+    }
 
     // 14. Get receipt
     r = await api('GET', '/v1/cases/' + caseId + '/receipt');

@@ -351,9 +351,19 @@ def generate_document(case: Case) -> Case:
         "content_hash": case.structured_record.content_hash,
     }
 
-    # foxit confidence module -> risk band drives Doctavian template branching
-    from ..providers.confidence_adapter import score_case
-    confidence = score_case(case)
+    # Use classification from pipeline if available, else compute default
+    if hasattr(case, '_confidence') and case._confidence:
+        confidence = case._confidence
+    elif hasattr(case, '_classification') and case._classification:
+        cls = case._classification
+        confidence = {
+            "confidence": cls.get("calibrated_confidence", 0.5),
+            "threshold": cls.get("threshold", 0.7),
+            "band": cls.get("risk_level", "high"),
+            "field_risks": cls.get("per_field_violations", []),
+        }
+    else:
+        confidence = {"confidence": 0.5, "threshold": 0.7, "band": "high", "field_risks": []}
 
     artifact, content = doctavian_generate(record_data, confidence=confidence)
     case.generated_artifact = artifact
@@ -396,7 +406,7 @@ def prepare_pdf(case: Case) -> Case:
 
     from ..providers import trace as vtrace
     vtrace.set_current(case.case_id)
-    is_real = pdf_result.get("provider") == "foxit_pdf_services"
+    is_real = pdf_result.get("mode") == "live"
     vtrace.record(case.case_id,
         "Foxit PDF Services", "merge + compress + download",
         "POST", "https://na1.fusion.foxit.com/pdf-services/api/documents/enhance/pdf-combine",

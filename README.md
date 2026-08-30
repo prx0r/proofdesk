@@ -54,7 +54,6 @@ src/
 │   └── evaluation.py             ← Binary rubric evaluation
 ├── providers/
 │   ├── nutrient.py               ← Nutrient DWS API (REAL)
-│   ├── doctavian.py              ← Doctavian API (REAL)
 │   ├── classifier.py             ← Risk classification
 │   ├── extractconf.py            ← EXTRACTCONF verification
 │   ├── ravidp.py                 ← RaV-IDP validation
@@ -73,7 +72,7 @@ src/
 tests/
 ├── test_all.py                   ← Core tests (38/38)
 ├── test_audit.py                 ← Audit tests (25/25)
-├── test_doctavian.py             ← Doctavian tests (3/3)
+├── test_integration.py           ← Integration tests (26/26)
 ├── test_frontier.py              ← Frontier tests (16/16)
 └── test_learning.py             ← Convergence tests (3/3)
 ```
@@ -83,9 +82,7 @@ tests/
 ```
 data/
 ├── test_pdfs/                    ← 18 test PDFs
-├── datasets/pdfs/                ← 509 CUAD contracts
-└── templates/
-    └── vendor_approval_memo.docx ← Doctavian template
+└── datasets/pdfs/                ← 509 CUAD contracts
 ```
 
 ### Documentation (`docs/`)
@@ -97,9 +94,6 @@ docs/
 │   ├── CANONICAL_COMPARISON.md   ← vs previous experiments
 │   ├── PEER_REVIEW_FINAL.md      ← Honest assessment
 │   └── PROVIDER_USPS.md          ← What each API does
-├── credentials/
-│   └── DOCTAVIAN_CREDENTIALS.md  ← API keys
-├── DOCTAVIAN_API_REFERENCE.md    ← Doctavian docs
 └── vendors/                      ← API references
 ```
 
@@ -108,20 +102,19 @@ docs/
 ```
 scripts/
 ├── benchmark_proper.py           ← Benchmark runner
-├── foxit-mcp-launch.sh           ← Foxit MCP launcher
 └── headless_inspect.py           ← API verification
 ```
 
 ### Root Files
 
 ```
-├── demo_2min.py                  ← 2-minute demo
+├── demo_2min.py                  ← 3-minute demo
 ├── run_benchmark.py              ← Full benchmark
 ├── generate_visuals.py           ← Chart generation
 ├── pitch_script.py               ← Pitch presentation
 ├── NORTHSTAR.md                  ← Thesis + gaps
 ├── README.md                     ← This file
-├── .env.keys                     ← API keys (DO NOT COMMIT)
+├── .env.example                  ← API key template
 └── requirements.txt              ← Dependencies
 ```
 
