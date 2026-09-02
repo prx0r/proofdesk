@@ -80,6 +80,15 @@ footer a{color:#999}
 <!-- PROCUREMENT — LIVE -->
 <div class="scenario on" id="s0">
 <div class="explain"><b>the scenario:</b> a $42,500 vendor onboarding. four documents. the agent reads them all correctly. but together they describe a transaction that should not happen.</div>
+
+<div class="label">source documents</div>
+<table style="width:100%">
+<tr><td><a href="procurement_request.pdf" target="_blank" style="font-weight:500">procurement_request.pdf</a></td><td class="dim">requested spend, contract dates, insurance requirement</td></tr>
+<tr><td><a href="vendor_quote.pdf" target="_blank" style="font-weight:500">vendor_quote.pdf</a></td><td class="dim">pricing breakdown, line items</td></tr>
+<tr><td><a href="insurance_certificate.pdf" target="_blank" style="font-weight:500">insurance_certificate.pdf</a></td><td class="dim">coverage type, expiry date</td></tr>
+<tr><td><a href="security_questionnaire.pdf" target="_blank" style="font-weight:500">security_questionnaire.pdf</a></td><td class="dim">data retention, encryption, compliance</td></tr>
+</table>
+
 <div id="status" class="status"></div>
 <button class="btn" id="runBtn" onclick="run()">run live →</button>
 <button class="btn btn-outline" id="rawToggle" onclick="toggleRaw()" style="display:none;margin-left:.5rem">show api</button>
