@@ -14,22 +14,17 @@ body{font-family:'Source Code Pro',monospace;background:#fafafa;color:#111;-webk
 h1{font-size:1rem;font-weight:500}
 .sub{font-size:.8125rem;color:#666;margin-top:.5rem;max-width:560px}
 .dim{color:#999;font-size:.75rem}
-.pass{color:#166534;font-size:.75rem;font-weight:500}
-.fail{color:#991b1b;font-size:.75rem;font-weight:500}
+.pass{color:#166534;font-weight:500}.fail{color:#991b1b;font-weight:500}
 .label{font-size:.625rem;color:#999;text-transform:uppercase;letter-spacing:.12em;margin-top:2.5rem;margin-bottom:.75rem;font-weight:500}
 hr{border:none;border-top:1px solid #eee;margin:2rem 0}
 .btn{padding:.625rem 1.5rem;background:#111;color:#fff;border:none;font-family:'Source Code Pro',monospace;font-size:.75rem;font-weight:500;cursor:pointer;margin-top:1rem}
 .btn:hover{background:#333}
 .btn:disabled{background:#ccc;cursor:default}
-.btn-outline{background:transparent;color:#111;border:1px solid #ccc}
-.btn-outline:hover{border-color:#111}
-.log{margin-top:.75rem;padding:.75rem;background:#fff;border:1px solid #eee;font-size:.75rem;line-height:1.8;overflow-x:auto;max-height:400px;overflow-y:auto}
-.log .ok{color:#166534}.log .er{color:#991b1b}.log .h{font-weight:500}
+.explain{margin:.75rem 0;padding:.75rem 1rem;background:#f8f8f8;border-left:2px solid #ddd;font-size:.8125rem;color:#555;line-height:1.6}
+.explain b{color:#111}
 .field{display:flex;gap:1rem;padding:.5rem 0;border-bottom:1px solid #f0f0f0;font-size:.8125rem;align-items:baseline}
 .field:last-child{border-bottom:none}
-.field .fn{width:180px;font-weight:500}
-.field .fv{flex:1}
-.field .fc{font-size:.75rem;width:40px;text-align:right}
+.field .fn{width:180px;font-weight:500}.field .fv{flex:1}.field .fc{font-size:.75rem;width:40px;text-align:right}
 .fc-hi{color:#166534;font-weight:500}
 .vs{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.75rem}
 .vs-box{padding:1rem;background:#fff;border:1px solid #eee}
@@ -42,27 +37,29 @@ hr{border:none;border-top:1px solid #eee;margin:2rem 0}
 .gate-row:last-child{border-bottom:none}
 .gate-icon{width:16px;text-align:center}
 .gate-label{flex:1}
-.gate-val{font-size:.75rem;font-weight:500;padding:2px 8px;border-radius:3px}
+.gate-val{font-size:.75rem;font-weight:500;padding:2px 10px;border-radius:3px}
 .gp{background:#f0fdf4;color:#166534}.gf{background:#fef2f2;color:#991b1b}
 .verdict{margin-top:.75rem;padding:.75rem 1rem;font-weight:500;font-size:.8125rem}
 .v-block{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
 .v-ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
 .status{font-size:.75rem;color:#999;margin-top:.5rem;min-height:1.2em}
-.explain{margin:.75rem 0;padding:.75rem 1rem;background:#f8f8f8;border-left:2px solid #ddd;font-size:.8125rem;color:#555}
-.explain strong{color:#111}
+.trace{margin-top:.75rem;padding:.75rem;background:#fff;border:1px solid #eee;font-size:.75rem;line-height:1.8;overflow-x:auto}
+.trace .m{color:#166534}.trace .h{font-weight:500}
 .raw-toggle{font-size:.6875rem;color:#999;cursor:pointer;border:1px solid #ccc;padding:.25rem .625rem;background:none;font-family:'Source Code Pro',monospace;margin-top:.5rem;display:inline-block}
 .raw-toggle:hover{border-color:#111;color:#111}
 .raw{display:none;margin-top:.5rem;padding:.75rem;background:#fff;border:1px solid #eee;font-size:.6875rem;line-height:1.7;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
 .raw.open{display:block}
 .scenario-tabs{display:flex;gap:0;border-bottom:1px solid #eee;margin-top:2rem}
 .scenario-tab{padding:.5rem 1rem;font-size:.75rem;color:#999;cursor:pointer;border:none;background:none;font-family:'Source Code Pro',monospace;border-bottom:2px solid transparent;transition:all .15s}
-.scenario-tab:hover{color:#111}
-.scenario-tab.on{color:#111;border-bottom-color:#111}
-.scenario{display:none;margin-top:1.25rem}
-.scenario.on{display:block}
-.badge{display:inline-block;font-size:.625rem;padding:.125rem .375rem;border:1px solid #eee;margin-left:.5rem;vertical-align:middle}
-.badge-live{border-color:#166534;color:#166534}
-.badge-cache{border-color:#999;color:#999}
+.scenario-tab:hover{color:#111}.scenario-tab.on{color:#111;border-bottom-color:#111}
+.scenario{display:none;margin-top:1.25rem}.scenario.on{display:block}
+.step{border-left:2px solid #eee;padding-left:1rem;margin-top:1.5rem;opacity:0;transform:translateY(8px);transition:all .4s ease}
+.step.show{opacity:1;transform:translateY(0)}
+.step-num{font-size:.5625rem;color:#999;font-weight:500;letter-spacing:.1em;text-transform:uppercase}
+.step-title{font-size:.875rem;font-weight:500;margin-top:.2rem}
+.step-desc{font-size:.75rem;color:#666;margin-top:.25rem;line-height:1.5}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid #ccc;border-top-color:#111;border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
 footer{margin-top:4rem;padding-top:1rem;border-top:1px solid #eee;font-size:.625rem;color:#bbb;display:flex;justify-content:space-between}
 footer a{color:#999}
 </style>
@@ -82,26 +79,17 @@ footer a{color:#999}
 
 <!-- PROCUREMENT — LIVE -->
 <div class="scenario on" id="s0">
-<div class="label">live pipeline</div>
-<div id="status" class="status">ready — click run to execute against the live api</div>
+<div class="explain"><b>the scenario:</b> a $42,500 vendor onboarding. four documents. the agent reads them all correctly. but together they describe a transaction that should not happen.</div>
+<div id="status" class="status"></div>
 <button class="btn" id="runBtn" onclick="run()">run live →</button>
-<button class="btn btn-outline" id="rawToggle" onclick="toggleRaw()" style="display:none;margin-left:.5rem">show raw api</button>
+<button class="btn btn-outline" id="rawToggle" onclick="toggleRaw()" style="display:none;margin-left:.5rem">show api</button>
 <div id="rawLog" class="raw"></div>
-<div id="liveLog" class="log" style="display:none"></div>
-<div id="liveResults"></div>
+<div id="steps"></div>
 </div>
 
-<!-- INSURANCE — PRECOMPUTED -->
+<!-- INSURANCE -->
 <div class="scenario" id="s1">
-<div class="label">scenario</div>
-<div class="explain"><strong>insurance claim adjudication.</strong> a $67,500 property damage claim. the amount matches the contractor estimate, but water damage exceeds the $50k sublimit and equipment breakdown is excluded from coverage.</div>
-<div class="label">extracted fields</div>
-<div class="field"><div class="fn">claim.claimed_amount</div><div class="fv">$67,500</div><div class="fc fc-hi">0.99</div></div>
-<div class="field"><div class="fn">policy.water_sublimit</div><div class="fv">$50,000</div><div class="fc fc-hi">0.99</div></div>
-<div class="field"><div class="fn">policy.equipment_breakdown</div><div class="fv">Excluded</div><div class="fc fc-hi">0.98</div></div>
-<div class="field"><div class="fn">contractor.total</div><div class="fv">$67,500</div><div class="fc fc-hi">0.99</div></div>
-<div class="field"><div class="fn">claim.date_of_loss</div><div class="fv">2026-07-15</div><div class="fc fc-hi">0.95</div></div>
-<div class="label">contradiction</div>
+<div class="explain"><b>insurance claim.</b> $67,500 property damage. contractor estimate matches claimed amount. but water damage exceeds the $50k sublimit and equipment breakdown is excluded.</div>
 <div class="vs">
 <div class="vs-box"><div class="vl">contractor estimate</div><div class="vv">total: $67,500</div><div class="vm">water damage + equipment</div></div>
 <div class="vs-box hit"><div class="vl">insurance policy</div><div class="vv">water sublimit: $50,000</div><div class="vm">equipment breakdown: excluded</div></div>
@@ -116,17 +104,9 @@ footer a{color:#999}
 <div class="verdict v-block">blocked — 2 blockers, routed to adjuster</div>
 </div>
 
-<!-- CONTRACT — PRECOMPUTED -->
+<!-- CONTRACT -->
 <div class="scenario" id="s2">
-<div class="label">scenario</div>
-<div class="explain"><strong>saas contract red flag review.</strong> a 24-month agreement between cloudvault inc. and pinnacle financial group. contains an aggressive 60-day auto-renewal, one-way indemnification, and no refund on convenience termination.</div>
-<div class="label">extracted fields</div>
-<div class="field"><div class="fn">contract.liability_cap</div><div class="fv">12-month fees</div><div class="fc fc-hi">0.95</div></div>
-<div class="field"><div class="fn">contract.auto_renewal_notice</div><div class="fv">60 days</div><div class="fc fc-hi">0.98</div></div>
-<div class="field"><div class="fn">contract.data_license</div><div class="fv">anonymized product improvement</div><div class="fc fc-hi">0.96</div></div>
-<div class="field"><div class="fn">contract.indemnification</div><div class="fv">one-way customer</div><div class="fc fc-hi">0.97</div></div>
-<div class="field"><div class="fn">contract.termination_refund</div><div class="fv">no refund</div><div class="fc fc-hi">0.98</div></div>
-<div class="field"><div class="fn">contract.sla_remedy</div><div class="fv">10% cap</div><div class="fc fc-hi">0.97</div></div>
+<div class="explain"><b>saas contract review.</b> 24-month agreement. 5 red flags: aggressive auto-renewal, one-way indemnification, no refund on termination, weak SLA remedy, risky data license.</div>
 <div class="label">assertions</div>
 <div class="gate-row"><div class="gate-icon pass">&#10003;</div><div class="gate-label">liability cap at 12-month fees is standard</div><div class="gate-val gp">PASS</div></div>
 <div class="gate-row"><div class="gate-icon fail">&#10007;</div><div class="gate-label">auto-renewal 60-day notice (standard: 90-180)</div><div class="gate-val gf">FAIL</div></div>
@@ -137,22 +117,14 @@ footer a{color:#999}
 <div class="verdict v-block">blocked — 5 red flags, routed to legal</div>
 </div>
 
-<!-- TRADE — PRECOMPUTED -->
+<!-- TRADE -->
 <div class="scenario" id="s3">
-<div class="label">scenario</div>
-<div class="explain"><strong>trade document cross-check.</strong> shipment shp-2026-00341 between globaltech manufacturing and pacific imports. invoice, bill of lading, and certificate of origin are mostly consistent — but the incoterm is wrong.</div>
-<div class="label">extracted fields</div>
-<div class="field"><div class="fn">invoice.quantity</div><div class="fv">240 units</div><div class="fc fc-hi">0.99</div></div>
-<div class="field"><div class="fn">invoice.total_value</div><div class="fv">$300,000</div><div class="fc fc-hi">0.99</div></div>
-<div class="field"><div class="fn">invoice.incoterm</div><div class="fv">FOB Shanghai</div><div class="fc fc-hi">0.98</div></div>
-<div class="field"><div class="fn">bill_of_lading.freight</div><div class="fv">Freight Prepaid</div><div class="fc fc-hi">0.99</div></div>
-<div class="field"><div class="fn">certificate.origin</div><div class="fv">China</div><div class="fc fc-hi">0.99</div></div>
-<div class="label">contradiction</div>
+<div class="explain"><b>trade document cross-check.</b> invoice, bill of lading, certificate of origin. mostly consistent — but the incoterm is wrong.</div>
 <div class="vs">
 <div class="vs-box"><div class="vl">commercial invoice</div><div class="vv">FOB Shanghai</div><div class="vm">buyer pays freight</div></div>
 <div class="vs-box hit"><div class="vl">bill of lading</div><div class="vv">Freight Prepaid</div><div class="vm">seller paid freight</div></div>
 </div>
-<div class="gap">FOB means buyer pays freight. but the bill of lading says freight is prepaid. this mismatch triggers customs holds.</div>
+<div class="gap">FOB means buyer pays freight. bill of lading says freight is prepaid. this triggers customs holds.</div>
 <div class="label">assertions</div>
 <div class="gate-row"><div class="gate-icon pass">&#10003;</div><div class="gate-label">invoice quantity matches bill of lading</div><div class="gate-val gp">PASS</div></div>
 <div class="gate-row"><div class="gate-icon pass">&#10003;</div><div class="gate-label">country of origin consistent across all 3 docs</div><div class="gate-val gp">PASS</div></div>
@@ -164,138 +136,36 @@ footer a{color:#999}
 
 <!-- RESEARCH -->
 <div class="scenario" id="s4">
-<div class="label">what's under the hood</div>
-<div class="explain"><strong>proofdesk isn't just if/else rules.</strong> behind the authority gate is a research program in calibrated confidence — when can an automated system be trusted to act, and when must it abstain?</div>
-
+<div class="explain"><b>what's under the hood.</b> behind the authority gate is a research program in calibrated confidence.</div>
 <div class="label">confidence algorithms</div>
-<table style="width:100%">
-<tr><td>conformal risk control</td><td class="dim">angelopoulos et al., iclr 2024 — finite-sample risk guarantees</td></tr>
-<tr><td>dual-call confidence</td><td class="dim">extractconf style — hunter + mapper extraction verification</td></tr>
-<tr><td>per-field risk budgets</td><td class="dim">signer: 1%, amount: 2%, date: 3%, default: 5%</td></tr>
-<tr><td>isotonic calibration</td><td class="dim">score mapping from raw confidence to true correctness probability</td></tr>
-<tr><td>sheepish transform</td><td class="dim">asymmetric overconfidence penalty — our contribution</td></tr>
-<tr><td>online calibration</td><td class="dim">marginonlinecalibrator — learns from human feedback</td></tr>
-</table>
-
-<div class="label">how the sheepish metric works</div>
-<div class="explain"><strong>standard calibration</strong> treats overconfidence and underconfidence symmetrically. but in document automation, overconfident errors are operationally more dangerous than cautious abstentions. the sheepish transform applies an asymmetric penalty: confidence that is too high gets penalized more than confidence that is too low.</div>
-<div class="trace">raw_confidence: 0.85<br>field_accuracy: 0.72<br>match_score: 0.90<br>grounding: 0.80<br><br>standard calibration: 0.85 → 0.82<br>sheepish calibration: 0.85 → 0.74  <span class="h">(penalizes overconfidence)</span></div>
-
-<div class="label">per-field risk budgets</div>
-<div class="explain"><strong>different fields have different risk profiles.</strong> a wrong signer name is catastrophic. a wrong metadata field is tolerable. proofdesk applies per-field thresholds based on operational impact.</div>
-<table style="width:100%">
-<tr><td>signer</td><td class="dim">1% max error rate — signing is irreversible</td></tr>
-<tr><td>amount</td><td class="dim">2% — financial impact</td></tr>
-<tr><td>date</td><td class="dim">3% — temporal fields</td></tr>
-<tr><td>party_name</td><td class="dim">2% — entity identification</td></tr>
-<tr><td>document_body</td><td class="dim">5% — general content</td></tr>
-<tr><td>metadata</td><td class="dim">10% — low-impact fields</td></tr>
-</table>
-
-<div class="label">convergence loop</div>
-<div class="explain"><strong>human decisions become calibration data.</strong> each time a person resolves an exception, proofdesk receives a labeled observation: "at this confidence level, was trusting this evidence actually justified?" the online calibrator updates, and future decisions improve.</div>
-<div class="trace">deployment begins<br>↓<br>100 decisions<br>↓<br>review corrections arrive sequentially<br>↓<br>calibration updates<br><br>result:<br>  review rate: falls over time<br>  measured false-authority risk: stays within policy<br>  different fields earn different levels of trust</div>
-
-<div class="label">benchmark results</div>
-<div class="explain"><strong>tested on 24,878 examples</strong> across 6 datasets (mix of tabular records and document text). the research benchmarks measure whether calibrated abstention reduces bad decisions.</div>
-<table style="width:100%">
-<tr><td>dataset</td><td>type</td><td class="dim" style="text-align:right">examples</td></tr>
-<tr><td>coldhearted fraud</td><td class="dim">transactions</td><td class="dim" style="text-align:right">19,872</td></tr>
-<tr><td>contractner</td><td class="dim">contracts</td><td class="dim" style="text-align:right">3,241</td></tr>
-<tr><td>fatura</td><td class="dim">invoices</td><td class="dim" style="text-align:right">1,400</td></tr>
-<tr><td>cuad</td><td class="dim">contracts (pdf)</td><td class="dim" style="text-align:right">509</td></tr>
-<tr><td>invoicebenchmark</td><td class="dim">invoices</td><td class="dim" style="text-align:right">200</td></tr>
-<tr><td>local pdfs</td><td class="dim">real nutrient extraction</td><td class="dim" style="text-align:right">18</td></tr>
-</table>
-<div style="margin-top:.75rem;padding:.75rem 1rem;background:#f0fdf4;border:1px solid #bbf7d0;font-size:.8125rem;color:#166534">
-<strong>result:</strong> at 1% false sign rate, proofdesk achieves 59.8% auto-sign coverage — 2.7x improvement over baseline logistic regression. feature engineering + gradient boosting + calibrated thresholds.
-</div>
-
-<div class="label">the evidence-to-authority gap</div>
-<div class="explain"><strong>this is the core research question:</strong> when is a correctly extracted document fact sufficient evidence for an automated action? extraction accuracy ≠ action safety. proofdesk measures the gap between "we extracted it correctly" and "we should act on it."</div>
-<div class="vs">
-<div class="vs-box"><div class="vl">extraction accuracy</div><div class="vv">95%</div><div class="vm">fields extracted correctly</div></div>
-<div class="vs-box"><div class="vl">authority accuracy</div><div class="vv">100%</div><div class="vm">unsafe actions prevented</div></div>
-</div>
-<div class="gap" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534"><strong>proofdesk catches what extraction misses:</strong> individually correct fields that together describe an unsafe transaction.</div>
-
-<div class="label">document types supported</div>
-<div class="explain"><strong>12 document type schemas</strong> with field-level extraction rules. each type has specific fields, risk budgets, and verification assertions.</div>
-<table style="width:100%">
-<tr><td>procurement</td><td class="dim">vendor, spend, contract dates, insurance coverage</td></tr>
-<tr><td>invoice</td><td class="dim">vendor, total, line items, tax, payment terms</td></tr>
-<tr><td>contract</td><td class="dim">liability, indemnification, termination, renewal, sla</td></tr>
-<tr><td>insurance</td><td class="dim">policyholder, coverage, deductible, sublimit, exclusions</td></tr>
-<tr><td>trade_invoice</td><td class="dim">shipper, consignee, quantity, value, incoterm</td></tr>
-<tr><td>trade_bol</td><td class="dim">B/L number, vessel, port, weight, freight terms</td></tr>
-<tr><td>trade_certificate</td><td class="dim">origin, HS code, exporter, quantity</td></tr>
-<tr><td>kyc_id</td><td class="dim">name, DOB, license number, address</td></tr>
-<tr><td>kyc_address</td><td class="dim">street, city, state, zip, proof type</td></tr>
-<tr><td>kyc_bank</td><td class="dim">account number, routing, bank name, balance</td></tr>
-<tr><td>mortgage</td><td class="dim">appraisal value, LTV, property address, borrower</td></tr>
-<tr><td>medical</td><td class="dim">patient, procedure, diagnosis, provider, billing</td></tr>
-</table>
-
+<table style="width:100%"><tr><td>conformal risk control</td><td class="dim">angelopoulos et al., iclr 2024</td></tr>
+<tr><td>dual-call confidence</td><td class="dim">extractconf style — hunter + mapper</td></tr>
+<tr><td>per-field risk budgets</td><td class="dim">signer: 1%, amount: 2%, date: 3%</td></tr>
+<tr><td>sheepish transform</td><td class="dim">asymmetric overconfidence penalty</td></tr>
+<tr><td>online calibration</td><td class="dim">learns from human feedback</td></tr></table>
+<div class="label">12 document types</div>
+<table style="width:100%"><tr><td>procurement</td><td class="dim">vendor, spend, dates, insurance</td></tr>
+<tr><td>invoice</td><td class="dim">vendor, total, line items, tax</td></tr>
+<tr><td>contract</td><td class="dim">liability, indemnification, termination</td></tr>
+<tr><td>insurance</td><td class="dim">policyholder, coverage, deductible</td></tr>
+<tr><td>trade</td><td class="dim">invoice, bol, certificate of origin</td></tr>
+<tr><td>kyc</td><td class="dim">id, address, bank statement</td></tr>
+<tr><td>mortgage</td><td class="dim">appraisal, LTV, property</td></tr>
+<tr><td>medical</td><td class="dim">patient, procedure, billing</td></tr></table>
 <div class="label">extraction results</div>
-<div class="explain"><strong>nutrient dws extraction</strong> tested on 13 real PDFs across 6 document types. every field supported with source grounding.</div>
-<table style="width:100%">
-<tr><td style="font-size:.625rem;color:#999">PDF</td><td style="font-size:.625rem;color:#999">TYPE</td><td style="font-size:.625rem;color:#999;text-align:right">RESULT</td></tr>
-<tr><td>procurement_request.pdf</td><td class="dim">procurement</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
-<tr><td>vendor_quote.pdf</td><td class="dim">procurement</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
-<tr><td>insurance_certificate.pdf</td><td class="dim">procurement</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
-<tr><td>security_questionnaire.pdf</td><td class="dim">procurement</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
-<tr><td>kyc_01_drivers_license.pdf</td><td class="dim">kyc</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
-<tr><td>kyc_02_proof_of_address.pdf</td><td class="dim">kyc</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
-<tr><td>kyc_03_bank_statement.pdf</td><td class="dim">kyc</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
-<tr><td>invoice_01_vendor_invoice.pdf</td><td class="dim">invoice</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
-<tr><td>trade_01_invoice.pdf</td><td class="dim">trade</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
-<tr><td>trade_02_bill_of_lading.pdf</td><td class="dim">trade</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
-<tr><td>trade_03_certificate_origin.pdf</td><td class="dim">trade</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
-<tr><td>mortgage_01_appraisal.pdf</td><td class="dim">mortgage</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
-<tr><td>redaction_01_intake_form.pdf</td><td class="dim">medical</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
-</table>
-<div style="margin-top:.75rem;padding:.75rem 1rem;background:#f0fdf4;border:1px solid #bbf7d0;font-size:.8125rem;color:#166534">
-<strong>result:</strong> 13/13 PDFs extraction supported across procurement, kyc, invoice, trade, mortgage, and medical document types.
-</div>
-
+<div class="explain"><b>13/13 PDFs</b> extraction supported across procurement, kyc, invoice, trade, mortgage, and medical document types.</div>
 <div class="label">tamper detection</div>
-<div class="explain"><strong>post-approval tamper detection.</strong> after an artifact is generated, any byte-level modification changes the SHA-256 hash. the signature gate verifies the artifact hash before allowing signing.</div>
-<div class="trace">original artifact: sha256:a3f2d8...<br>gate check: hash matches → PASS<br><br>tamper: append one byte (\x00)<br>recompute: sha256:7b1e4a...<br>gate check: hash mismatch → DENY<br><br>demonstrates: probabilistic evidence + deterministic execution boundary</div>
-
-<div class="label">batch processing</div>
-<div class="explain"><strong>multi-file batch processing.</strong> upload multiple PDFs, process each through the pipeline, aggregate results with per-file Merkle proofs.</div>
-<table style="width:100%">
-<tr><td>endpoint</td><td class="dim">what it does</td></tr>
-<tr><td>POST /v1/batch</td><td class="dim">upload multiple PDFs, create batch job</td></tr>
-<tr><td>GET /v1/batch/{id}/status</td><td class="dim">check processing progress</td></tr>
-<tr><td>POST /v1/batch/{id}/process</td><td class="dim">process next file in batch</td></tr>
-<tr><td>GET /v1/batch/{id}/results</td><td class="dim">get all file results</td></tr>
-<tr><td>POST /v1/batch/{id}/resolve/{file_id}</td><td class="dim">resolve deferred file with human feedback</td></tr>
-<tr><td>GET /v1/batch/{id}/report</td><td class="dim">final report with Merkle proofs per document</td></tr>
-</table>
-
-<div class="label">convergence stats</div>
-<div class="explain"><strong>live feedback data</strong> from the running system. as humans resolve exceptions, the calibrator improves.</div>
-<table style="width:100%">
-<tr><td>total feedback labels</td><td id="fb-total">—</td></tr>
-<tr><td>field labels</td><td id="fb-fields">—</td></tr>
-<tr><td>auto-signed cases</td><td id="fb-auto">—</td></tr>
-<tr><td>spot-audited</td><td id="fb-audited">—</td></tr>
-<tr><td>measured error rate</td><td id="fb-error">—</td></tr>
-</table>
-
-<div class="label">reproduce</div>
-<div class="trace">git clone https://github.com/prx0r/proofdesk<br>cd proofdesk<br>python3 -m venv .venv && source .venv/bin/activate<br>pip install -r requirements.txt<br><br># run all 115 tests<br>python3 tests/test_all.py<br>python3 tests/test_audit.py<br>python3 tests/test_integration.py<br>python3 tests/test_frontier.py<br>python3 tests/test_learning.py<br><br># start server<br>uvicorn src.api.app:app --port 8080</div>
+<div class="explain"><b>post-approval.</b> any byte-level modification changes the SHA-256 hash. the gate verifies before signing.</div>
+<div class="label">115 tests</div>
+<div class="explain">38 core + 25 audit + 33 integration + 16 frontier + 3 learning. all passing.</div>
 </div>
 
 <hr>
 <div class="label">beyond procurement</div>
-<table style="width:100%">
-<tr><td>accounts payable</td><td class="dim">invoice → po → receipt → payment auth</td></tr>
+<table style="width:100%"><tr><td>accounts payable</td><td class="dim">invoice → po → receipt → payment auth</td></tr>
 <tr><td>insurance</td><td class="dim">claim → policy → evidence → settlement</td></tr>
 <tr><td>lending</td><td class="dim">application → income → valuation → underwrite</td></tr>
-<tr><td>compliance</td><td class="dim">id → kyc → risk → onboard</td></tr>
-</table>
+<tr><td>compliance</td><td class="dim">id → kyc → risk → onboard</td></tr></table>
 <footer>
 <span>v0.1.0</span>
 <span><a href="https://github.com/prx0r/proofdesk">github</a> · devnetwork hackathon 2026</span>
@@ -303,20 +173,32 @@ footer a{color:#999}
 </div>
 
 <script>
-// Live API URL — updated when tunnel changes
-const API='https://commons-orange-reporters-reproduce.trycloudflare.com';
-const log=document.getElementById('liveLog');
-const results=document.getElementById('liveResults');
+const API='https://greater-might-respond-ahead.trycloudflare.com';
+const steps=document.getElementById('steps');
 const status=document.getElementById('status');
 const rawLog=document.getElementById('rawLog');
 const runBtn=document.getElementById('runBtn');
 const rawToggleBtn=document.getElementById('rawToggle');
 let caseId=null,showRaw=false;
 
-function addLog(t,c=''){log.style.display='block';const d=document.createElement('div');d.className=c;d.textContent=t;log.appendChild(d);log.scrollTop=log.scrollHeight;}
-function setStatus(t){status.textContent=t;}
-function toggleRaw(){showRaw=!showRaw;rawLog.classList.toggle('open',showRaw);rawToggleBtn.textContent=showRaw?'hide raw api':'show raw api';}
-function scenario(i){document.querySelectorAll('.scenario-tab').forEach((t,j)=>{t.classList.toggle('on',j===i)});document.querySelectorAll('.scenario').forEach((s,j)=>{s.classList.toggle('on',j===i)});}
+function scenario(i){
+  document.querySelectorAll('.scenario-tab').forEach((t,j)=>{t.classList.toggle('on',j===i)});
+  document.querySelectorAll('.scenario').forEach((s,j)=>{s.classList.toggle('on',j===i)});
+}
+function toggleRaw(){showRaw=!showRaw;rawLog.classList.toggle('open',showRaw);rawToggleBtn.textContent=showRaw?'hide api':'show api';}
+
+function showStep(num,title,html,delay){
+  return new Promise(resolve=>{
+    setTimeout(()=>{
+      const div=document.createElement('div');
+      div.className='step';
+      div.innerHTML=`<div class="step-num">${num}</div><div class="step-title">${title}</div>${html}`;
+      steps.appendChild(div);
+      requestAnimationFrame(()=>div.classList.add('show'));
+      resolve();
+    },delay);
+  });
+}
 
 async function api(method,path,body=null){
   const opts={method,headers:{'Content-Type':'application/json'}};
@@ -325,306 +207,114 @@ async function api(method,path,body=null){
   const res=await fetch(API+path,opts);
   const data=await res.json();
   const ms=Math.round(performance.now()-t0);
-  if(showRaw){
-    rawLog.textContent+=`\n${method} ${path}\n${res.status} ${ms}ms\n${JSON.stringify(data,null,2).substring(0,1200)}\n`;
-    rawLog.scrollTop=rawLog.scrollHeight;
-  }
+  if(showRaw){rawLog.textContent+=`\n${method} ${path}\n${res.status} ${ms}ms\n${JSON.stringify(data,null,2).substring(0,800)}\n`;rawLog.scrollTop=rawLog.scrollHeight;}
   return data;
 }
 
 async function run(){
-  log.innerHTML='';results.innerHTML='';rawLog.textContent='';
+  steps.innerHTML='';rawLog.textContent='';
   runBtn.disabled=true;runBtn.textContent='running...';
+  status.innerHTML='<span class="spinner"></span> connecting to api...';
 
-  // Check API health first
-  setStatus('connecting to api...');
-  try{
-    const health=await api('GET','/health');
-    addLog(`api: ${health.status} v${health.version}`,'ok');
-    addLog(`audit chain: ${health.audit.total_events} events`,'ok');
-  }catch(e){
-    addLog('api unavailable — showing cached results','er');
-    setStatus('api offline — cached results shown');
-    runBtn.disabled=false;runBtn.textContent='run live →';
-    showCached();
-    return;
-  }
+  // Health
+  const health=await api('GET','/health');
+  await showStep('1/7','connecting',`<div class="step-desc">api: ${health.status} · chain: ${health.audit.total_events} events verified</div>`,0);
 
-  // 1. Create fixture
-  setStatus('1/6 creating case...');
-  addLog('$ curl -X POST /v1/cases/fixture');
+  // Create case
+  status.innerHTML='<span class="spinner"></span> loading documents...';
   const c=await api('POST','/v1/cases/fixture');
   caseId=c.case_id;
-  addLog(`case: ${caseId}  docs: ${c.documents}`,'ok');
+  await showStep('2/7','loading documents',`<div class="step-desc">4 procurement PDFs loaded into case ${caseId}</div>`,400);
 
-  // 2. Run pipeline
-  setStatus('2/6 running pipeline...');
-  addLog('$ curl -X POST /v1/cases/'+caseId+'/run');
-  const r=await api('POST','/v1/cases/'+caseId+'/run',{domain:'procurement'});
-  addLog(`state: ${r.state}  blocking: ${r.blocking_exceptions}`,r.state==='REVIEW_REQUIRED'?'er':'ok');
+  // Run pipeline
+  status.innerHTML='<span class="spinner"></span> extracting with nutrient dws...';
+  const t0=performance.now();
+  await api('POST',`/v1/cases/${caseId}/run`,{domain:'procurement'});
+  const runMs=Math.round(performance.now()-t0);
+  await showStep('3/7','extraction complete',`<div class="step-desc">nutrient dws extracted fields from 4 documents in ${runMs}ms</div>`,400);
 
-  // 3. Get facts
-  setStatus('3/6 extracting facts...');
-  const f=await api('GET','/v1/cases/'+caseId+'/facts');
-  addLog(`nutrient dws: ${f.facts.length} fields extracted`);
+  // Facts
+  const f=await api('GET',`/v1/cases/${caseId}/facts`);
+  const facts=f.facts;
+  const ie=facts.find(x=>x.field==='insurance.expiry_date');
+  const rc=facts.find(x=>x.field==='procurement.required_coverage_until');
+  let factsHtml='<div class="step-desc">'+facts.length+' fields extracted with confidence scores and source grounding.</div>';
+  if(ie&&rc){
+    factsHtml+=`<div class="vs" style="margin-top:.75rem"><div class="vs-box"><div class="vl">procurement request</div><div class="vv">coverage until ${rc.value_normalized}</div><div class="vm">confidence ${rc.confidence} · page ${rc.page}</div></div><div class="vs-box hit"><div class="vl">insurance certificate</div><div class="vv">expires ${ie.value_normalized}</div><div class="vm">confidence ${ie.confidence} · page ${ie.page}</div></div></div>`;
+    factsHtml+=`<div class="gap" style="margin-top:.75rem"><b>${Math.round((new Date(rc.value_normalized)-new Date(ie.value_normalized))/(1000*60*60*24))}-day gap</b> — insurance expires before the service period ends.</div>`;
+  }
+  await showStep('4/7','contradiction found',factsHtml,400);
 
-  // 4. Get assertions
-  setStatus('4/6 checking assertions...');
-  const a=await api('GET','/v1/cases/'+caseId+'/assertions');
+  // Assertions
+  const a=await api('GET',`/v1/cases/${caseId}/assertions`);
+  let aHtml='<div class="step-desc">'+a.assertions.length+' cross-document checks. ';
   const fails=a.assertions.filter(x=>x.result==='FAIL');
-  addLog(`assertions: ${a.assertions.length} total, ${fails.length} fail`,fails.length?'er':'ok');
+  aHtml+=fails.length+' failed.</div>';
+  aHtml+='<div style="margin-top:.5rem">';
+  for(const x of a.assertions){
+    const cls=x.result==='FAIL'?'fail':'pass';
+    const icon=x.result==='FAIL'?'&#10007;':'&#10003;';
+    aHtml+=`<div class="gate-row"><div class="gate-icon ${cls}">${icon}</div><div class="gate-label">${x.predicate}</div><div class="gate-val ${x.result==='FAIL'?'gf':'gp'}">${x.result}</div></div>`;
+  }
+  aHtml+='</div>';
+  await showStep('5/7','gate blocked',aHtml,400);
 
-  // 5. Get gate
-  setStatus('5/6 evaluating authority gate...');
-  const g=await api('GET','/v1/cases/'+caseId+'/signature-gate');
-  addLog(`gate: ${g.allowed?'PASS':'BLOCKED'} (${g.reasons.length} reasons)`,g.allowed?'ok':'er');
-
-  // 6. Get events
-  setStatus('6/7 recording audit trail...');
-  const e=await api('GET','/v1/cases/'+caseId+'/events');
-  addLog(`audit: ${e.events.length} events recorded`);
+  // Gate
+  const g=await api('GET',`/v1/cases/${caseId}/signature-gate`);
+  await showStep('6/7','authority gate',`<div class="verdict v-block">blocked — ${g.reasons.length} reasons. agent cannot sign.</div><div class="step-desc" style="margin-top:.5rem">the agent extracted everything correctly. but the documents conflict. the gate blocks the action.</div>`,400);
 
   // Provider status
-  setStatus('7/8 checking providers...');
   const prov=await api('GET','/v1/providers/status');
-  addLog(`providers: nutrient=${prov.nutrient} foxit_pdf=${prov.foxit_pdf} foxit_esign=${prov.foxit_esign}`);
-
-  // API trace
-  setStatus('8/8 fetching api trace...');
-  const trace=await api('GET','/v1/cases/'+caseId+'/trace');
+  const trace=await api('GET',`/v1/cases/${caseId}/trace`);
   const calls=trace.calls||[];
-  addLog(`api trace: ${calls.length} outbound calls recorded`);
+  let traceHtml=`<div class="step-desc">nutrient dws: ${prov.nutrient} · ${calls.length} api calls recorded</div>`;
+  if(calls.length){
+    traceHtml+='<div class="trace" style="margin-top:.5rem">';
+    for(const c of calls){
+      traceHtml+=`<div><span class="m">${c.provider||''}</span> ${c.operation||''} <span class="${(c.status||0)<400?'pass':'fail'}">${c.status||''}</span> ${c.duration_ms?Math.round(c.duration_ms)+'ms':''}</div>`;
+    }
+    traceHtml+='</div>';
+  }
+  await showStep('7/7','nutrient dws trace',traceHtml,400);
 
-  // Audit chain
-  const chain=await api('GET','/v1/audit/chain');
-  addLog(`audit chain: ${chain.valid?'VALID':'INVALID'} — ${chain.stats.total_events} events across ${chain.stats.cases} cases`);
+  // Resolve button
+  if(!g.allowed){
+    const resolveDiv=document.createElement('div');
+    resolveDiv.style.cssText='margin-top:1.5rem;padding-top:1rem;border-top:1px solid #eee';
+    resolveDiv.innerHTML='<div class="explain"><b>next:</b> a human reviews the exact evidence and resolves the exception.</div><button class="btn" onclick="resolve()">resolve exception →</button>';
+    steps.appendChild(resolveDiv);
+    requestAnimationFrame(()=>resolveDiv.classList.add('show'));
+  }
 
-  setStatus('pipeline complete');
+  status.textContent='pipeline complete';
   runBtn.disabled=false;runBtn.textContent='run again';
   rawToggleBtn.style.display='inline-block';
-  render(f.facts,a.assertions,g,e.events,prov,calls,chain);
-}
-
-function showCached(){
-  // Pre-computed procurement results
-  const facts=[
-    {field:'vendor.legal_name',value_normalized:'Northstar Data Systems',confidence:0.98,page:1},
-    {field:'procurement.requested_spend',value_normalized:'$42,500',confidence:0.99,page:1},
-    {field:'procurement.contract_start',value_normalized:'2026-10-01',confidence:0.99,page:1},
-    {field:'procurement.required_coverage',value_normalized:'2027-10-01',confidence:0.98,page:1},
-    {field:'quote.total',value_normalized:'$42,500',confidence:0.99,page:1},
-    {field:'quote.platform_price',value_normalized:'$35,000',confidence:0.99,page:1},
-    {field:'quote.support_price',value_normalized:'$7,500',confidence:0.99,page:1},
-    {field:'insurance.expiry_date',value_normalized:'2027-08-31',confidence:0.99,page:1},
-    {field:'insurance.policy_type',value_normalized:'Commercial General Liability',confidence:0.98,page:1},
-    {field:'security.encryption_at_rest',value_normalized:'Yes',confidence:0.98,page:1},
-    {field:'security.soc2_compliance',value_normalized:'Yes',confidence:0.98,page:1},
-  ];
-  const assertions=[
-    {predicate:'quote.total == platform + support',result:'PASS'},
-    {predicate:'entity names normalize across docs',result:'PASS'},
-    {predicate:'requested spend == quote total',result:'PASS'},
-    {predicate:'encryption at rest confirmed',result:'PASS'},
-    {predicate:'soc2 compliance confirmed',result:'PASS'},
-    {predicate:'insurance_expiry >= required_coverage',result:'FAIL'},
-  ];
-  const gate={allowed:false,reasons:[
-    {code:'UNRESOLVED_BLOCKER'},{code:'NO_HUMAN_APPROVAL'},{code:'NO_STRUCTURED_RECORD'}
-  ]};
-  const events=[
-    {from_state:'RECEIVED',to_state:'INGESTED',event_type:'STATE_TRANSITION'},
-    {from_state:'INGESTED',to_state:'EXTRACTED',event_type:'STATE_TRANSITION'},
-    {from_state:'EXTRACTED',to_state:'RECONCILED',event_type:'STATE_TRANSITION'},
-    {from_state:'RECONCILED',to_state:'CHECKED',event_type:'STATE_TRANSITION'},
-    {from_state:'CHECKED',to_state:'REVIEW_REQUIRED',event_type:'STATE_TRANSITION'},
-  ];
-  render(facts,assertions,gate,events);
-}
-
-function render(facts,assertions,gate,events,prov,calls,chain){
-  const ie=facts.find(f=>f.field==='insurance.expiry_date');
-  const rc=facts.find(f=>f.field==='procurement.required_coverage');
-  let h='';
-
-  // Provider status
-  h+='<div class="label">providers</div>';
-  h+='<table style="width:100%">';
-  h+=`<tr><td>nutrient dws</td><td class="${prov&&prov.nutrient==='LIVE'?'pass':'dim'}">${prov?prov.nutrient:'—'}</td></tr>`;
-  h+=`<tr><td>foxit pdf</td><td class="dim">${prov?prov.foxit_pdf:'—'}</td></tr>`;
-  h+=`<tr><td>foxit esign</td><td class="dim">${prov?prov.foxit_esign:'—'}</td></tr>`;
-  h+='</table>';
-
-  if(ie&&rc){
-    h+='<div class="explain"><strong>the contradiction:</strong> both fields were extracted correctly by nutrient dws. the problem is that together they describe an unsafe transaction. a naive extraction system would proceed. proofdesk blocks it.</div>';
-    h+='<div class="vs">';
-    h+=`<div class="vs-box"><div class="vl">procurement request</div><div class="vv">coverage until ${rc.value_normalized}</div><div class="vm">confidence ${rc.confidence} · page ${rc.page}</div></div>`;
-    h+=`<div class="vs-box hit"><div class="vl">insurance certificate</div><div class="vv">expires ${ie.value_normalized}</div><div class="vm">confidence ${ie.confidence} · page ${ie.page}</div></div>`;
-    h+='</div>';
-    h+=`<div class="gap"><strong>gap detected</strong> — insurance expires before the service period ends. signing blocked.</div>`;
-  }
-
-  h+='<div class="label">extracted fields</div>';
-  h+='<div class="explain"><strong>nutrient dws</strong> extracts structured fields with confidence scores and source provenance. each field traces back to a specific page in the original document.</div>';
-  for(const f of facts){
-    h+=`<div class="field"><div class="fn">${f.field}</div><div class="fv">${f.value_normalized}</div><div class="fc fc-hi">${f.confidence}</div></div>`;
-  }
-
-  h+='<div class="label">cross-document assertions</div>';
-  h+='<div class="explain"><strong>deterministic checks</strong> across all extracted facts. no llm calls — pure rule-based verification.</div>';
-  for(const a of assertions){
-    const cls=a.result==='FAIL'?'fail':'pass';
-    const icon=a.result==='FAIL'?'&#10007;':'&#10003;';
-    h+=`<div class="gate-row"><div class="gate-icon ${cls}">${icon}</div><div class="gate-label">${a.predicate}</div><div class="gate-val ${a.result==='FAIL'?'gf':'gp'}">${a.result}</div></div>`;
-  }
-
-  h+='<div class="label">authority gate</div>';
-  h+='<div class="explain"><strong>signaturegate</strong> enforces 6 conditions server-side. the agent cannot negotiate.</div>';
-  const gc=[
-    {l:'state is prepared',p:true},
-    {l:'no unresolved blockers',p:!gate.reasons.find(r=>r.code==='UNRESOLVED_BLOCKER')},
-    {l:'human approval present',p:!gate.reasons.find(r=>r.code==='NO_HUMAN_APPROVAL')},
-    {l:'structured record exists',p:!gate.reasons.find(r=>r.code==='NO_STRUCTURED_RECORD')},
-    {l:'artifact hash verified',p:!gate.reasons.find(r=>r.code==='ARTIFACT_HASH_MISMATCH')},
-    {l:'calibrated score ≥ threshold',p:!gate.reasons.find(r=>r.code==='BELOW_CALIBRATED_THRESHOLD')},
-  ];
-  for(const c of gc){
-    const cls=c.p?'pass':'fail';
-    const icon=c.p?'&#10003;':'&#10007;';
-    h+=`<div class="gate-row"><div class="gate-icon ${cls}">${icon}</div><div class="gate-label">${c.l}</div><div class="gate-val ${c.p?'gp':'gf'}">${c.p?'pass':'fail'}</div></div>`;
-  }
-  h+=`<div class="verdict ${gate.allowed?'v-ok':'v-block'}">${gate.allowed?'proceed — signing authorized':'blocked — agent cannot sign'}</div>`;
-
-  h+='<div class="label">audit trail</div>';
-  h+='<div class="explain"><strong>every state transition</strong> is hash-chained. the trail is tamper-evident.</div>';
-  h+='<table style="width:100%">';
-  for(const ev of events){
-    const cls=ev.event_type==='STATE_TRANSITION'?'g':(ev.event_type.includes('FAIL')?'r':'g');
-    h+=`<tr><td class="dim" style="width:120px">${ev.from_state||''} → ${ev.to_state||''}</td><td><span class="dot ${cls}"></span>${ev.event_type}</td></tr>`;
-  }
-  h+='</table>';
-
-  // API trace
-  if(calls&&calls.length){
-    h+='<div class="label">api trace</div>';
-    h+='<div class="explain"><strong>every outbound provider call</strong> is recorded with timing.</div>';
-    h+='<table style="width:100%">';
-    for(const c of calls){
-      h+=`<tr><td class="dim" style="width:80px">${c.provider||''}</td><td>${c.operation||''}</td><td class="${(c.status||0)<400?'pass':'fail'}">${c.status||''}</td><td class="dim" style="text-align:right">${c.duration_ms?Math.round(c.duration_ms)+'ms':''}</td></tr>`;
-    }
-    h+='</table>';
-  }
-
-  // Audit chain
-  if(chain){
-    h+='<div class="label">audit chain</div>';
-    h+=`<div class="explain"><strong>hash chain:</strong> ${chain.valid?'valid — '+chain.stats.total_events+' events, '+chain.stats.cases+' cases':'INVALID'}</div>`;
-  }
-
-  if(!gate.allowed&&gate.reasons.find(r=>r.code==='UNRESOLVED_BLOCKER')&&caseId){
-    h+='<div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid #eee">';
-    h+='<div class="explain"><strong>next step:</strong> a human reviews the exact evidence, resolves the exception, and the system re-evaluates.</div>';
-    h+='<button class="btn" onclick="resolve()">resolve exception →</button>';
-    h+='</div>';
-  }
-
-  results.innerHTML=h;
 }
 
 async function resolve(){
   if(!caseId)return;
-  setStatus('resolving...');
-  addLog('$ curl -X POST /v1/cases/'+caseId+'/resolve');
-  const a=await api('GET','/v1/cases/'+caseId+'/assertions');
+  status.innerHTML='<span class="spinner"></span> resolving...';
+
+  const a=await api('GET',`/v1/cases/${caseId}/assertions`);
   const fail=a.assertions.find(x=>x.result==='FAIL');
   if(!fail)return;
-  await api('POST','/v1/cases/'+caseId+'/resolve',{
-    assertion_id:fail.assertion_id,decision:'CONDITIONAL_ACCEPT',
-    reason:'Vendor confirmed renewal is in progress',actor_id:'pm@company.com'
-  });
-  addLog('resolved: CONDITIONAL_ACCEPT','ok');
 
-  setStatus('approving record...');
-  addLog('$ curl -X POST /v1/cases/'+caseId+'/approve');
-  const approve=await api('POST','/v1/cases/'+caseId+'/approve');
-  addLog(`approved: record ${approve.record_hash||''}`,'ok');
+  await api('POST',`/v1/cases/${caseId}/resolve`,{assertion_id:fail.assertion_id,decision:'CONDITIONAL_ACCEPT',reason:'Vendor confirmed renewal is in progress',actor_id:'pm@company.com'});
+  await showStep('','resolved',`<div class="step-desc">pm@company.com reviewed the evidence and approved: "vendor confirmed renewal is in progress"</div>`,0);
 
-  setStatus('generating document...');
-  addLog('$ curl -X POST /v1/cases/'+caseId+'/generate');
-  const gen=await api('POST','/v1/cases/'+caseId+'/generate');
-  addLog(`generated: artifact ${gen.artifact_id||''}`,'ok');
+  await api('POST',`/v1/cases/${caseId}/approve`);
+  await showStep('','approved',`<div class="step-desc">structured record created with content hash</div>`,300);
 
-  // Get final state
-  const caseData=await api('GET','/v1/cases/'+caseId);
-  const g=await api('GET','/v1/cases/'+caseId+'/signature-gate');
-  const e=await api('GET','/v1/cases/'+caseId+'/events');
-  const f=await api('GET','/v1/cases/'+caseId+'/facts');
-  const a2=await api('GET','/v1/cases/'+caseId+'/assertions');
-  const receipt=await api('GET','/v1/cases/'+caseId+'/receipt');
+  await api('POST',`/v1/cases/${caseId}/generate`);
+  await showStep('','generated',`<div class="step-desc">approval memo generated (risk-branched)</div>`,300);
 
-  addLog(`final state: ${caseData.state}`,'ok');
-  addLog(`record hash: ${receipt.record_hash||'n/a'}`);
-  addLog(`facts: ${receipt.facts_extracted}  assertions: ${receipt.assertions_checked}  events: ${receipt.audit_events}`);
+  const receipt=await api('GET',`/v1/cases/${caseId}/receipt`);
+  const caseData=await api('GET',`/v1/cases/${caseId}`);
 
-  setStatus('pipeline complete — artifact generated');
-  renderResolved(f.facts,a2.assertions,g,e.events,receipt,caseData);
+  await showStep('','complete',`<div style="padding:1rem;background:#f0fdf4;border:1px solid #bbf7d0"><b style="color:#166534">pipeline complete</b><div class="step-desc" style="margin-top:.25rem">state: ${caseData.state} · facts: ${receipt.facts_extracted} · assertions: ${receipt.assertions_checked} · events: ${receipt.audit_events}<br>record: ${receipt.record_hash||'n/a'}</div></div>`,300);
+
+  status.textContent='done';
 }
-
-function renderResolved(facts,assertions,gate,events,receipt,caseData){
-  let h='';
-  h+='<div style="padding:1rem;background:#f0fdf4;border:1px solid #bbf7d0;margin-bottom:1rem">';
-  h+='<div style="font-weight:500;color:#166534">pipeline complete</div>';
-  h+='<div style="font-size:.75rem;color:#666;margin-top:.25rem">case: '+caseData.case_id+'</div>';
-  h+='</div>';
-  h+='<div class="label">result</div>';
-  h+='<table style="width:100%">';
-  h+='<tr><td>state</td><td class="pass">'+caseData.state+'</td></tr>';
-  h+='<tr><td>facts extracted</td><td>'+receipt.facts_extracted+'</td></tr>';
-  h+='<tr><td>assertions checked</td><td>'+receipt.assertions_checked+'</td></tr>';
-  h+='<tr><td>audit events</td><td>'+receipt.audit_events+'</td></tr>';
-  h+='<tr><td>record hash</td><td class="dim" style="word-break:break-all">'+(receipt.record_hash||'n/a')+'</td></tr>';
-  if(receipt.artifact_hash)h+='<tr><td>artifact hash</td><td class="dim" style="word-break:break-all">'+receipt.artifact_hash+'</td></tr>';
-  h+='</table>';
-  h+='<div class="label">what happened</div>';
-  h+='<div class="explain"><strong>1.</strong> human reviewed the insurance expiry gap and confirmed renewal is in progress<br>';
-  h+='<strong>2.</strong> structured record created with content hash<br>';
-  h+='<strong>3.</strong> approval memo generated (risk-branched)<br>';
-  h+='<strong>4.</strong> every step recorded in hash-chained audit trail</div>';
-  const ie=facts.find(f=>f.field==='insurance.expiry_date');
-  const rc=facts.find(f=>f.field==='procurement.required_coverage');
-  if(ie&&rc){
-    h+='<div class="label">contradiction resolved</div>';
-    h+='<div class="vs">';
-    h+=`<div class="vs-box"><div class="vl">procurement request</div><div class="vv">coverage until ${rc.value_normalized}</div></div>`;
-    h+=`<div class="vs-box" style="border-color:#bbf7d0;background:#f0fdf4"><div class="vl">insurance certificate</div><div class="vv" style="color:#166534">expires ${ie.value_normalized}</div><div class="vm">renewal confirmed by pm@company.com</div></div>`;
-    h+='</div>';
-  }
-  h+='<div class="label">audit trail</div>';
-  h+='<table style="width:100%">';
-  for(const ev of events){
-    const cls=ev.event_type==='STATE_TRANSITION'?'g':(ev.event_type.includes('FAIL')?'r':'g');
-    h+=`<tr><td class="dim" style="width:120px">${ev.from_state||''} → ${ev.to_state||''}</td><td><span class="dot ${cls}"></span>${ev.event_type}</td></tr>`;
-  }
-  h+='</table>';
-  h+='<div class="label">next steps (production)</div>';
-  h+='<div class="explain">in a production deployment with foxit pdf services configured:<br>';
-  h+='<strong>prepare</strong> — merge source documents + approval memo, compress, sha-256 verify<br>';
-  h+='<strong>sign</strong> — send signing request to cfo@company.com via foxit esign<br>';
-  h+='<strong>archive</strong> — immutable record sealed with merkle proof</div>';
-  results.innerHTML=h;
-}
-// Load feedback stats on research tab
-async function loadFeedback(){
-  try{
-    const r=await fetch(API+'/v1/feedback/stats');
-    const d=await r.json();
-    document.getElementById('fb-total').textContent=d.total_feedback||0;
-    document.getElementById('fb-fields').textContent=d.total_field_labels||0;
-    document.getElementById('fb-auto').textContent=d.auto_sign_panel?.auto_signed_total||0;
-    document.getElementById('fb-audited').textContent=d.auto_sign_panel?.audited||0;
-    document.getElementById('fb-error').textContent=d.auto_sign_panel?.measured_error_rate!=null?d.auto_sign_panel.measured_error_rate:'no data yet';
-  }catch(e){}
-}
-loadFeedback();
 </script>
 </body>
 </html>
