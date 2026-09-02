@@ -315,9 +315,14 @@ async function run(){
   addLog(`gate: ${g.allowed?'PASS':'BLOCKED'} (${g.reasons.length} reasons)`,g.allowed?'ok':'er');
 
   // 6. Get events
-  setStatus('6/6 recording audit trail...');
+  setStatus('6/7 recording audit trail...');
   const e=await api('GET','/v1/cases/'+caseId+'/events');
   addLog(`audit: ${e.events.length} events recorded`);
+
+  // Provider status
+  setStatus('7/7 checking providers...');
+  const prov=await api('GET','/v1/providers/status');
+  addLog(`providers: nutrient=${prov.nutrient} foxit_pdf=${prov.foxit_pdf} foxit_esign=${prov.foxit_esign}`);
 
   setStatus('pipeline complete');
   runBtn.disabled=false;runBtn.textContent='run again';
@@ -437,19 +442,75 @@ async function resolve(){
     reason:'Vendor confirmed renewal is in progress',actor_id:'pm@company.com'
   });
   addLog('resolved: CONDITIONAL_ACCEPT','ok');
-  setStatus('approving...');
-  await api('POST','/v1/cases/'+caseId+'/approve');
-  addLog('approved','ok');
-  setStatus('generating...');
-  await api('POST','/v1/cases/'+caseId+'/generate');
-  addLog('generated','ok');
+
+  setStatus('approving record...');
+  addLog('$ curl -X POST /v1/cases/'+caseId+'/approve');
+  const approve=await api('POST','/v1/cases/'+caseId+'/approve');
+  addLog(`approved: record ${approve.record_hash||''}`,'ok');
+
+  setStatus('generating document...');
+  addLog('$ curl -X POST /v1/cases/'+caseId+'/generate');
+  const gen=await api('POST','/v1/cases/'+caseId+'/generate');
+  addLog(`generated: artifact ${gen.artifact_id||''}`,'ok');
+
+  // Get final state
+  const caseData=await api('GET','/v1/cases/'+caseId);
   const g=await api('GET','/v1/cases/'+caseId+'/signature-gate');
-  addLog(`gate: ${g.allowed?'PASS':'BLOCKED'}`,g.allowed?'ok':'er');
   const e=await api('GET','/v1/cases/'+caseId+'/events');
   const f=await api('GET','/v1/cases/'+caseId+'/facts');
   const a2=await api('GET','/v1/cases/'+caseId+'/assertions');
-  setStatus('complete');
-  render(f.facts,a2.assertions,g,e.events);
+  const receipt=await api('GET','/v1/cases/'+caseId+'/receipt');
+
+  addLog(`final state: ${caseData.state}`,'ok');
+  addLog(`record hash: ${receipt.record_hash||'n/a'}`);
+  addLog(`facts: ${receipt.facts_extracted}  assertions: ${receipt.assertions_checked}  events: ${receipt.audit_events}`);
+
+  setStatus('pipeline complete — artifact generated');
+  renderResolved(f.facts,a2.assertions,g,e.events,receipt,caseData);
+}
+
+function renderResolved(facts,assertions,gate,events,receipt,caseData){
+  let h='';
+  h+='<div style="padding:1rem;background:#f0fdf4;border:1px solid #bbf7d0;margin-bottom:1rem">';
+  h+='<div style="font-weight:500;color:#166534">pipeline complete</div>';
+  h+='<div style="font-size:.75rem;color:#666;margin-top:.25rem">case: '+caseData.case_id+'</div>';
+  h+='</div>';
+  h+='<div class="label">result</div>';
+  h+='<table style="width:100%">';
+  h+='<tr><td>state</td><td class="pass">'+caseData.state+'</td></tr>';
+  h+='<tr><td>facts extracted</td><td>'+receipt.facts_extracted+'</td></tr>';
+  h+='<tr><td>assertions checked</td><td>'+receipt.assertions_checked+'</td></tr>';
+  h+='<tr><td>audit events</td><td>'+receipt.audit_events+'</td></tr>';
+  h+='<tr><td>record hash</td><td class="dim" style="word-break:break-all">'+(receipt.record_hash||'n/a')+'</td></tr>';
+  if(receipt.artifact_hash)h+='<tr><td>artifact hash</td><td class="dim" style="word-break:break-all">'+receipt.artifact_hash+'</td></tr>';
+  h+='</table>';
+  h+='<div class="label">what happened</div>';
+  h+='<div class="explain"><strong>1.</strong> human reviewed the insurance expiry gap and confirmed renewal is in progress<br>';
+  h+='<strong>2.</strong> structured record created with content hash<br>';
+  h+='<strong>3.</strong> approval memo generated (risk-branched)<br>';
+  h+='<strong>4.</strong> every step recorded in hash-chained audit trail</div>';
+  const ie=facts.find(f=>f.field==='insurance.expiry_date');
+  const rc=facts.find(f=>f.field==='procurement.required_coverage');
+  if(ie&&rc){
+    h+='<div class="label">contradiction resolved</div>';
+    h+='<div class="vs">';
+    h+=`<div class="vs-box"><div class="vl">procurement request</div><div class="vv">coverage until ${rc.value_normalized}</div></div>`;
+    h+=`<div class="vs-box" style="border-color:#bbf7d0;background:#f0fdf4"><div class="vl">insurance certificate</div><div class="vv" style="color:#166534">expires ${ie.value_normalized}</div><div class="vm">renewal confirmed by pm@company.com</div></div>`;
+    h+='</div>';
+  }
+  h+='<div class="label">audit trail</div>';
+  h+='<table style="width:100%">';
+  for(const ev of events){
+    const cls=ev.event_type==='STATE_TRANSITION'?'g':(ev.event_type.includes('FAIL')?'r':'g');
+    h+=`<tr><td class="dim" style="width:120px">${ev.from_state||''} → ${ev.to_state||''}</td><td><span class="dot ${cls}"></span>${ev.event_type}</td></tr>`;
+  }
+  h+='</table>';
+  h+='<div class="label">next steps (production)</div>';
+  h+='<div class="explain">in a production deployment with foxit pdf services configured:<br>';
+  h+='<strong>prepare</strong> — merge source documents + approval memo, compress, sha-256 verify<br>';
+  h+='<strong>sign</strong> — send signing request to cfo@company.com via foxit esign<br>';
+  h+='<strong>archive</strong> — immutable record sealed with merkle proof</div>';
+  results.innerHTML=h;
 }
 </script>
 </body>
