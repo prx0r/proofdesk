@@ -320,14 +320,24 @@ async function run(){
   addLog(`audit: ${e.events.length} events recorded`);
 
   // Provider status
-  setStatus('7/7 checking providers...');
+  setStatus('7/8 checking providers...');
   const prov=await api('GET','/v1/providers/status');
   addLog(`providers: nutrient=${prov.nutrient} foxit_pdf=${prov.foxit_pdf} foxit_esign=${prov.foxit_esign}`);
+
+  // API trace
+  setStatus('8/8 fetching api trace...');
+  const trace=await api('GET','/v1/cases/'+caseId+'/trace');
+  const calls=trace.calls||[];
+  addLog(`api trace: ${calls.length} outbound calls recorded`);
+
+  // Audit chain
+  const chain=await api('GET','/v1/audit/chain');
+  addLog(`audit chain: ${chain.valid?'VALID':'INVALID'} — ${chain.stats.total_events} events across ${chain.stats.cases} cases`);
 
   setStatus('pipeline complete');
   runBtn.disabled=false;runBtn.textContent='run again';
   rawToggleBtn.style.display='inline-block';
-  render(f.facts,a.assertions,g,e.events);
+  render(f.facts,a.assertions,g,e.events,prov,calls,chain);
 }
 
 function showCached(){
@@ -366,10 +376,18 @@ function showCached(){
   render(facts,assertions,gate,events);
 }
 
-function render(facts,assertions,gate,events){
+function render(facts,assertions,gate,events,prov,calls,chain){
   const ie=facts.find(f=>f.field==='insurance.expiry_date');
   const rc=facts.find(f=>f.field==='procurement.required_coverage');
   let h='';
+
+  // Provider status
+  h+='<div class="label">providers</div>';
+  h+='<table style="width:100%">';
+  h+=`<tr><td>nutrient dws</td><td class="${prov&&prov.nutrient==='LIVE'?'pass':'dim'}">${prov?prov.nutrient:'—'}</td></tr>`;
+  h+=`<tr><td>foxit pdf</td><td class="dim">${prov?prov.foxit_pdf:'—'}</td></tr>`;
+  h+=`<tr><td>foxit esign</td><td class="dim">${prov?prov.foxit_esign:'—'}</td></tr>`;
+  h+='</table>';
 
   if(ie&&rc){
     h+='<div class="explain"><strong>the contradiction:</strong> both fields were extracted correctly by nutrient dws. the problem is that together they describe an unsafe transaction. a naive extraction system would proceed. proofdesk blocks it.</div>';
@@ -419,6 +437,23 @@ function render(facts,assertions,gate,events){
     h+=`<tr><td class="dim" style="width:120px">${ev.from_state||''} → ${ev.to_state||''}</td><td><span class="dot ${cls}"></span>${ev.event_type}</td></tr>`;
   }
   h+='</table>';
+
+  // API trace
+  if(calls&&calls.length){
+    h+='<div class="label">api trace</div>';
+    h+='<div class="explain"><strong>every outbound provider call</strong> is recorded with timing.</div>';
+    h+='<table style="width:100%">';
+    for(const c of calls){
+      h+=`<tr><td class="dim" style="width:80px">${c.provider||''}</td><td>${c.operation||''}</td><td class="${(c.status||0)<400?'pass':'fail'}">${c.status||''}</td><td class="dim" style="text-align:right">${c.duration_ms?Math.round(c.duration_ms)+'ms':''}</td></tr>`;
+    }
+    h+='</table>';
+  }
+
+  // Audit chain
+  if(chain){
+    h+='<div class="label">audit chain</div>';
+    h+=`<div class="explain"><strong>hash chain:</strong> ${chain.valid?'valid — '+chain.stats.total_events+' events, '+chain.stats.cases+' cases':'INVALID'}</div>`;
+  }
 
   if(!gate.allowed&&gate.reasons.find(r=>r.code==='UNRESOLVED_BLOCKER')&&caseId){
     h+='<div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid #eee">';
