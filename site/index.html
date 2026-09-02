@@ -24,7 +24,7 @@ hr{border:none;border-top:1px solid #eee;margin:2rem 0}
 .btn-outline{background:transparent;color:#111;border:1px solid #ccc}
 .btn-outline:hover{border-color:#111}
 .log{margin-top:.75rem;padding:.75rem;background:#fff;border:1px solid #eee;font-size:.75rem;line-height:1.8;overflow-x:auto;max-height:400px;overflow-y:auto}
-.log .t{color:#999}.log .ok{color:#166534}.log .er{color:#991b1b}.log .h{font-weight:500}
+.log .ok{color:#166534}.log .er{color:#991b1b}.log .h{font-weight:500}
 .field{display:flex;gap:1rem;padding:.5rem 0;border-bottom:1px solid #f0f0f0;font-size:.8125rem;align-items:baseline}
 .field:last-child{border-bottom:none}
 .field .fn{width:180px;font-weight:500}
@@ -47,8 +47,6 @@ hr{border:none;border-top:1px solid #eee;margin:2rem 0}
 .verdict{margin-top:.75rem;padding:.75rem 1rem;font-weight:500;font-size:.8125rem}
 .v-block{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
 .v-ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
-.spinner{display:inline-block;width:12px;height:12px;border:2px solid #ccc;border-top-color:#111;border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;vertical-align:middle}
-@keyframes spin{to{transform:rotate(360deg)}}
 .status{font-size:.75rem;color:#999;margin-top:.5rem;min-height:1.2em}
 .explain{margin:.75rem 0;padding:.75rem 1rem;background:#f8f8f8;border-left:2px solid #ddd;font-size:.8125rem;color:#555}
 .explain strong{color:#111}
@@ -62,6 +60,9 @@ hr{border:none;border-top:1px solid #eee;margin:2rem 0}
 .scenario-tab.on{color:#111;border-bottom-color:#111}
 .scenario{display:none;margin-top:1.25rem}
 .scenario.on{display:block}
+.badge{display:inline-block;font-size:.625rem;padding:.125rem .375rem;border:1px solid #eee;margin-left:.5rem;vertical-align:middle}
+.badge-live{border-color:#166534;color:#166534}
+.badge-cache{border-color:#999;color:#999}
 footer{margin-top:4rem;padding-top:1rem;border-top:1px solid #eee;font-size:.625rem;color:#bbb;display:flex;justify-content:space-between}
 footer a{color:#999}
 </style>
@@ -81,7 +82,7 @@ footer a{color:#999}
 <!-- PROCUREMENT — LIVE -->
 <div class="scenario on" id="s0">
 <div class="label">live pipeline</div>
-<div id="status" class="status">click run to execute the full pipeline against the live api</div>
+<div id="status" class="status">ready — click run to execute against the live api</div>
 <button class="btn" id="runBtn" onclick="run()">run live →</button>
 <button class="btn btn-outline" id="rawToggle" onclick="toggleRaw()" style="display:none;margin-left:.5rem">show raw api</button>
 <div id="rawLog" class="raw"></div>
@@ -92,7 +93,7 @@ footer a{color:#999}
 <!-- INSURANCE — PRECOMPUTED -->
 <div class="scenario" id="s1">
 <div class="label">scenario</div>
-<div class="explain"><strong>insurance claim adjudication.</strong> a property damage claim for $67,500. the claimed amount matches the contractor estimate, but the water damage exceeds the $50k sublimit and equipment breakdown is excluded from coverage.</div>
+<div class="explain"><strong>insurance claim adjudication.</strong> a $67,500 property damage claim. the amount matches the contractor estimate, but water damage exceeds the $50k sublimit and equipment breakdown is excluded from coverage.</div>
 <div class="label">extracted fields</div>
 <div class="field"><div class="fn">claim.claimed_amount</div><div class="fv">$67,500</div><div class="fc fc-hi">0.99</div></div>
 <div class="field"><div class="fn">policy.water_sublimit</div><div class="fv">$50,000</div><div class="fc fc-hi">0.99</div></div>
@@ -117,7 +118,7 @@ footer a{color:#999}
 <!-- CONTRACT — PRECOMPUTED -->
 <div class="scenario" id="s2">
 <div class="label">scenario</div>
-<div class="explain"><strong>saas contract red flag review.</strong> a 24-month agreement between cloudvault inc. and pinnacle financial group. the contract contains an aggressive 60-day auto-renewal notice, one-way indemnification, and no refund on convenience termination.</div>
+<div class="explain"><strong>saas contract red flag review.</strong> a 24-month agreement between cloudvault inc. and pinnacle financial group. contains an aggressive 60-day auto-renewal, one-way indemnification, and no refund on convenience termination.</div>
 <div class="label">extracted fields</div>
 <div class="field"><div class="fn">contract.liability_cap</div><div class="fv">12-month fees</div><div class="fc fc-hi">0.95</div></div>
 <div class="field"><div class="fn">contract.auto_renewal_notice</div><div class="fv">60 days</div><div class="fc fc-hi">0.98</div></div>
@@ -127,7 +128,7 @@ footer a{color:#999}
 <div class="field"><div class="fn">contract.sla_remedy</div><div class="fv">10% cap</div><div class="fc fc-hi">0.97</div></div>
 <div class="label">assertions</div>
 <div class="gate-row"><div class="gate-icon pass">&#10003;</div><div class="gate-label">liability cap at 12-month fees is standard</div><div class="gate-val gp">PASS</div></div>
-<div class="gate-row"><div class="gate-icon fail">&#10007;</div><div class="gate-label">auto-renewal 60-day notice (standard is 90-180)</div><div class="gate-val gf">FAIL</div></div>
+<div class="gate-row"><div class="gate-icon fail">&#10007;</div><div class="gate-label">auto-renewal 60-day notice (standard: 90-180)</div><div class="gate-val gf">FAIL</div></div>
 <div class="gate-row"><div class="gate-icon fail">&#10007;</div><div class="gate-label">anonymized data license may conflict with regulations</div><div class="gate-val gf">FAIL</div></div>
 <div class="gate-row"><div class="gate-icon fail">&#10007;</div><div class="gate-label">one-way indemnification favors provider</div><div class="gate-val gf">FAIL</div></div>
 <div class="gate-row"><div class="gate-icon fail">&#10007;</div><div class="gate-label">no refund on convenience termination</div><div class="gate-val gf">FAIL</div></div>
@@ -138,7 +139,7 @@ footer a{color:#999}
 <!-- TRADE — PRECOMPUTED -->
 <div class="scenario" id="s3">
 <div class="label">scenario</div>
-<div class="explain"><strong>trade document cross-check.</strong> shipment shp-2026-00341 between globaltech manufacturing and pacific imports. the commercial invoice, bill of lading, and certificate of origin are mostly consistent — but the incoterm is wrong.</div>
+<div class="explain"><strong>trade document cross-check.</strong> shipment shp-2026-00341 between globaltech manufacturing and pacific imports. invoice, bill of lading, and certificate of origin are mostly consistent — but the incoterm is wrong.</div>
 <div class="label">extracted fields</div>
 <div class="field"><div class="fn">invoice.quantity</div><div class="fv">240 units</div><div class="fc fc-hi">0.99</div></div>
 <div class="field"><div class="fn">invoice.total_value</div><div class="fv">$300,000</div><div class="fc fc-hi">0.99</div></div>
@@ -150,7 +151,7 @@ footer a{color:#999}
 <div class="vs-box"><div class="vl">commercial invoice</div><div class="vv">FOB Shanghai</div><div class="vm">buyer pays freight</div></div>
 <div class="vs-box hit"><div class="vl">bill of lading</div><div class="vv">Freight Prepaid</div><div class="vm">seller paid freight</div></div>
 </div>
-<div class="gap">FOB means buyer pays freight. but the bill of lading says freight is prepaid. this mismatch would trigger a customs hold.</div>
+<div class="gap">FOB means buyer pays freight. but the bill of lading says freight is prepaid. this mismatch triggers customs holds.</div>
 <div class="label">assertions</div>
 <div class="gate-row"><div class="gate-icon pass">&#10003;</div><div class="gate-label">invoice quantity matches bill of lading</div><div class="gate-val gp">PASS</div></div>
 <div class="gate-row"><div class="gate-icon pass">&#10003;</div><div class="gate-label">country of origin consistent across all 3 docs</div><div class="gate-val gp">PASS</div></div>
@@ -175,6 +176,7 @@ footer a{color:#999}
 </div>
 
 <script>
+// Live API URL — updated when tunnel changes
 const API='https://commons-orange-reporters-reproduce.trycloudflare.com';
 const log=document.getElementById('liveLog');
 const results=document.getElementById('liveResults');
@@ -184,7 +186,7 @@ const runBtn=document.getElementById('runBtn');
 const rawToggleBtn=document.getElementById('rawToggle');
 let caseId=null,showRaw=false;
 
-function addLog(text,cls=''){log.style.display='block';const d=document.createElement('div');d.className=cls;d.textContent=text;log.appendChild(d);log.scrollTop=log.scrollHeight;}
+function addLog(t,c=''){log.style.display='block';const d=document.createElement('div');d.className=c;d.textContent=t;log.appendChild(d);log.scrollTop=log.scrollHeight;}
 function setStatus(t){status.textContent=t;}
 function toggleRaw(){showRaw=!showRaw;rawLog.classList.toggle('open',showRaw);rawToggleBtn.textContent=showRaw?'hide raw api':'show raw api';}
 function scenario(i){document.querySelectorAll('.scenario-tab').forEach((t,j)=>{t.classList.toggle('on',j===i)});document.querySelectorAll('.scenario').forEach((s,j)=>{s.classList.toggle('on',j===i)});}
@@ -197,7 +199,7 @@ async function api(method,path,body=null){
   const data=await res.json();
   const ms=Math.round(performance.now()-t0);
   if(showRaw){
-    rawLog.textContent+=`\n${method} ${path}\n${res.status} ${ms}ms\n${JSON.stringify(data,null,2).substring(0,800)}\n`;
+    rawLog.textContent+=`\n${method} ${path}\n${res.status} ${ms}ms\n${JSON.stringify(data,null,2).substring(0,1200)}\n`;
     rawLog.scrollTop=rawLog.scrollHeight;
   }
   return data;
@@ -206,9 +208,23 @@ async function api(method,path,body=null){
 async function run(){
   log.innerHTML='';results.innerHTML='';rawLog.textContent='';
   runBtn.disabled=true;runBtn.textContent='running...';
-  setStatus('1/6 creating case...');
+
+  // Check API health first
+  setStatus('connecting to api...');
+  try{
+    const health=await api('GET','/health');
+    addLog(`api: ${health.status} v${health.version}`,'ok');
+    addLog(`audit chain: ${health.audit.total_events} events`,'ok');
+  }catch(e){
+    addLog('api unavailable — showing cached results','er');
+    setStatus('api offline — cached results shown');
+    runBtn.disabled=false;runBtn.textContent='run live →';
+    showCached();
+    return;
+  }
 
   // 1. Create fixture
+  setStatus('1/6 creating case...');
   addLog('$ curl -X POST /v1/cases/fixture');
   const c=await api('POST','/v1/cases/fixture');
   caseId=c.case_id;
@@ -241,10 +257,46 @@ async function run(){
   const e=await api('GET','/v1/cases/'+caseId+'/events');
   addLog(`audit: ${e.events.length} events recorded`);
 
-  setStatus('pipeline complete — click resolve to continue');
+  setStatus('pipeline complete');
   runBtn.disabled=false;runBtn.textContent='run again';
   rawToggleBtn.style.display='inline-block';
   render(f.facts,a.assertions,g,e.events);
+}
+
+function showCached(){
+  // Pre-computed procurement results
+  const facts=[
+    {field:'vendor.legal_name',value_normalized:'Northstar Data Systems',confidence:0.98,page:1},
+    {field:'procurement.requested_spend',value_normalized:'$42,500',confidence:0.99,page:1},
+    {field:'procurement.contract_start',value_normalized:'2026-10-01',confidence:0.99,page:1},
+    {field:'procurement.required_coverage',value_normalized:'2027-10-01',confidence:0.98,page:1},
+    {field:'quote.total',value_normalized:'$42,500',confidence:0.99,page:1},
+    {field:'quote.platform_price',value_normalized:'$35,000',confidence:0.99,page:1},
+    {field:'quote.support_price',value_normalized:'$7,500',confidence:0.99,page:1},
+    {field:'insurance.expiry_date',value_normalized:'2027-08-31',confidence:0.99,page:1},
+    {field:'insurance.policy_type',value_normalized:'Commercial General Liability',confidence:0.98,page:1},
+    {field:'security.encryption_at_rest',value_normalized:'Yes',confidence:0.98,page:1},
+    {field:'security.soc2_compliance',value_normalized:'Yes',confidence:0.98,page:1},
+  ];
+  const assertions=[
+    {predicate:'quote.total == platform + support',result:'PASS'},
+    {predicate:'entity names normalize across docs',result:'PASS'},
+    {predicate:'requested spend == quote total',result:'PASS'},
+    {predicate:'encryption at rest confirmed',result:'PASS'},
+    {predicate:'soc2 compliance confirmed',result:'PASS'},
+    {predicate:'insurance_expiry >= required_coverage',result:'FAIL'},
+  ];
+  const gate={allowed:false,reasons:[
+    {code:'UNRESOLVED_BLOCKER'},{code:'NO_HUMAN_APPROVAL'},{code:'NO_STRUCTURED_RECORD'}
+  ]};
+  const events=[
+    {from_state:'RECEIVED',to_state:'INGESTED',event_type:'STATE_TRANSITION'},
+    {from_state:'INGESTED',to_state:'EXTRACTED',event_type:'STATE_TRANSITION'},
+    {from_state:'EXTRACTED',to_state:'RECONCILED',event_type:'STATE_TRANSITION'},
+    {from_state:'RECONCILED',to_state:'CHECKED',event_type:'STATE_TRANSITION'},
+    {from_state:'CHECKED',to_state:'REVIEW_REQUIRED',event_type:'STATE_TRANSITION'},
+  ];
+  render(facts,assertions,gate,events);
 }
 
 function render(facts,assertions,gate,events){
@@ -252,9 +304,8 @@ function render(facts,assertions,gate,events){
   const rc=facts.find(f=>f.field==='procurement.required_coverage');
   let h='';
 
-  // Contradiction
   if(ie&&rc){
-    h+='<div class="explain"><strong>the contradiction:</strong> both fields were extracted correctly by nutrient dws. the problem is that together they describe an unsafe transaction. proofdesk catches this — a naive extraction system would not.</div>';
+    h+='<div class="explain"><strong>the contradiction:</strong> both fields were extracted correctly by nutrient dws. the problem is that together they describe an unsafe transaction. a naive extraction system would proceed. proofdesk blocks it.</div>';
     h+='<div class="vs">';
     h+=`<div class="vs-box"><div class="vl">procurement request</div><div class="vv">coverage until ${rc.value_normalized}</div><div class="vm">confidence ${rc.confidence} · page ${rc.page}</div></div>`;
     h+=`<div class="vs-box hit"><div class="vl">insurance certificate</div><div class="vv">expires ${ie.value_normalized}</div><div class="vm">confidence ${ie.confidence} · page ${ie.page}</div></div>`;
@@ -262,25 +313,22 @@ function render(facts,assertions,gate,events){
     h+=`<div class="gap"><strong>gap detected</strong> — insurance expires before the service period ends. signing blocked.</div>`;
   }
 
-  // Facts
   h+='<div class="label">extracted fields</div>';
-  h+='<div class="explain"><strong>nutrient dws</strong> extracts structured fields with confidence scores and source provenance. each field traces back to a specific page and location in the original document.</div>';
+  h+='<div class="explain"><strong>nutrient dws</strong> extracts structured fields with confidence scores and source provenance. each field traces back to a specific page in the original document.</div>';
   for(const f of facts){
     h+=`<div class="field"><div class="fn">${f.field}</div><div class="fv">${f.value_normalized}</div><div class="fc fc-hi">${f.confidence}</div></div>`;
   }
 
-  // Assertions
   h+='<div class="label">cross-document assertions</div>';
-  h+='<div class="explain"><strong>deterministic checks</strong> across all extracted facts. no llm calls — pure rule-based verification. each assertion compares fields from different documents.</div>';
+  h+='<div class="explain"><strong>deterministic checks</strong> across all extracted facts. no llm calls — pure rule-based verification.</div>';
   for(const a of assertions){
     const cls=a.result==='FAIL'?'fail':'pass';
     const icon=a.result==='FAIL'?'&#10007;':'&#10003;';
     h+=`<div class="gate-row"><div class="gate-icon ${cls}">${icon}</div><div class="gate-label">${a.predicate}</div><div class="gate-val ${a.result==='FAIL'?'gf':'gp'}">${a.result}</div></div>`;
   }
 
-  // Gate
   h+='<div class="label">authority gate</div>';
-  h+='<div class="explain"><strong>signaturegate</strong> enforces 6 conditions server-side. the agent cannot negotiate. all conditions must pass before any signing request is allowed.</div>';
+  h+='<div class="explain"><strong>signaturegate</strong> enforces 6 conditions server-side. the agent cannot negotiate.</div>';
   const gc=[
     {l:'state is prepared',p:true},
     {l:'no unresolved blockers',p:!gate.reasons.find(r=>r.code==='UNRESOLVED_BLOCKER')},
@@ -296,20 +344,18 @@ function render(facts,assertions,gate,events){
   }
   h+=`<div class="verdict ${gate.allowed?'v-ok':'v-block'}">${gate.allowed?'proceed — signing authorized':'blocked — agent cannot sign'}</div>`;
 
-  // Audit
   h+='<div class="label">audit trail</div>';
-  h+='<div class="explain"><strong>every state transition</strong> is hash-chained and recorded. the audit trail is tamper-evident — any modification to the sequence breaks the chain.</div>';
+  h+='<div class="explain"><strong>every state transition</strong> is hash-chained. the trail is tamper-evident.</div>';
   h+='<table style="width:100%">';
   for(const ev of events){
-    const cls=ev.event_type==='STATE_TRANSITION'?'g':(ev.event_type.includes('FAIL')||ev.event_type.includes('ERROR')?'r':'g');
+    const cls=ev.event_type==='STATE_TRANSITION'?'g':(ev.event_type.includes('FAIL')?'r':'g');
     h+=`<tr><td class="dim" style="width:120px">${ev.from_state||''} → ${ev.to_state||''}</td><td><span class="dot ${cls}"></span>${ev.event_type}</td></tr>`;
   }
   h+='</table>';
 
-  // Resolve button
-  if(!gate.allowed&&gate.reasons.find(r=>r.code==='UNRESOLVED_BLOCKER')){
+  if(!gate.allowed&&gate.reasons.find(r=>r.code==='UNRESOLVED_BLOCKER')&&caseId){
     h+='<div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid #eee">';
-    h+='<div class="explain"><strong>next step:</strong> a human reviews the exact evidence, resolves the exception, and the system re-evaluates the gate.</div>';
+    h+='<div class="explain"><strong>next step:</strong> a human reviews the exact evidence, resolves the exception, and the system re-evaluates.</div>';
     h+='<button class="btn" onclick="resolve()">resolve exception →</button>';
     h+='</div>';
   }
@@ -319,36 +365,28 @@ function render(facts,assertions,gate,events){
 
 async function resolve(){
   if(!caseId)return;
-  setStatus('resolving exception...');
+  setStatus('resolving...');
   addLog('$ curl -X POST /v1/cases/'+caseId+'/resolve');
-
   const a=await api('GET','/v1/cases/'+caseId+'/assertions');
   const fail=a.assertions.find(x=>x.result==='FAIL');
-  if(!fail){addLog('no failing assertion','er');return;}
-
+  if(!fail)return;
   await api('POST','/v1/cases/'+caseId+'/resolve',{
     assertion_id:fail.assertion_id,decision:'CONDITIONAL_ACCEPT',
     reason:'Vendor confirmed renewal is in progress',actor_id:'pm@company.com'
   });
   addLog('resolved: CONDITIONAL_ACCEPT','ok');
-
-  setStatus('approving record...');
-  addLog('$ curl -X POST /v1/cases/'+caseId+'/approve');
+  setStatus('approving...');
   await api('POST','/v1/cases/'+caseId+'/approve');
   addLog('approved','ok');
-
-  setStatus('generating document...');
+  setStatus('generating...');
   await api('POST','/v1/cases/'+caseId+'/generate');
   addLog('generated','ok');
-
   const g=await api('GET','/v1/cases/'+caseId+'/signature-gate');
   addLog(`gate: ${g.allowed?'PASS':'BLOCKED'}`,g.allowed?'ok':'er');
-
   const e=await api('GET','/v1/cases/'+caseId+'/events');
   const f=await api('GET','/v1/cases/'+caseId+'/facts');
   const a2=await api('GET','/v1/cases/'+caseId+'/assertions');
-
-  setStatus('resolution complete');
+  setStatus('complete');
   render(f.facts,a2.assertions,g,e.events);
 }
 </script>
