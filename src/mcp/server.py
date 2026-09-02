@@ -206,8 +206,8 @@ def proofdesk_advance(case_id: str, signer: str = "") -> dict:
     return t_advance(case_id, signer)
 
 @mcp.tool()
-def proofdesk_signature_gate(case_id: str) -> dict:
-    """Evaluate the SignatureGate: allowed? named reasons?"""
+def proofdesk_authority_gate(case_id: str) -> dict:
+    """Evaluate the Authority Gate: allowed? named reasons?"""
     return t_gate(case_id)
 
 @mcp.tool()

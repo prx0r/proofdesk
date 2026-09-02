@@ -170,10 +170,10 @@ async def extract_from_document(
             if value is None:
                 continue
 
-            # Extract citation metadata
+            # Extract citation metadata — never fabricate provenance
             cite = metadata.get(schema_field, {})
-            page = cite.get("pageNumber", 1) if cite else 1
-            bbox = cite.get("bbox", {}) if cite else {}
+            page = cite.get("pageNumber") if cite and cite.get("pageNumber") is not None else None
+            bbox = cite.get("bbox") if cite and cite.get("bbox") else None
             confidence = cite.get("confidence") if cite and cite.get("confidence") is not None else None
 
             raw_value = str(value)

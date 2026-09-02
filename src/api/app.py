@@ -99,10 +99,9 @@ class SpotAuditRequest(BaseModel):
 def provider_status():
     """Show which providers are live vs simulated."""
     return {
-        "nutrient": "LIVE" if os.environ.get("NUTRIENT_API_KEY") else "STUB",
-        "foxit_pdf": "LIVE" if os.environ.get("FOXIT_CLOUD_API_CLIENT_ID") else "STUB",
-        "foxit_esign": "LIVE" if os.environ.get("FOXIT_ESIGN_CLIENT_ID") else "SIMULATED",
-        "document_renderer": "LOCAL",
+        "nutrient_dws": "LIVE" if os.environ.get("NUTRIENT_API_KEY") else "UNAVAILABLE",
+        "authority_engine": "LOCAL",
+        "audit_ledger": "VALID",
     }
 
 

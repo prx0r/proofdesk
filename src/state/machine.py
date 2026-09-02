@@ -1,4 +1,4 @@
-"""State machine + SignatureGate for ProofDesk."""
+"""State machine + Authority Gate for ProofDesk."""
 
 from __future__ import annotations
 
@@ -94,7 +94,7 @@ def transition(case: Case, to_state: CaseState, actor: str = "system",
 
 
 def can_request_signature(case: Case) -> dict:
-    """SignatureGate — returns allowed=True, denial reasons, and passing checks."""
+    """Authority Gate — returns allowed=True, denial reasons, and passing checks."""
     reasons = []
     checks = []
 

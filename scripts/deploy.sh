@@ -23,7 +23,7 @@ railway link 2>/dev/null || railway init
 
 # Set environment variable
 echo "Setting NUTRIENT_API_KEY..."
-railway variables set NUTRIENT_API_KEY="pdf_live_hAAUR0ppmrzrIQcOqnPH29ea5z0uioX8pO9SGG6XYmk"
+railway variables set NUTRIENT_API_KEY=\$NUTRIENT_API_KEY
 
 # Deploy
 echo "Deploying..."
