@@ -138,8 +138,8 @@ footer a{color:#999}
 <div class="scenario" id="s4">
 <div class="explain"><b>what's under the hood.</b> behind the authority gate is a research program in calibrated confidence.</div>
 <div class="label">confidence algorithms</div>
-<table style="width:100%"><tr><td>conformal risk control</td><td class="dim">angelopoulos et al., iclr 2024</td></tr>
-<tr><td>dual-call confidence</td><td class="dim">extractconf style — hunter + mapper</td></tr>
+<table style="width:100%"><tr><td>conformal-style risk calibration</td><td class="dim">angelopoulos et al., iclr 2024 — selective prediction research</td></tr>
+<tr><td>dual-call confidence</td><td class="dim">extractconf-inspired — hunter + mapper verification</td></tr>
 <tr><td>per-field risk budgets</td><td class="dim">signer: 1%, amount: 2%, date: 3%</td></tr>
 <tr><td>sheepish transform</td><td class="dim">asymmetric overconfidence penalty</td></tr>
 <tr><td>online calibration</td><td class="dim">learns from human feedback</td></tr></table>
@@ -153,7 +153,17 @@ footer a{color:#999}
 <tr><td>mortgage</td><td class="dim">appraisal, LTV, property</td></tr>
 <tr><td>medical</td><td class="dim">patient, procedure, billing</td></tr></table>
 <div class="label">extraction results</div>
-<div class="explain"><b>13/13 PDFs</b> extraction supported across procurement, kyc, invoice, trade, mortgage, and medical document types.</div>
+<div class="explain"><b>13 PDF fixtures</b> across six document types (procurement, kyc, invoice, trade, mortgage, medical). each field extracted with confidence and source grounding.</div>
+<div class="label">historical calibration research</div>
+<div class="explain"><b>heterogeneous classification datasets</b> used for threshold tuning and calibration experiments. these are not Nutrient document benchmarks — they are tabular/text classification datasets used to develop the confidence algorithms.</div>
+<table style="width:100%"><tr><td>coldhearted fraud</td><td class="dim">19,872 transaction records</td></tr>
+<tr><td>contractner</td><td class="dim">3,241 contract text examples</td></tr>
+<tr><td>fatura</td><td class="dim">1,400 invoice records</td></tr>
+<tr><td>cuad</td><td class="dim">509 contract clauses</td></tr>
+<tr><td>invoicebenchmark</td><td class="dim">200 invoice examples</td></tr></table>
+<div class="explain"><b>key result:</b> at 1% false-sign rate, calibrated thresholds achieve 59.8% auto-sign coverage — 2.7x over baseline logistic regression. this was measured on the classification datasets above, not on the live Nutrient document pipeline.</div>
+<div class="label">evidence vs authority</div>
+<div class="explain"><b>the core thesis:</b> correct extraction does not equal sufficient authority. two fields can both be extracted with high confidence and still describe an unsafe transaction.</div>
 <div class="label">tamper detection</div>
 <div class="explain"><b>post-approval.</b> any byte-level modification changes the SHA-256 hash. the gate verifies the artifact before any irreversible action.</div>
 <div class="label">115 tests</div>
@@ -240,7 +250,7 @@ async function run(){
   const rc=facts.find(x=>x.field==='procurement.required_coverage_until');
   let factsHtml='<div class="step-desc">'+facts.length+' fields extracted with confidence scores and source grounding.</div>';
   if(ie&&rc){
-    factsHtml+=`<div class="vs" style="margin-top:.75rem"><div class="vs-box"><div class="vl">procurement request</div><div class="vv">coverage until ${rc.value_normalized}</div><div class="vm">confidence ${rc.confidence} · page ${rc.page}</div></div><div class="vs-box hit"><div class="vl">insurance certificate</div><div class="vv">expires ${ie.value_normalized}</div><div class="vm">confidence ${ie.confidence} · page ${ie.page}</div></div></div>`;
+    factsHtml+=`<div class="vs" style="margin-top:.75rem"><div class="vs-box"><div class="vl">procurement request — page ${rc.page}</div><div class="vv">coverage until ${rc.value_normalized}</div><div class="vm">confidence ${rc.confidence} · bbox [${rc.bounding_box||'n/a'}]</div></div><div class="vs-box hit"><div class="vl">insurance certificate — page ${ie.page}</div><div class="vv">expires ${ie.value_normalized}</div><div class="vm">confidence ${ie.confidence} · bbox [${ie.bounding_box||'n/a'}]</div></div></div>`;
     factsHtml+=`<div class="gap" style="margin-top:.75rem"><b>${Math.round((new Date(rc.value_normalized)-new Date(ie.value_normalized))/(1000*60*60*24))}-day gap</b> — insurance expires before the service period ends.</div>`;
   }
   await showStep('4/7','contradiction found',factsHtml,400);
