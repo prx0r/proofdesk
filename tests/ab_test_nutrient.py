@@ -13,9 +13,7 @@ import time
 import requests
 
 # Config
-NUTRIENT_API_KEY = os.environ.get(
-    "NUTRIENT_API_KEY", "pdf_live_hAAUR0ppmrzrIQcOqnPH29ea5z0uioX8pO9SGG6XYmk"
-)
+NUTRIENT_API_KEY = os.environ.get("NUTRIENT_API_KEY", "")
 NUTRIENT_URL = "https://api.nutrient.io/extraction/extract"
 PDF_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "test_pdfs")
 RESULTS_DIR = os.path.join(os.path.dirname(__file__), "..", "benchmarks")

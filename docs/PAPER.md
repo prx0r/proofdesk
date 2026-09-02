@@ -7,7 +7,7 @@
 
 ## Abstract
 
-We present SignatureGate, a risk-budgeted document signing system that uses conformal risk control to guarantee zero false signs while maximizing auto-sign coverage. On 24,878 real documents (9,984 fraudulent), our risk-adaptive system achieves **58.5% auto-sign coverage with 0% false signs** by applying different thresholds to different risk levels: contracts (100% coverage), invoices (92.5%), and fraud transactions (49.5%). Feature engineering improves coverage by 3x over baseline logistic regression. The system includes a Merkle-sealed audit trail, MCP server integration, and real Nutrient extraction.
+We present SignatureGate, a risk-budgeted document signing system that uses conformal risk control to guarantee zero false signs while maximizing auto-sign coverage. On 24,878 examples across 6 datasets (mix of tabular records and document text, 9,984 fraudulent), our risk-adaptive system achieves **58.5% auto-sign coverage with 0% false signs** by applying different thresholds to different risk levels: contracts (100% coverage), invoices (92.5%), and fraud transactions (49.5%). Feature engineering improves coverage by 3x over baseline logistic regression. The system includes a Merkle-sealed audit trail, MCP server integration, and real Nutrient extraction.
 
 ---
 
@@ -28,7 +28,7 @@ Organizations need to sign documents automatically, but signing a fraudulent doc
 
 | Metric | Value |
 |--------|-------|
-| Dataset | 24,878 real documents |
+| Dataset | 24,878 examples (mix of tabular records and document text) |
 | Risky documents | 9,984 (40% fraud) |
 | Coverage at 0% FSR | **58.5%** |
 | Coverage at 1% FSR | **59.8%** |
@@ -187,7 +187,7 @@ Given calibration scores s_1,...,s_n and labels y_1,...,y_n:
 1. **Feature engineering matters** — 3x improvement from engineered features
 2. **GradBoost beats LogReg** — Better ranking of predictions
 3. **Simple but effective** — No LLM calls, no dual-call, just good features
-4. **Real data** — 24,878 documents, not synthetic
+4. **Real data** — 24,878 examples (mix of tabular records and document text), not synthetic
 
 ### 5.3 What We're Missing vs Frontier
 
@@ -287,7 +287,7 @@ Given calibration scores s_1,...,s_n and labels y_1,...,y_n:
 
 1. **Feature engineering works** — 3x improvement from 3 extra features
 2. **GradBoost beats LogReg** — Better ranking of predictions
-3. **Real data matters** — 24,878 documents, not synthetic
+3. **Real data matters** — 24,878 examples (mix of tabular records and document text), not synthetic
 4. **The tradeoff is real** — You can't get 0% false signs with 100% coverage
 5. **Risk-adaptive thresholds work** — Different strategies for different doc types
 
@@ -300,7 +300,7 @@ Given calibration scores s_1,...,s_n and labels y_1,...,y_n:
 
 ### The Pitch
 
-"We achieved 58.5% auto-sign coverage with 0% false signs on 24,878 real documents. Risk-adaptive thresholds allow us to sign 100% of low-risk contracts, 92.5% of medium-risk invoices, and 49.5% of high-risk fraud documents — all with zero false signs. We're transparent about limitations: no conformal guarantee yet, some features fabricated, deployment blocked by API keys."
+"We achieved 58.5% auto-sign coverage with 0% false signs on 24,878 examples (mix of tabular records and document text). Risk-adaptive thresholds allow us to sign 100% of low-risk contracts, 92.5% of medium-risk invoices, and 49.5% of high-risk fraud documents — all with zero false signs. We're transparent about limitations: no conformal guarantee yet, some features fabricated, deployment blocked by API keys."
 
 ---
 

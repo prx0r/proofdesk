@@ -99,15 +99,15 @@ Before a fact enters the confidence module, it passes through multiple verificat
 
 ## 5. Benchmark Results
 
-### Dataset: 24,878 real documents
+### Dataset: 24,878 examples across 6 datasets
 
-| Dataset | Documents | Type |
-|---------|-----------|------|
-| InvoiceBenchmark | 200 | Invoices with fraud labels |
-| FATURA | 1,400 | Invoices |
-| ContractNER | 3,241 | Contracts |
-| ColdHearted Fraud | 19,872 | Transactions |
-| CUAD | 509 | Contracts |
+| Dataset | Records | Type |
+|---------|---------|------|
+| InvoiceBenchmark | 200 | Invoices (tabular) |
+| FATURA | 1,400 | Invoices (tabular) |
+| ContractNER | 3,241 | Contracts (text) |
+| ColdHearted Fraud | 19,872 | Transactions (tabular) |
+| CUAD | 509 | Contracts (PDF) |
 | Local PDFs | 18 | Real Nutrient extraction |
 
 ### Key Results at 1% False Sign Rate

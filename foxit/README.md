@@ -1,5 +1,10 @@
 # ProofDesk — Foxit Track
 
+> **RESEARCH LABORATORY.** This directory contains the calibration and authority
+> experiments that informed ProofDesk's current policy. The canonical hackathon
+> product is `/src` and the current submission targets Nutrient DWS. Do not build
+> this directory as part of the hackathon submission — it is research provenance.
+
 **Project:** Sheepish: Risk-Budgeted Document Signing with Conformal Guarantees
 **Team:** Trades
 **Tracks:** Foxit, Nutrient, Doctavian

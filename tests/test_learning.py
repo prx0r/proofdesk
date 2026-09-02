@@ -7,11 +7,14 @@ from src.engine.orchestrator import run_pipeline
 from src.models.domain import Case, Document
 
 
+FIXTURE_DIR = os.path.join(os.path.dirname(__file__), "..", "fixtures", "demo")
+
+
 def _fresh_case():
     case = Case(prompt="determinism probe")
     for n in ["procurement_request.pdf", "vendor_quote.pdf",
               "insurance_certificate.pdf", "security_questionnaire.pdf"]:
-        path = os.path.join(os.path.dirname(__file__), "..", "data", "test_pdfs", n)
+        path = os.path.join(FIXTURE_DIR, n)
         with open(path, "rb") as f:
             stub_id = "certificate_insurance" if n == "insurance_certificate.pdf" else n.replace(".pdf", "")
             case.documents.append(Document(doc_id=stub_id, case_id=case.case_id,

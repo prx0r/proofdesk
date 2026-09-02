@@ -113,9 +113,10 @@ Companion docs: `NORTHSTAR.md` (thesis audit), `docs/SPONSOR_CANONICAL.md`, `fox
 ## OPTIMIZATION RESULTS (2026-08-26)
 
 ### Dataset
-- **24,878 real documents** (InvoiceBenchmark, FATURA, ContractNER, ColdHearted Fraud, CUAD)
-- **9,984 risky documents** (40 invoice fraud + 9,936 transaction fraud + 8 risky PDFs)
-- **14,894 safe documents**
+- **24,878 examples** across 6 datasets (InvoiceBenchmark, FATURA, ContractNER, ColdHearted Fraud, CUAD, Local PDFs)
+- Mix of tabular records (transactions, invoices) and document text (contracts, PDFs)
+- **9,984 risky examples** (40 invoice fraud + 9,936 transaction fraud + 8 risky PDFs)
+- **14,894 safe examples**
 
 ### Key Finding: Label Leakage Fixed
 ColdHearted fraud dataset included `is_fraud` as a feature — the model could see the answer. Fixed by removing this feature. Results are now honest.

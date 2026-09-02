@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProofDesk — evidence-gated document automation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Code Pro',monospace;background:#fafafa;color:#111;-webkit-font-smoothing:antialiased;line-height:1.6}
+.wrap{max-width:800px;margin:0 auto;padding:3rem 2rem}
+h1{font-size:1rem;font-weight:500}
+.sub{font-size:.8125rem;color:#666;margin-top:.5rem;max-width:560px}
+.dim{color:#999;font-size:.75rem}
+.pass{color:#166534;font-size:.75rem;font-weight:500}
+.fail{color:#991b1b;font-size:.75rem;font-weight:500}
+.label{font-size:.625rem;color:#999;text-transform:uppercase;letter-spacing:.12em;margin-top:2.5rem;margin-bottom:.75rem;font-weight:500}
+hr{border:none;border-top:1px solid #eee;margin:2rem 0}
+.btn{padding:.625rem 1.5rem;background:#111;color:#fff;border:none;font-family:'Source Code Pro',monospace;font-size:.75rem;font-weight:500;cursor:pointer;margin-top:1rem}
+.btn:hover{background:#333}
+.btn:disabled{background:#ccc;cursor:default}
+.btn-outline{background:transparent;color:#111;border:1px solid #ccc}
+.btn-outline:hover{border-color:#111}
+.log{margin-top:.75rem;padding:.75rem;background:#fff;border:1px solid #eee;font-size:.75rem;line-height:1.8;overflow-x:auto;max-height:400px;overflow-y:auto}
+.log .t{color:#999}.log .ok{color:#166534}.log .er{color:#991b1b}.log .h{font-weight:500}
+.field{display:flex;gap:1rem;padding:.5rem 0;border-bottom:1px solid #f0f0f0;font-size:.8125rem;align-items:baseline}
+.field:last-child{border-bottom:none}
+.field .fn{width:180px;font-weight:500}
+.field .fv{flex:1}
+.field .fc{font-size:.75rem;width:40px;text-align:right}
+.fc-hi{color:#166534;font-weight:500}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.75rem}
+.vs-box{padding:1rem;background:#fff;border:1px solid #eee}
+.vs-box .vl{font-size:.625rem;color:#999;text-transform:uppercase;letter-spacing:.08em}
+.vs-box .vv{font-size:1.1rem;font-weight:500;margin-top:.25rem}
+.vs-box .vm{font-size:.75rem;color:#999;margin-top:.25rem}
+.vs-box.hit{border-color:#fecaca;background:#fef2f2}.vs-box.hit .vv{color:#991b1b}
+.gap{margin-top:.75rem;padding:.75rem 1rem;background:#fef2f2;border:1px solid #fecaca;font-size:.8125rem;color:#991b1b}
+.gate-row{display:flex;align-items:center;gap:.75rem;padding:.5rem 0;border-bottom:1px solid #f0f0f0;font-size:.8125rem}
+.gate-row:last-child{border-bottom:none}
+.gate-icon{width:16px;text-align:center}
+.gate-label{flex:1}
+.gate-val{font-size:.75rem;font-weight:500;padding:2px 8px;border-radius:3px}
+.gp{background:#f0fdf4;color:#166534}.gf{background:#fef2f2;color:#991b1b}
+.verdict{margin-top:.75rem;padding:.75rem 1rem;font-weight:500;font-size:.8125rem}
+.v-block{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+.v-ok{background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid #ccc;border-top-color:#111;border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.status{font-size:.75rem;color:#999;margin-top:.5rem;min-height:1.2em}
+.explain{margin:.75rem 0;padding:.75rem 1rem;background:#f8f8f8;border-left:2px solid #ddd;font-size:.8125rem;color:#555}
+.explain strong{color:#111}
+.raw-toggle{font-size:.6875rem;color:#999;cursor:pointer;border:1px solid #ccc;padding:.25rem .625rem;background:none;font-family:'Source Code Pro',monospace;margin-top:.5rem;display:inline-block}
+.raw-toggle:hover{border-color:#111;color:#111}
+.raw{display:none;margin-top:.5rem;padding:.75rem;background:#fff;border:1px solid #eee;font-size:.6875rem;line-height:1.7;overflow-x:auto;white-space:pre-wrap;word-break:break-all}
+.raw.open{display:block}
+.scenario-tabs{display:flex;gap:0;border-bottom:1px solid #eee;margin-top:2rem}
+.scenario-tab{padding:.5rem 1rem;font-size:.75rem;color:#999;cursor:pointer;border:none;background:none;font-family:'Source Code Pro',monospace;border-bottom:2px solid transparent;transition:all .15s}
+.scenario-tab:hover{color:#111}
+.scenario-tab.on{color:#111;border-bottom-color:#111}
+.scenario{display:none;margin-top:1.25rem}
+.scenario.on{display:block}
+footer{margin-top:4rem;padding-top:1rem;border-top:1px solid #eee;font-size:.625rem;color:#bbb;display:flex;justify-content:space-between}
+footer a{color:#999}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>proofdesk</h1>
+<p class="sub">evidence-gated document automation. nutrient dws extracts grounded evidence. proofdesk decides when that evidence is enough to act.</p>
+
+<div class="scenario-tabs">
+<button class="scenario-tab on" onclick="scenario(0)">procurement (live)</button>
+<button class="scenario-tab" onclick="scenario(1)">insurance</button>
+<button class="scenario-tab" onclick="scenario(2)">contract</button>
+<button class="scenario-tab" onclick="scenario(3)">trade</button>
+</div>
+
+<!-- PROCUREMENT — LIVE -->
+<div class="scenario on" id="s0">
+<div class="label">live pipeline</div>
+<div id="status" class="status">click run to execute the full pipeline against the live api</div>
+<button class="btn" id="runBtn" onclick="run()">run live →</button>
+<button class="btn btn-outline" id="rawToggle" onclick="toggleRaw()" style="display:none;margin-left:.5rem">show raw api</button>
+<div id="rawLog" class="raw"></div>
+<div id="liveLog" class="log" style="display:none"></div>
+<div id="liveResults"></div>
+</div>
+
+<!-- INSURANCE — PRECOMPUTED -->
+<div class="scenario" id="s1">
+<div class="label">scenario</div>
+<div class="explain"><strong>insurance claim adjudication.</strong> a property damage claim for $67,500. the claimed amount matches the contractor estimate, but the water damage exceeds the $50k sublimit and equipment breakdown is excluded from coverage.</div>
+<div class="label">extracted fields</div>
+<div class="field"><div class="fn">claim.claimed_amount</div><div class="fv">$67,500</div><div class="fc fc-hi">0.99</div></div>
+<div class="field"><div class="fn">policy.water_sublimit</div><div class="fv">$50,000</div><div class="fc fc-hi">0.99</div></div>
+<div class="field"><div class="fn">policy.equipment_breakdown</div><div class="fv">Excluded</div><div class="fc fc-hi">0.98</div></div>
+<div class="field"><div class="fn">contractor.total</div><div class="fv">$67,500</div><div class="fc fc-hi">0.99</div></div>
+<div class="field"><div class="fn">claim.date_of_loss</div><div class="fv">2026-07-15</div><div class="fc fc-hi">0.95</div></div>
+<div class="label">contradiction</div>
+<div class="vs">
+<div class="vs-box"><div class="vl">contractor estimate</div><div class="vv">total: $67,500</div><div class="vm">water damage + equipment</div></div>
+<div class="vs-box hit"><div class="vl">insurance policy</div><div class="vv">water sublimit: $50,000</div><div class="vm">equipment breakdown: excluded</div></div>
+</div>
+<div class="gap">$17,500 above sublimit. equipment damage excluded. claim blocked for adjuster review.</div>
+<div class="label">assertions</div>
+<div class="gate-row"><div class="gate-icon pass">&#10003;</div><div class="gate-label">claimed_amount == contractor.total</div><div class="gate-val gp">PASS</div></div>
+<div class="gate-row"><div class="gate-icon pass">&#10003;</div><div class="gate-label">date_of_loss within policy dates</div><div class="gate-val gp">PASS</div></div>
+<div class="gate-row"><div class="gate-icon fail">&#10007;</div><div class="gate-label">water damage within $50k sublimit</div><div class="gate-val gf">FAIL</div></div>
+<div class="gate-row"><div class="gate-icon fail">&#10007;</div><div class="gate-label">equipment breakdown not excluded</div><div class="gate-val gf">FAIL</div></div>
+<div class="gate-row"><div class="gate-icon pass">&#10003;</div><div class="gate-label">claim reported within 30 days</div><div class="gate-val gp">PASS</div></div>
+<div class="verdict v-block">blocked — 2 blockers, routed to adjuster</div>
+</div>
+
+<!-- CONTRACT — PRECOMPUTED -->
+<div class="scenario" id="s2">
+<div class="label">scenario</div>
+<div class="explain"><strong>saas contract red flag review.</strong> a 24-month agreement between cloudvault inc. and pinnacle financial group. the contract contains an aggressive 60-day auto-renewal notice, one-way indemnification, and no refund on convenience termination.</div>
+<div class="label">extracted fields</div>
+<div class="field"><div class="fn">contract.liability_cap</div><div class="fv">12-month fees</div><div class="fc fc-hi">0.95</div></div>
+<div class="field"><div class="fn">contract.auto_renewal_notice</div><div class="fv">60 days</div><div class="fc fc-hi">0.98</div></div>
+<div class="field"><div class="fn">contract.data_license</div><div class="fv">anonymized product improvement</div><div class="fc fc-hi">0.96</div></div>
+<div class="field"><div class="fn">contract.indemnification</div><div class="fv">one-way customer</div><div class="fc fc-hi">0.97</div></div>
+<div class="field"><div class="fn">contract.termination_refund</div><div class="fv">no refund</div><div class="fc fc-hi">0.98</div></div>
+<div class="field"><div class="fn">contract.sla_remedy</div><div class="fv">10% cap</div><div class="fc fc-hi">0.97</div></div>
+<div class="label">assertions</div>
+<div class="gate-row"><div class="gate-icon pass">&#10003;</div><div class="gate-label">liability cap at 12-month fees is standard</div><div class="gate-val gp">PASS</div></div>
+<div class="gate-row"><div class="gate-icon fail">&#10007;</div><div class="gate-label">auto-renewal 60-day notice (standard is 90-180)</div><div class="gate-val gf">FAIL</div></div>
+<div class="gate-row"><div class="gate-icon fail">&#10007;</div><div class="gate-label">anonymized data license may conflict with regulations</div><div class="gate-val gf">FAIL</div></div>
+<div class="gate-row"><div class="gate-icon fail">&#10007;</div><div class="gate-label">one-way indemnification favors provider</div><div class="gate-val gf">FAIL</div></div>
+<div class="gate-row"><div class="gate-icon fail">&#10007;</div><div class="gate-label">no refund on convenience termination</div><div class="gate-val gf">FAIL</div></div>
+<div class="gate-row"><div class="gate-icon fail">&#10007;</div><div class="gate-label">sla remedy capped at 10% (market: 25-50%)</div><div class="gate-val gf">FAIL</div></div>
+<div class="verdict v-block">blocked — 5 red flags, routed to legal</div>
+</div>
+
+<!-- TRADE — PRECOMPUTED -->
+<div class="scenario" id="s3">
+<div class="label">scenario</div>
+<div class="explain"><strong>trade document cross-check.</strong> shipment shp-2026-00341 between globaltech manufacturing and pacific imports. the commercial invoice, bill of lading, and certificate of origin are mostly consistent — but the incoterm is wrong.</div>
+<div class="label">extracted fields</div>
+<div class="field"><div class="fn">invoice.quantity</div><div class="fv">240 units</div><div class="fc fc-hi">0.99</div></div>
+<div class="field"><div class="fn">invoice.total_value</div><div class="fv">$300,000</div><div class="fc fc-hi">0.99</div></div>
+<div class="field"><div class="fn">invoice.incoterm</div><div class="fv">FOB Shanghai</div><div class="fc fc-hi">0.98</div></div>
+<div class="field"><div class="fn">bill_of_lading.freight</div><div class="fv">Freight Prepaid</div><div class="fc fc-hi">0.99</div></div>
+<div class="field"><div class="fn">certificate.origin</div><div class="fv">China</div><div class="fc fc-hi">0.99</div></div>
+<div class="label">contradiction</div>
+<div class="vs">
+<div class="vs-box"><div class="vl">commercial invoice</div><div class="vv">FOB Shanghai</div><div class="vm">buyer pays freight</div></div>
+<div class="vs-box hit"><div class="vl">bill of lading</div><div class="vv">Freight Prepaid</div><div class="vm">seller paid freight</div></div>
+</div>
+<div class="gap">FOB means buyer pays freight. but the bill of lading says freight is prepaid. this mismatch would trigger a customs hold.</div>
+<div class="label">assertions</div>
+<div class="gate-row"><div class="gate-icon pass">&#10003;</div><div class="gate-label">invoice quantity matches bill of lading</div><div class="gate-val gp">PASS</div></div>
+<div class="gate-row"><div class="gate-icon pass">&#10003;</div><div class="gate-label">country of origin consistent across all 3 docs</div><div class="gate-val gp">PASS</div></div>
+<div class="gate-row"><div class="gate-icon pass">&#10003;</div><div class="gate-label">hs code matches product description</div><div class="gate-val gp">PASS</div></div>
+<div class="gate-row"><div class="gate-icon pass">&#10003;</div><div class="gate-label">shipper/consignee names consistent</div><div class="gate-val gp">PASS</div></div>
+<div class="gate-row"><div class="gate-icon fail">&#10007;</div><div class="gate-label">FOB Shanghai contradicts Freight Prepaid</div><div class="gate-val gf">FAIL</div></div>
+<div class="verdict v-block">blocked — incoterm mismatch, customs risk</div>
+</div>
+
+<hr>
+<div class="label">beyond procurement</div>
+<table style="width:100%">
+<tr><td>accounts payable</td><td class="dim">invoice → po → receipt → payment auth</td></tr>
+<tr><td>insurance</td><td class="dim">claim → policy → evidence → settlement</td></tr>
+<tr><td>lending</td><td class="dim">application → income → valuation → underwrite</td></tr>
+<tr><td>compliance</td><td class="dim">id → kyc → risk → onboard</td></tr>
+</table>
+<footer>
+<span>v0.1.0</span>
+<span><a href="https://github.com/prx0r/proofdesk">github</a> · devnetwork hackathon 2026</span>
+</footer>
+</div>
+
+<script>
+const API='https://commons-orange-reporters-reproduce.trycloudflare.com';
+const log=document.getElementById('liveLog');
+const results=document.getElementById('liveResults');
+const status=document.getElementById('status');
+const rawLog=document.getElementById('rawLog');
+const runBtn=document.getElementById('runBtn');
+const rawToggleBtn=document.getElementById('rawToggle');
+let caseId=null,showRaw=false;
+
+function addLog(text,cls=''){log.style.display='block';const d=document.createElement('div');d.className=cls;d.textContent=text;log.appendChild(d);log.scrollTop=log.scrollHeight;}
+function setStatus(t){status.textContent=t;}
+function toggleRaw(){showRaw=!showRaw;rawLog.classList.toggle('open',showRaw);rawToggleBtn.textContent=showRaw?'hide raw api':'show raw api';}
+function scenario(i){document.querySelectorAll('.scenario-tab').forEach((t,j)=>{t.classList.toggle('on',j===i)});document.querySelectorAll('.scenario').forEach((s,j)=>{s.classList.toggle('on',j===i)});}
+
+async function api(method,path,body=null){
+  const opts={method,headers:{'Content-Type':'application/json'}};
+  if(body)opts.body=JSON.stringify(body);
+  const t0=performance.now();
+  const res=await fetch(API+path,opts);
+  const data=await res.json();
+  const ms=Math.round(performance.now()-t0);
+  if(showRaw){
+    rawLog.textContent+=`\n${method} ${path}\n${res.status} ${ms}ms\n${JSON.stringify(data,null,2).substring(0,800)}\n`;
+    rawLog.scrollTop=rawLog.scrollHeight;
+  }
+  return data;
+}
+
+async function run(){
+  log.innerHTML='';results.innerHTML='';rawLog.textContent='';
+  runBtn.disabled=true;runBtn.textContent='running...';
+  setStatus('1/6 creating case...');
+
+  // 1. Create fixture
+  addLog('$ curl -X POST /v1/cases/fixture');
+  const c=await api('POST','/v1/cases/fixture');
+  caseId=c.case_id;
+  addLog(`case: ${caseId}  docs: ${c.documents}`,'ok');
+
+  // 2. Run pipeline
+  setStatus('2/6 running pipeline...');
+  addLog('$ curl -X POST /v1/cases/'+caseId+'/run');
+  const r=await api('POST','/v1/cases/'+caseId+'/run',{domain:'procurement'});
+  addLog(`state: ${r.state}  blocking: ${r.blocking_exceptions}`,r.state==='REVIEW_REQUIRED'?'er':'ok');
+
+  // 3. Get facts
+  setStatus('3/6 extracting facts...');
+  const f=await api('GET','/v1/cases/'+caseId+'/facts');
+  addLog(`nutrient dws: ${f.facts.length} fields extracted`);
+
+  // 4. Get assertions
+  setStatus('4/6 checking assertions...');
+  const a=await api('GET','/v1/cases/'+caseId+'/assertions');
+  const fails=a.assertions.filter(x=>x.result==='FAIL');
+  addLog(`assertions: ${a.assertions.length} total, ${fails.length} fail`,fails.length?'er':'ok');
+
+  // 5. Get gate
+  setStatus('5/6 evaluating authority gate...');
+  const g=await api('GET','/v1/cases/'+caseId+'/signature-gate');
+  addLog(`gate: ${g.allowed?'PASS':'BLOCKED'} (${g.reasons.length} reasons)`,g.allowed?'ok':'er');
+
+  // 6. Get events
+  setStatus('6/6 recording audit trail...');
+  const e=await api('GET','/v1/cases/'+caseId+'/events');
+  addLog(`audit: ${e.events.length} events recorded`);
+
+  setStatus('pipeline complete — click resolve to continue');
+  runBtn.disabled=false;runBtn.textContent='run again';
+  rawToggleBtn.style.display='inline-block';
+  render(f.facts,a.assertions,g,e.events);
+}
+
+function render(facts,assertions,gate,events){
+  const ie=facts.find(f=>f.field==='insurance.expiry_date');
+  const rc=facts.find(f=>f.field==='procurement.required_coverage');
+  let h='';
+
+  // Contradiction
+  if(ie&&rc){
+    h+='<div class="explain"><strong>the contradiction:</strong> both fields were extracted correctly by nutrient dws. the problem is that together they describe an unsafe transaction. proofdesk catches this — a naive extraction system would not.</div>';
+    h+='<div class="vs">';
+    h+=`<div class="vs-box"><div class="vl">procurement request</div><div class="vv">coverage until ${rc.value_normalized}</div><div class="vm">confidence ${rc.confidence} · page ${rc.page}</div></div>`;
+    h+=`<div class="vs-box hit"><div class="vl">insurance certificate</div><div class="vv">expires ${ie.value_normalized}</div><div class="vm">confidence ${ie.confidence} · page ${ie.page}</div></div>`;
+    h+='</div>';
+    h+=`<div class="gap"><strong>gap detected</strong> — insurance expires before the service period ends. signing blocked.</div>`;
+  }
+
+  // Facts
+  h+='<div class="label">extracted fields</div>';
+  h+='<div class="explain"><strong>nutrient dws</strong> extracts structured fields with confidence scores and source provenance. each field traces back to a specific page and location in the original document.</div>';
+  for(const f of facts){
+    h+=`<div class="field"><div class="fn">${f.field}</div><div class="fv">${f.value_normalized}</div><div class="fc fc-hi">${f.confidence}</div></div>`;
+  }
+
+  // Assertions
+  h+='<div class="label">cross-document assertions</div>';
+  h+='<div class="explain"><strong>deterministic checks</strong> across all extracted facts. no llm calls — pure rule-based verification. each assertion compares fields from different documents.</div>';
+  for(const a of assertions){
+    const cls=a.result==='FAIL'?'fail':'pass';
+    const icon=a.result==='FAIL'?'&#10007;':'&#10003;';
+    h+=`<div class="gate-row"><div class="gate-icon ${cls}">${icon}</div><div class="gate-label">${a.predicate}</div><div class="gate-val ${a.result==='FAIL'?'gf':'gp'}">${a.result}</div></div>`;
+  }
+
+  // Gate
+  h+='<div class="label">authority gate</div>';
+  h+='<div class="explain"><strong>signaturegate</strong> enforces 6 conditions server-side. the agent cannot negotiate. all conditions must pass before any signing request is allowed.</div>';
+  const gc=[
+    {l:'state is prepared',p:true},
+    {l:'no unresolved blockers',p:!gate.reasons.find(r=>r.code==='UNRESOLVED_BLOCKER')},
+    {l:'human approval present',p:!gate.reasons.find(r=>r.code==='NO_HUMAN_APPROVAL')},
+    {l:'structured record exists',p:!gate.reasons.find(r=>r.code==='NO_STRUCTURED_RECORD')},
+    {l:'artifact hash verified',p:!gate.reasons.find(r=>r.code==='ARTIFACT_HASH_MISMATCH')},
+    {l:'calibrated score ≥ threshold',p:!gate.reasons.find(r=>r.code==='BELOW_CALIBRATED_THRESHOLD')},
+  ];
+  for(const c of gc){
+    const cls=c.p?'pass':'fail';
+    const icon=c.p?'&#10003;':'&#10007;';
+    h+=`<div class="gate-row"><div class="gate-icon ${cls}">${icon}</div><div class="gate-label">${c.l}</div><div class="gate-val ${c.p?'gp':'gf'}">${c.p?'pass':'fail'}</div></div>`;
+  }
+  h+=`<div class="verdict ${gate.allowed?'v-ok':'v-block'}">${gate.allowed?'proceed — signing authorized':'blocked — agent cannot sign'}</div>`;
+
+  // Audit
+  h+='<div class="label">audit trail</div>';
+  h+='<div class="explain"><strong>every state transition</strong> is hash-chained and recorded. the audit trail is tamper-evident — any modification to the sequence breaks the chain.</div>';
+  h+='<table style="width:100%">';
+  for(const ev of events){
+    const cls=ev.event_type==='STATE_TRANSITION'?'g':(ev.event_type.includes('FAIL')||ev.event_type.includes('ERROR')?'r':'g');
+    h+=`<tr><td class="dim" style="width:120px">${ev.from_state||''} → ${ev.to_state||''}</td><td><span class="dot ${cls}"></span>${ev.event_type}</td></tr>`;
+  }
+  h+='</table>';
+
+  // Resolve button
+  if(!gate.allowed&&gate.reasons.find(r=>r.code==='UNRESOLVED_BLOCKER')){
+    h+='<div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid #eee">';
+    h+='<div class="explain"><strong>next step:</strong> a human reviews the exact evidence, resolves the exception, and the system re-evaluates the gate.</div>';
+    h+='<button class="btn" onclick="resolve()">resolve exception →</button>';
+    h+='</div>';
+  }
+
+  results.innerHTML=h;
+}
+
+async function resolve(){
+  if(!caseId)return;
+  setStatus('resolving exception...');
+  addLog('$ curl -X POST /v1/cases/'+caseId+'/resolve');
+
+  const a=await api('GET','/v1/cases/'+caseId+'/assertions');
+  const fail=a.assertions.find(x=>x.result==='FAIL');
+  if(!fail){addLog('no failing assertion','er');return;}
+
+  await api('POST','/v1/cases/'+caseId+'/resolve',{
+    assertion_id:fail.assertion_id,decision:'CONDITIONAL_ACCEPT',
+    reason:'Vendor confirmed renewal is in progress',actor_id:'pm@company.com'
+  });
+  addLog('resolved: CONDITIONAL_ACCEPT','ok');
+
+  setStatus('approving record...');
+  addLog('$ curl -X POST /v1/cases/'+caseId+'/approve');
+  await api('POST','/v1/cases/'+caseId+'/approve');
+  addLog('approved','ok');
+
+  setStatus('generating document...');
+  await api('POST','/v1/cases/'+caseId+'/generate');
+  addLog('generated','ok');
+
+  const g=await api('GET','/v1/cases/'+caseId+'/signature-gate');
+  addLog(`gate: ${g.allowed?'PASS':'BLOCKED'}`,g.allowed?'ok':'er');
+
+  const e=await api('GET','/v1/cases/'+caseId+'/events');
+  const f=await api('GET','/v1/cases/'+caseId+'/facts');
+  const a2=await api('GET','/v1/cases/'+caseId+'/assertions');
+
+  setStatus('resolution complete');
+  render(f.facts,a2.assertions,g,e.events);
+}
+</script>
+</body>
+</html>

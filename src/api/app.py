@@ -207,7 +207,7 @@ def create_fixture_case():
         "doc_security_questionnaire": "security_questionnaire.pdf",
     }
     
-    pdf_dir = os.path.join(os.path.dirname(__file__), "..", "..", "data", "test_pdfs")
+    pdf_dir = os.path.join(os.path.dirname(__file__), "..", "..", "fixtures", "demo")
     
     for doc_data in uc.documents:
         mapped_filename = filename_map.get(doc_data["doc_id"], doc_data["filename"])

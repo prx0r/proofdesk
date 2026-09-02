@@ -37,8 +37,8 @@ print(f"  {len(tools)} tools:", ", ".join(t["name"] for t in tools))
 print("\n══ LIFECYCLE ══")
 c = tool("proofdesk_create_case", {"prompt":"MCP-driven inspection run"})
 cid = c["case_id"]; print("  case:", cid)
-for p in ["data/test_pdfs/vendor_quote.pdf","data/test_pdfs/procurement_request.pdf",
-          "data/test_pdfs/insurance_certificate.pdf","data/test_pdfs/security_questionnaire.pdf"]:
+for p in ["fixtures/demo/vendor_quote.pdf","fixtures/demo/procurement_request.pdf",
+          "fixtures/demo/insurance_certificate.pdf","fixtures/demo/security_questionnaire.pdf"]:
     d = tool("proofdesk_upload_pdf", {"case_id":cid,"path":p})
     print("  uploaded:", d["filename"], d["bytes"],"B")
 for st in ["INGESTED","EXTRACTED","CHECKED"]:

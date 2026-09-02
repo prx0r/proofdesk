@@ -1,16 +1,18 @@
 # AGENTS.md — ProofDesk Hackathon Project
 
-**Last updated:** 2026-08-27
-**Status:** Ready for handover
+**Last updated:** 2026-09-01
+**Status:** Nutrient DWS submission — see `docs/DEV_PLAN.md` for canonical dev plan
 **Deadline:** Sep 3, 2026 10:00 AM PT
 
 ---
 
 ## Project Overview
 
-ProofDesk is an **evidence-gated document execution system** for the DevNetwork API+Cloud+AI Hackathon 2026. It uses AI to verify facts before humans sign documents.
+ProofDesk is an **evidence-gated document execution system** for the DevNetwork API+Cloud+AI Hackathon 2026 (Nutrient DWS track). Nutrient DWS extracts grounded evidence from source documents. ProofDesk reconciles it, estimates decision risk, routes uncertain cases to people, and produces a replayable audit trail.
 
-**Core thesis:** "AI does the reversible work. Evidence and people control the irreversible."
+**Core thesis:** "Nutrient provides trustworthy evidence. ProofDesk turns that evidence into progressively better calibrated authority."
+
+**Canonical dev plan:** `docs/DEV_PLAN.md` (2101 lines, 23 phases + audit appendix)
 
 ---
 
@@ -73,8 +75,9 @@ uvicorn src.api.app:app --host 0.0.0.0 --port 8080
 
 | Directory | Contents |
 |-----------|----------|
-| `data/test_pdfs/` | 18 test PDFs |
-| `data/datasets/pdfs/` | 509 CUAD contracts |
+| `fixtures/demo/` | 4 canonical demo PDFs (committed to Git) |
+| `data/test_pdfs/` | 18 test PDFs (gitignored, for local dev) |
+| `data/datasets/pdfs/` | 509 CUAD contracts (gitignored) |
 | `data/templates/` | Doctavian DOCX template |
 
 ### Scripts
@@ -194,11 +197,13 @@ uvicorn src.api.app:app --host 0.0.0.0 --port 8080
 
 ## Files to Read First
 
-1. `README.md` — Project overview
-2. `NORTHSTAR.md` — Thesis and gaps
-3. `src/engine/batch.py` — Core logic
-4. `src/providers/classifier.py` — Classification
-5. `tests/test_all.py` — How tests work
+1. `docs/DEV_PLAN.md` — Canonical dev plan (23 phases + audit appendix)
+2. `docs/AUTHORITYBENCH_PLAN.md` — Stretch goal: benchmark + Trust Lab + paper
+3. `README.md` — Project overview (Nutrient-first)
+4. `src/engine/orchestrator.py` — Pipeline orchestration
+5. `src/state/machine.py` — SignatureGate (6 conditions)
+6. `src/engine/feedback.py` — Convergence loop
+6. `tests/test_all.py` — How tests work
 
 ---
 

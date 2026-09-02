@@ -1,6 +1,6 @@
 # ProofDesk — Frontier Analysis & Limitations
 
-**Date:** 2026-08-26 · 24,878 real documents · 9,984 risky
+**Date:** 2026-08-26 · 24,878 examples (mix of tabular records and document text) · 9,984 risky
 
 ---
 
@@ -76,7 +76,7 @@ Total documents:     24,878
 1. **Feature engineering matters** — 3x improvement from engineered features
 2. **GradBoost beats LogReg** — Better ranking of predictions
 3. **Simple but effective** — No LLM calls, no dual-call, just good features
-4. **Real data** — 24,878 documents, not synthetic
+4. **Real data** — 24,878 examples (mix of tabular records and document text), not synthetic
 
 ### What We're Missing vs Frontier
 
@@ -170,7 +170,7 @@ Total documents:     24,878
 
 1. **Feature engineering works** — 3x improvement from 3 extra features
 2. **GradBoost beats LogReg** — Better ranking of predictions
-3. **Real data matters** — 24,878 documents, not synthetic
+3. **Real data matters** — 24,878 examples (mix of tabular records and document text), not synthetic
 4. **The tradeoff is real** — You can't get 0% false signs with 100% coverage
 
 ### What We Didn't Prove
@@ -197,7 +197,7 @@ Total documents:     24,878
 ### Lead With
 
 1. **The optimization story** — 3x improvement from feature engineering
-2. **Real data** — 24,878 documents, not synthetic
+2. **Real data** — 24,878 examples (mix of tabular records and document text), not synthetic
 3. **Honest numbers** — 59.8% at 1% FSR, not 100%
 4. **Per-type strategy** — Different thresholds for different docs
 
@@ -210,4 +210,4 @@ Total documents:     24,878
 
 ### The Pitch
 
-"We achieved 59.8% auto-sign coverage at 1% false sign rate on 24,878 real documents. Feature engineering + gradient boosting improved coverage by 3x over the baseline. The system correctly identifies fraud based on transaction patterns, with different strategies for different document types. We're transparent about limitations: no conformal guarantee yet, some features fabricated, deployment blocked by API keys."
+"We achieved 59.8% auto-sign coverage at 1% false sign rate on 24,878 examples (mix of tabular records and document text). Feature engineering + gradient boosting improved coverage by 3x over the baseline. The system correctly identifies fraud based on transaction patterns, with different strategies for different document types. We're transparent about limitations: no conformal guarantee yet, some features fabricated, deployment blocked by API keys."

@@ -1,115 +1,66 @@
-# ProofDesk — Northstar: Hackathon Winning Strategy
+# ProofDesk — Northstar: Hackathon Strategy
 
-**Last updated:** 2026-08-25
-**Status:** Strategy finalized, dev plan pending
+**Last updated:** 2026-09-01
 **Deadline:** Sep 3, 2026 @ 10:00 AM PT
 
 ---
 
-## Strategic Decision: ONE ENTRY, THREE STORIES
+## Primary Submission: Nutrient DWS
 
-**Single monolith submission.** The same procurement workflow naturally hits all three sponsor narratives. Making three separate apps would be weaker — judges see spread-thin effort, waste time building three UIs, and the ProofDesk concept is literally one pipeline with authority tiers.
+ProofDesk is an evidence-gated document automation system. Nutrient DWS extracts grounded evidence from source documents. ProofDesk reconciles it, estimates decision risk, routes uncertain cases to people, and produces a replayable audit trail.
 
 ---
 
-## Sponsor Story Map
+## The Nutrient Story
 
 ```
-MESSY PROCUREMENT PACKET
-        ↓
-NUTRIENT — "We can trust the AI's document reading"
-  extract + source evidence + confidence
-        ↓
-PROOFDESK — "The AI found a real problem"
-  detect discrepancies / policy violations
-        ↓
-HUMAN REVIEW — "A person decided, not the machine"
-        ↓
-DOCTAVIAN — "The final document is correct by construction"
-  structured data → conditional document with branches/loops/calcs
-        ↓
-FOXIT MCP — "The agent prepared, but didn't overstep"
-  reversible PDF work (merge/convert/compress)
-        ↓
-HUMAN AUTHORITY GATE — "Signing requires a person"
-        ↓
-FOXIT eSIGN — "Real signature, real commitment"
-        ↓
-AUDITABLE OUTPUT — "You can prove why this happened"
+PDF → NUTRIENT DWS → Grounded Evidence → Verify → Classify → Route → Human → Audit
+         │                │                │        │         │       │       │
+         │                │                │        │         │       │       └─ Hash chain + Merkle
+         │                │                │        │         │       └─ Binary feedback
+         │                │                │        │         └─ AUTO/DEFER/BLOCK
+         │                │                │        └─ Calibrated thresholds
+         │                │                └─ Cross-document checks
+         │                └─ value + confidence + page + bbox
+         └─ Real API: document understanding
 ```
 
----
+### What the Nutrient judge sees
 
-## What Each Sponsor Judge Sees
+- Real DWS extraction with value, confidence, page, and bounding-box provenance
+- Cross-document discrepancy detection (e.g., insurance coverage gap)
+- Source-grounded evidence review
+- Human exception routing with audit trail
+- The SignatureGate: 6 conditions enforced server-side before any signing
 
-### Nutrient judge sees:
-- Real DWS extraction with coordinates, confidence, source pages
-- Cross-document discrepancy detection (payment terms mismatch)
-- Click-to-source review in DWS Viewer
-- Human exception routing
-- Audit trail
+### Why this is a strong Nutrient submission
 
-### Doctavian judge sees:
-- Approved structured record with jurisdiction, payment terms, risk tier, line items
-- Template branching: IF high-risk → add compliance schedule
-- Loop: FOR EACH line item → pricing row
-- Calculation: totals, taxes
-- Different inputs produce visibly different documents
+Nutrient's own judging thesis: "pull the data out, judge confidence, bring a human in where it matters, keep a record."
 
-### Foxit judge sees:
-- Plain prompt entry
-- Agent does reversible PDF work (merge, convert, compress) via MCP
-- Clear authority boundary: "Ready to commit. Human signature required."
-- Real eSign API call to real person
-- Signed document returned
-- Audit log distinguishes AI actions from human actions
-
-### Overall judge sees:
-- A functioning business product, not an experiment
-- Solves expensive procurement problem
-- Could become a company (horizontal trust control plane)
-- Built substantially during the event
+That is exactly what ProofDesk does. The research makes it stronger — calibrated confidence thresholds, convergence loop from human feedback, spot-audit pool measuring actual error on auto-sign decisions.
 
 ---
 
-## The Canonical Discrepancy
+## What Each Endpoint Proves
 
-```
-PO:           Payment = Net 60
-Vendor contract: Payment = Net 15
-Company policy:  Contracts over $50k require Net 45+
-```
-
-This single discrepancy demonstrates all three sponsors:
-- Nutrient: extracted the actual values with confidence
-- Doctavian: generated corrected contract with proper Net 45 terms
-- Foxit: authority boundary prevents agent from self-signing the corrected contract
+| Endpoint | What it shows |
+|----------|---------------|
+| `/v1/cases/{id}/facts` | Extracted fields with confidence, page, bbox |
+| `/v1/cases/{id}/trace` | Every outbound Nutrient DWS call |
+| `/v1/cases/{id}/signature-gate` | 6-condition gate check |
+| `/v1/cases/{id}/events` | Hash-chained audit trail |
+| `/v1/feedback/stats` | Convergence loop: human labels -> calibration |
 
 ---
 
-## Acceptance Checklist (60 gates)
-
-See:
-- `docs/NUTRIENT_GATES.md` — 20 TRUE/FALSE gates
-- `docs/DOCTAVIAN_GATES.md` — 20 TRUE/FALSE gates
-- `docs/FOXIT_GATES.md` — 20 TRUE/FALSE gates
-
-**Target:** 55/60 minimum. Items 1-9 of each track should all be TRUE first.
-
----
-
-## Priority Order (DO NOT INVERT)
+## Priority Order
 
 1. One immaculate procurement scenario that works end-to-end
 2. Real Nutrient extraction with evidence/confidence
 3. Visible human review gate
-4. Real Doctavian conditional generation
-5. Real Foxit MCP document preparation
-6. Real Foxit eSign + human signature
-7. Audit/provenance screen
-8. 5-20 adversarial/edge-case fixtures
-9. Frozen quantitative evaluation
-10. Demo polish
+4. Audit/provenance screen
+5. Convergence loop demo (brief)
+6. Demo polish
 
 ---
 
@@ -117,8 +68,7 @@ See:
 
 - Three separate apps
 - Sophisticated multi-agent debate
-- Free-form contract-writing LLM (Doctavian is about structured generation)
-- Benchmark harness for OCR routing (distracted from the actual problem)
+- Free-form contract-writing LLM
 - Generic chat-with-PDF
 - Custom OCR / viewer / e-sign engine
 - Blockchain notarization
@@ -129,21 +79,9 @@ See:
 
 ---
 
-## Sponsor API Keys Status
-
-| Provider | Keys | Status |
-|----------|------|--------|
-| Nutrient DWS | In HANDOVER.md | Have keys, need to wire real calls |
-| Doctavian | Need to register | Contact hello@doctavian.com |
-| Foxit PDF + eSign | Need to register | Contact theodore_castro@foxitsoftware.com |
-| SerpApi | In HANDOVER.md | Optional $3k track — easiest add |
-
----
-
 ## Reference Documents
 
-- `PROOFDESK_CANONICAL.md` — Full hackathon spec (the source of truth)
-- `HANDOVER.md` — Session log with real API keys
-- `docs/NUTRIENT_GATES.md` — 20 acceptance gates
-- `docs/DOCTAVIAN_GATES.md` — 20 acceptance gates
-- `docs/FOXIT_GATES.md` — 20 acceptance gates
+- `docs/JUDGE_GUIDE.md` — One-page judge guide
+- `docs/TECHNICAL_DEPTH.md` — Full research appendix
+- `HACKATHON_SUBMISSION.md` — Submission narrative
+- `fixtures/demo/` — 4 canonical demo PDFs (committed to Git)

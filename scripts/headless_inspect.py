@@ -93,9 +93,9 @@ def main(pdf_paths):
 
 if __name__ == "__main__":
     paths = sys.argv[1:] or [
-        "data/test_pdfs/vendor_quote.pdf",
-        "data/test_pdfs/procurement_request.pdf",
-        "data/test_pdfs/insurance_certificate.pdf",
-        "data/test_pdfs/security_questionnaire.pdf",
+        "fixtures/demo/vendor_quote.pdf",
+        "fixtures/demo/procurement_request.pdf",
+        "fixtures/demo/insurance_certificate.pdf",
+        "fixtures/demo/security_questionnaire.pdf",
     ]
     sys.exit(0 if main(paths) else 1)

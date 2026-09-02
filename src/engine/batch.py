@@ -575,7 +575,7 @@ class BatchProcessor:
             tree_levels.append(next_level)
             current_level = next_level
         
-        job.merkle_root = f"sha256:{leaves[0].hex()[:32]}"
+        job.merkle_root = f"sha256:{tree_levels[-1][0].hex()}"
         
         # Compute inclusion proofs for each file
         for file_result in job.files:
