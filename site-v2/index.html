@@ -272,6 +272,28 @@ footer a{color:#111;text-decoration:none;font-weight:500}
 </table>
 <p style="font-size:.875rem;color:#166534;font-weight:500;margin-top:12px">At 1% false-sign rate: 59.8% auto-sign coverage — 2.7x over baseline logistic regression.</p>
 </div>
+
+<div style="margin-top:40px">
+<div class="section-label">Visualizations</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+<div><img src="research/decision_distribution.png" style="width:100%;border:1px solid #eee;border-radius:8px" alt="Decision Distribution"><p style="font-size:.75rem;color:#999;margin-top:6px;text-align:center">Decision distribution: auto-sign / defer / block</p></div>
+<div><img src="research/confidence_distribution.png" style="width:100%;border:1px solid #eee;border-radius:8px" alt="Confidence Distribution"><p style="font-size:.75rem;color:#999;margin-top:6px;text-align:center">Confidence score distribution across extractions</p></div>
+<div><img src="research/convergence_projection.png" style="width:100%;border:1px solid #eee;border-radius:8px" alt="Convergence Projection"><p style="font-size:.75rem;color:#999;margin-top:6px;text-align:center">Convergence: review rate falls, error stays bounded</p></div>
+<div><img src="research/cost_savings.png" style="width:100%;border:1px solid #eee;border-radius:8px" alt="Cost Savings"><p style="font-size:.75rem;color:#999;margin-top:6px;text-align:center">Cost analysis: time saved vs manual review cost</p></div>
+</div>
+</div>
+
+<div style="margin-top:40px">
+<div class="section-label">Publications &amp; Technical Reports</div>
+<div class="card-grid">
+<a href="research/PAPER.md" style="text-decoration:none;color:inherit"><div class="card"><h3>SignatureGate: Risk-Budgeted Document Signing</h3><p>Full paper with abstract, methods, results, limitations. Covers conformal risk control, sheepish metric, per-field budgets, and convergence analysis.</p></div></a>
+<a href="research/ARXIV_PAPER.md" style="text-decoration:none;color:inherit"><div class="card"><h3>From Confidence to Authority</h3><p>ArXiv-style preprint on risk-calibrated document automation with source-grounded evidence.</p></div></a>
+<a href="research/CANONICAL_THESIS.md" style="text-decoration:none;color:inherit"><div class="card"><h3>Canonical Thesis</h3><p>The foundational argument: extraction accuracy is not execution authority. Calibrated confidence as the bridge.</p></div></a>
+<a href="research/CONFIDENCE_RESEARCH.md" style="text-decoration:none;color:inherit"><div class="card"><h3>Confidence Metrics Research</h3><p>Survey of non-hallucinated confidence approaches: UCCI, conformal prediction, ConfidenceBench, FaR.</p></div></a>
+<a href="research/FEEDBACK_THESIS.md" style="text-decoration:none;color:inherit"><div class="card"><h3>Feedback-Driven Calibration</h3><p>How human decisions become calibration data. The convergence loop thesis.</p></div></a>
+<a href="research/TECHNICAL_DEPTH.md" style="text-decoration:none;color:inherit"><div class="card"><h3>Technical Depth Appendix</h3><p>Full technical documentation: algorithms, benchmarks, experiments, and methodology.</p></div></a>
+</div>
+</div>
 </div>
 </section>
 
