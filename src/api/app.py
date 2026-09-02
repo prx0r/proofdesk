@@ -488,6 +488,7 @@ def serve_index():
 
 
 @app.get("/app", response_class=HTMLResponse)
+@app.get("/app.html", response_class=HTMLResponse)
 def serve_app():
     """Batch processing dashboard — the main product interface."""
     app_path = os.path.join(STATIC_DIR, "app.html")
