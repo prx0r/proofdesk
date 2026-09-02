@@ -77,6 +77,7 @@ footer a{color:#999}
 <button class="scenario-tab" onclick="scenario(1)">insurance</button>
 <button class="scenario-tab" onclick="scenario(2)">contract</button>
 <button class="scenario-tab" onclick="scenario(3)">trade</button>
+<button class="scenario-tab" onclick="scenario(4)">research</button>
 </div>
 
 <!-- PROCUREMENT — LIVE -->
@@ -159,6 +160,67 @@ footer a{color:#999}
 <div class="gate-row"><div class="gate-icon pass">&#10003;</div><div class="gate-label">shipper/consignee names consistent</div><div class="gate-val gp">PASS</div></div>
 <div class="gate-row"><div class="gate-icon fail">&#10007;</div><div class="gate-label">FOB Shanghai contradicts Freight Prepaid</div><div class="gate-val gf">FAIL</div></div>
 <div class="verdict v-block">blocked — incoterm mismatch, customs risk</div>
+</div>
+
+<!-- RESEARCH -->
+<div class="scenario" id="s4">
+<div class="label">what's under the hood</div>
+<div class="explain"><strong>proofdesk isn't just if/else rules.</strong> behind the authority gate is a research program in calibrated confidence — when can an automated system be trusted to act, and when must it abstain?</div>
+
+<div class="label">confidence algorithms</div>
+<table style="width:100%">
+<tr><td>conformal risk control</td><td class="dim">angelopoulos et al., iclr 2024 — finite-sample risk guarantees</td></tr>
+<tr><td>dual-call confidence</td><td class="dim">extractconf style — hunter + mapper extraction verification</td></tr>
+<tr><td>per-field risk budgets</td><td class="dim">signer: 1%, amount: 2%, date: 3%, default: 5%</td></tr>
+<tr><td>isotonic calibration</td><td class="dim">score mapping from raw confidence to true correctness probability</td></tr>
+<tr><td>sheepish transform</td><td class="dim">asymmetric overconfidence penalty — our contribution</td></tr>
+<tr><td>online calibration</td><td class="dim">marginonlinecalibrator — learns from human feedback</td></tr>
+</table>
+
+<div class="label">how the sheepish metric works</div>
+<div class="explain"><strong>standard calibration</strong> treats overconfidence and underconfidence symmetrically. but in document automation, overconfident errors are operationally more dangerous than cautious abstentions. the sheepish transform applies an asymmetric penalty: confidence that is too high gets penalized more than confidence that is too low.</div>
+<div class="trace">raw_confidence: 0.85<br>field_accuracy: 0.72<br>match_score: 0.90<br>grounding: 0.80<br><br>standard calibration: 0.85 → 0.82<br>sheepish calibration: 0.85 → 0.74  <span class="h">(penalizes overconfidence)</span></div>
+
+<div class="label">per-field risk budgets</div>
+<div class="explain"><strong>different fields have different risk profiles.</strong> a wrong signer name is catastrophic. a wrong metadata field is tolerable. proofdesk applies per-field thresholds based on operational impact.</div>
+<table style="width:100%">
+<tr><td>signer</td><td class="dim">1% max error rate — signing is irreversible</td></tr>
+<tr><td>amount</td><td class="dim">2% — financial impact</td></tr>
+<tr><td>date</td><td class="dim">3% — temporal fields</td></tr>
+<tr><td>party_name</td><td class="dim">2% — entity identification</td></tr>
+<tr><td>document_body</td><td class="dim">5% — general content</td></tr>
+<tr><td>metadata</td><td class="dim">10% — low-impact fields</td></tr>
+</table>
+
+<div class="label">convergence loop</div>
+<div class="explain"><strong>human decisions become calibration data.</strong> each time a person resolves an exception, proofdesk receives a labeled observation: "at this confidence level, was trusting this evidence actually justified?" the online calibrator updates, and future decisions improve.</div>
+<div class="trace">deployment begins<br>↓<br>100 decisions<br>↓<br>review corrections arrive sequentially<br>↓<br>calibration updates<br><br>result:<br>  review rate: falls over time<br>  measured false-authority risk: stays within policy<br>  different fields earn different levels of trust</div>
+
+<div class="label">benchmark results</div>
+<div class="explain"><strong>tested on 24,878 examples</strong> across 6 datasets (mix of tabular records and document text). the research benchmarks measure whether calibrated abstention reduces bad decisions.</div>
+<table style="width:100%">
+<tr><td>dataset</td><td>type</td><td class="dim" style="text-align:right">examples</td></tr>
+<tr><td>coldhearted fraud</td><td class="dim">transactions</td><td class="dim" style="text-align:right">19,872</td></tr>
+<tr><td>contractner</td><td class="dim">contracts</td><td class="dim" style="text-align:right">3,241</td></tr>
+<tr><td>fatura</td><td class="dim">invoices</td><td class="dim" style="text-align:right">1,400</td></tr>
+<tr><td>cuad</td><td class="dim">contracts (pdf)</td><td class="dim" style="text-align:right">509</td></tr>
+<tr><td>invoicebenchmark</td><td class="dim">invoices</td><td class="dim" style="text-align:right">200</td></tr>
+<tr><td>local pdfs</td><td class="dim">real nutrient extraction</td><td class="dim" style="text-align:right">18</td></tr>
+</table>
+<div style="margin-top:.75rem;padding:.75rem 1rem;background:#f0fdf4;border:1px solid #bbf7d0;font-size:.8125rem;color:#166534">
+<strong>result:</strong> at 1% false sign rate, proofdesk achieves 59.8% auto-sign coverage — 2.7x improvement over baseline logistic regression. feature engineering + gradient boosting + calibrated thresholds.
+</div>
+
+<div class="label">the evidence-to-authority gap</div>
+<div class="explain"><strong>this is the core research question:</strong> when is a correctly extracted document fact sufficient evidence for an automated action? extraction accuracy ≠ action safety. proofdesk measures the gap between "we extracted it correctly" and "we should act on it."</div>
+<div class="vs">
+<div class="vs-box"><div class="vl">extraction accuracy</div><div class="vv">95%</div><div class="vm">fields extracted correctly</div></div>
+<div class="vs-box"><div class="vl">authority accuracy</div><div class="vv">100%</div><div class="vm">unsafe actions prevented</div></div>
+</div>
+<div class="gap" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534"><strong>proofdesk catches what extraction misses:</strong> individually correct fields that together describe an unsafe transaction.</div>
+
+<div class="label">reproduce</div>
+<div class="trace">git clone https://github.com/prx0r/proofdesk<br>cd proofdesk<br>python3 -m venv .venv && source .venv/bin/activate<br>pip install -r requirements.txt<br><br># run all 115 tests<br>python3 tests/test_all.py<br>python3 tests/test_audit.py<br>python3 tests/test_integration.py<br>python3 tests/test_frontier.py<br>python3 tests/test_learning.py<br><br># start server<br>uvicorn src.api.app:app --port 8080</div>
 </div>
 
 <hr>
