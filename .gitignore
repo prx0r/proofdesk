@@ -51,3 +51,4 @@ kaggle_kernel/
 /tmp/proofdesk/
 .env
 .env.keys
+data/real_datasets/zugferd/
