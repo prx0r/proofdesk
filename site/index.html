@@ -219,6 +219,16 @@ footer a{color:#999}
 </div>
 <div class="gap" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534"><strong>proofdesk catches what extraction misses:</strong> individually correct fields that together describe an unsafe transaction.</div>
 
+<div class="label">convergence stats</div>
+<div class="explain"><strong>live feedback data</strong> from the running system. as humans resolve exceptions, the calibrator improves.</div>
+<table style="width:100%">
+<tr><td>total feedback labels</td><td id="fb-total">—</td></tr>
+<tr><td>field labels</td><td id="fb-fields">—</td></tr>
+<tr><td>auto-signed cases</td><td id="fb-auto">—</td></tr>
+<tr><td>spot-audited</td><td id="fb-audited">—</td></tr>
+<tr><td>measured error rate</td><td id="fb-error">—</td></tr>
+</table>
+
 <div class="label">reproduce</div>
 <div class="trace">git clone https://github.com/prx0r/proofdesk<br>cd proofdesk<br>python3 -m venv .venv && source .venv/bin/activate<br>pip install -r requirements.txt<br><br># run all 115 tests<br>python3 tests/test_all.py<br>python3 tests/test_audit.py<br>python3 tests/test_integration.py<br>python3 tests/test_frontier.py<br>python3 tests/test_learning.py<br><br># start server<br>uvicorn src.api.app:app --port 8080</div>
 </div>
@@ -547,6 +557,19 @@ function renderResolved(facts,assertions,gate,events,receipt,caseData){
   h+='<strong>archive</strong> — immutable record sealed with merkle proof</div>';
   results.innerHTML=h;
 }
+// Load feedback stats on research tab
+async function loadFeedback(){
+  try{
+    const r=await fetch(API+'/v1/feedback/stats');
+    const d=await r.json();
+    document.getElementById('fb-total').textContent=d.total_feedback||0;
+    document.getElementById('fb-fields').textContent=d.total_field_labels||0;
+    document.getElementById('fb-auto').textContent=d.auto_sign_panel?.auto_signed_total||0;
+    document.getElementById('fb-audited').textContent=d.auto_sign_panel?.audited||0;
+    document.getElementById('fb-error').textContent=d.auto_sign_panel?.measured_error_rate!=null?d.auto_sign_panel.measured_error_rate:'no data yet';
+  }catch(e){}
+}
+loadFeedback();
 </script>
 </body>
 </html>
