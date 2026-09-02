@@ -151,7 +151,14 @@ def run_pipeline(case: Case, domain: str = "procurement", stop_after: str | None
             _pre = len(case.facts)
             for doc in case.documents:
                 try:
-                    case.facts.extend(nutrient_extract(doc))
+                    # Real Nutrient needs actual PDF bytes — fall back to stubs for text-only docs
+                    if _USE_REAL_NUTRIENT and doc.raw_bytes:
+                        case.facts.extend(nutrient_extract(doc))
+                    elif _USE_REAL_NUTRIENT and not doc.raw_bytes:
+                        from ..providers.stubs import nutrient_extract as stub_extract
+                        case.facts.extend(stub_extract(doc))
+                    else:
+                        case.facts.extend(nutrient_extract(doc))
                 except Exception as e:
                     # provider failure degrades this doc, never the pipeline
                     degraded.append({"doc_id": doc.doc_id, "error": str(e)[:120]})
