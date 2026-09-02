@@ -210,7 +210,7 @@ def build_approval_payload(record_data: dict, confidence: dict | None = None) ->
     }
 
 
-def render_approval_memo(record_data: dict, template_id: str = "approval_memo", confidence: dict | None = None) -> tuple[GeneratedArtifact, str]:
+def render_approval_memo(record_data: dict, template_id: str = "approval_memo", confidence: dict | None = None, generated_at: str | None = None) -> tuple[GeneratedArtifact, str]:
     """Generate approval memo from structured record (deterministic local renderer)."""
 
     lines = []
@@ -232,7 +232,7 @@ def render_approval_memo(record_data: dict, template_id: str = "approval_memo", 
     approval_status = band_text
 
     lines.append(f"Status: {approval_status}")
-    lines.append(f"Generated: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+    lines.append(f"Generated: {generated_at or 'N/A'}")
     lines.append("")
 
     # Vendor info
