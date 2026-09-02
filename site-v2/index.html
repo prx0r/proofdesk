@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProofDesk — Evidence-Gated Document Automation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Source+Code+Pro:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',-apple-system,system-ui,sans-serif;background:#fafafa;color:#111;line-height:1.6;-webkit-font-smoothing:antialiased}
+code,.mono{font-family:'Source Code Pro',monospace}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;background:rgba(250,250,250,.95);backdrop-filter:blur(12px);border-bottom:1px solid #eee;z-index:100;padding:0 2rem}
+.nav-inner{max-width:1000px;margin:0 auto;display:flex;align-items:center;height:48px;gap:2rem}
+.nav-inner a{font-size:.8rem;color:#666;text-decoration:none;font-weight:500}
+.nav-inner a:hover{color:#111}
+.nav-brand{font-weight:700;font-size:.9rem;color:#111}
+
+/* HERO */
+.hero{padding:120px 2rem 80px;text-align:center}
+.hero h1{font-size:3rem;font-weight:800;letter-spacing:-.04em;line-height:1.1;max-width:700px;margin:0 auto}
+.hero .tag{display:inline-block;background:#eff6ff;color:#1d4ed8;font-size:.75rem;font-weight:600;padding:4px 12px;border-radius:20px;margin-bottom:20px}
+.hero p{font-size:1.15rem;color:#555;max-width:600px;margin:20px auto 0;line-height:1.7}
+.hero-cta{display:flex;gap:12px;justify-content:center;margin-top:32px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 24px;border-radius:8px;font-size:.875rem;font-weight:600;text-decoration:none;transition:all .15s}
+.btn-primary{background:#111;color:#fff}.btn-primary:hover{background:#333}
+.btn-outline{background:transparent;color:#111;border:1px solid #ddd}.btn-outline:hover{border-color:#111}
+
+/* SECTIONS */
+section{padding:80px 2rem}
+.section-inner{max-width:1000px;margin:0 auto}
+.section-label{font-size:.7rem;text-transform:uppercase;letter-spacing:.12em;color:#999;font-weight:600;margin-bottom:8px}
+.section-title{font-size:2rem;font-weight:700;letter-spacing:-.03em;margin-bottom:12px}
+.section-desc{font-size:1rem;color:#555;max-width:600px;line-height:1.7}
+.bg-dark{background:#0a0a0f;color:#fff}
+.bg-dark .section-desc{color:#999}
+
+/* CARDS */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;margin-top:32px}
+.card{background:#fff;border:1px solid #eee;border-radius:12px;padding:24px}
+.card h3{font-size:1rem;font-weight:600;margin-bottom:8px}
+.card p{font-size:.875rem;color:#666;line-height:1.6}
+.card .icon{font-size:1.5rem;margin-bottom:12px}
+
+/* PIPELINE */
+.pipeline{display:flex;gap:0;margin-top:40px;overflow-x:auto}
+.pipe-step{flex:1;min-width:140px;background:#fff;border:1px solid #eee;padding:20px 16px;text-align:center;position:relative}
+.pipe-step:first-child{border-radius:12px 0 0 12px}
+.pipe-step:last-child{border-radius:0 12px 12px 0}
+.pipe-step+.pipe-step{border-left:none}
+.pipe-num{font-size:.625rem;text-transform:uppercase;letter-spacing:.1em;color:#999;font-weight:600}
+.pipe-title{font-size:.9rem;font-weight:600;margin-top:6px}
+.pipe-desc{font-size:.75rem;color:#666;margin-top:4px;line-height:1.5}
+.pipe-step.highlight{border-color:#1d4ed8;background:#eff6ff}
+
+/* ALGO TABLE */
+.algo-table{width:100%;border-collapse:collapse;margin-top:24px}
+.algo-table th{text-align:left;font-size:.6875rem;text-transform:uppercase;letter-spacing:.1em;color:#999;padding:8px 12px;border-bottom:2px solid #eee;font-weight:600}
+.algo-table td{padding:12px;border-bottom:1px solid #f0f0f0;font-size:.875rem}
+.algo-table td:first-child{font-weight:500}
+.algo-table td:last-child{color:#666}
+
+/* METRIC */
+.metric{text-align:center;padding:32px}
+.metric .num{font-size:2.5rem;font-weight:700;letter-spacing:-.03em}
+.metric .label{font-size:.8rem;color:#666;margin-top:4px}
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid #eee;border-radius:12px;overflow:hidden;margin-top:32px}
+.metric-grid .metric{border-right:1px solid #eee}.metric-grid .metric:last-child{border-right:none}
+
+/* CONTRADICTION */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:24px}
+.vs-box{background:#fff;border:1px solid #eee;border-radius:12px;padding:24px}
+.vs-box .label{font-size:.6875rem;text-transform:uppercase;letter-spacing:.1em;color:#999;font-weight:600}
+.vs-box .value{font-size:1.5rem;font-weight:700;margin-top:8px}
+.vs-box .meta{font-size:.8rem;color:#666;margin-top:8px}
+.vs-box.hit{border-color:#fecaca;background:#fef2f2}.vs-box.hit .value{color:#991b1b}
+
+/* TIMELINE */
+.timeline{position:relative;padding-left:32px;margin-top:32px}
+.timeline::before{content:'';position:absolute;left:11px;top:0;bottom:0;width:2px;background:#eee}
+.tl-item{position:relative;padding:16px 0}
+.tl-item::before{content:'';position:absolute;left:-25px;top:22px;width:10px;height:10px;border-radius:50%;background:#22c55e;border:2px solid #fafafa}
+.tl-item.fail::before{background:#ef4444}
+.tl-time{font-size:.7rem;color:#999;font-weight:500}
+.tl-title{font-size:.9rem;font-weight:600;margin-top:2px}
+.tl-desc{font-size:.8rem;color:#666;margin-top:2px}
+
+/* GATE */
+.gate-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:.875rem}
+.gate-row:last-child{border-bottom:none}
+.gate-icon{width:20px;text-align:center;font-size:.9rem}
+.gate-label{flex:1}
+.gate-val{font-size:.75rem;font-weight:600;padding:3px 10px;border-radius:4px}
+.gp{background:#f0fdf4;color:#166534}.gf{background:#fef2f2;color:#991b1b}
+.verdict-box{margin-top:16px;padding:12px 16px;border-radius:8px;font-weight:600;font-size:.9rem}
+.v-block{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+
+/* FOOTER */
+footer{padding:48px 2rem;border-top:1px solid #eee;text-align:center}
+footer p{font-size:.8rem;color:#999}
+footer a{color:#111;text-decoration:none;font-weight:500}
+
+@media(max-width:768px){
+.hero h1{font-size:2rem}
+.metric-grid{grid-template-columns:repeat(2,1fr)}
+.vs{grid-template-columns:1fr}
+.pipeline{flex-direction:column}.pipe-step{border-radius:8px!important;border-left:1px solid #eee!important}.pipe-step+.pipe-step{border-top:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+<div class="nav-inner">
+<span class="nav-brand">ProofDesk</span>
+<a href="#problem">Problem</a>
+<a href="#solution">Solution</a>
+<a href="#research">Research</a>
+<a href="#demo">Demo</a>
+<a href="https://github.com/prx0r/proofdesk">GitHub</a>
+</div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+<div class="tag">DevNetwork API+Cloud+AI Hackathon 2026</div>
+<h1>Extraction accuracy is not execution authority</h1>
+<p>Two documents can be individually read correctly and still describe a transaction that should never be approved. ProofDesk catches the gap between "we extracted it correctly" and "we should act on it."</p>
+<div class="hero-cta">
+<a href="#demo" class="btn btn-primary">Live Demo</a>
+<a href="#research" class="btn btn-outline">Read the Research</a>
+<a href="https://github.com/prx0r/proofdesk" class="btn btn-outline">GitHub</a>
+</div>
+</div>
+
+<!-- PROBLEM -->
+<section id="problem">
+<div class="section-inner">
+<div class="section-label">The Problem</div>
+<div class="section-title">AI can read documents. That doesn't mean it should act on them.</div>
+<div class="section-desc">Current document AI optimizes for extraction accuracy. But in regulated workflows, the hard problem isn't "can the model read this?" — it's "is the evidence sufficient to authorize what happens next?"</div>
+
+<div class="vs">
+<div class="vs-box">
+<div class="label">Extraction Accuracy</div>
+<div class="value">95%+</div>
+<div class="meta">Fields extracted correctly by modern DWS systems</div>
+</div>
+<div class="vs-box hit">
+<div class="label">Action Safety</div>
+<div class="value">Unknown</div>
+<div class="meta">Whether the evidence justifies an irreversible commitment</div>
+</div>
+</div>
+
+<div class="card-grid" style="margin-top:32px">
+<div class="card">
+<div class="icon">&#128269;</div>
+<h3>Individually correct</h3>
+<p>Each document is extracted with high confidence. No extraction error.</p>
+</div>
+<div class="card">
+<div class="icon">&#9888;</div>
+<h3>Jointly unsafe</h3>
+<p>Together the facts describe a transaction that violates policy. Insurance expires before the service period ends.</p>
+</div>
+<div class="card">
+<div class="icon">&#128683;</div>
+<h3>Agent proceeds anyway</h3>
+<p>A naive system sees high confidence and auto-approves. The human never reviews the contradiction.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- SOLUTION -->
+<section id="solution" class="bg-dark">
+<div class="section-inner">
+<div class="section-label" style="color:#666">The Solution</div>
+<div class="section-title">ProofDesk: Evidence-Gated Document Automation</div>
+<div class="section-desc">Nutrient DWS extracts grounded evidence. ProofDesk determines when that evidence is sufficient to act — and when it must defer to a human.</div>
+
+<div class="pipeline">
+<div class="pipe-step"><div class="pipe-num">1</div><div class="pipe-title">Extract</div><div class="pipe-desc">Nutrient DWS pulls value, confidence, page, bbox for every field</div></div>
+<div class="pipe-step"><div class="pipe-num">2</div><div class="pipe-title">Verify</div><div class="pipe-desc">Cross-document checks catch contradictions</div></div>
+<div class="pipe-step highlight"><div class="pipe-num">3</div><div class="pipe-title">Gate</div><div class="pipe-desc">6 conditions enforced server-side. Agent cannot negotiate.</div></div>
+<div class="pipe-step"><div class="pipe-num">4</div><div class="pipe-title">Human</div><div class="pipe-desc">Reviews exact evidence, not the entire bundle</div></div>
+<div class="pipe-step"><div class="pipe-num">5</div><div class="pipe-title">Execute</div><div class="pipe-desc">Hash-chained audit trail, Merkle proofs</div></div>
+<div class="pipe-step"><div class="pipe-num">6</div><div class="pipe-title">Learn</div><div class="pipe-desc">Human decisions improve future calibration</div></div>
+</div>
+
+<div class="metric-grid" style="margin-top:40px;border-color:#333">
+<div class="metric"><div class="num" style="color:#22c55e">15</div><div class="label" style="color:#999">Extracted Fields</div></div>
+<div class="metric"><div class="num" style="color:#22c55e">6</div><div class="label" style="color:#999">Authority Checks</div></div>
+<div class="metric"><div class="num" style="color:#ef4444">1</div><div class="label" style="color:#999">Contradiction Found</div></div>
+<div class="metric"><div class="num" style="color:#22c55e">0</div><div class="label" style="color:#999">Unsafe Actions</div></div>
+</div>
+</div>
+</section>
+
+<!-- THE CONTRADICTION -->
+<section>
+<div class="section-inner">
+<div class="section-label">The Demo</div>
+<div class="section-title">A real contradiction, caught live</div>
+<div class="section-desc">Four procurement documents. Each extracted correctly. Together they describe a transaction that should not be approved.</div>
+
+<div class="vs">
+<div class="vs-box">
+<div class="label">Procurement Request</div>
+<div class="value">Coverage until 2027-10-01</div>
+<div class="meta">confidence 0.98 &middot; page 1 &middot; bbox [560, 169, 907, 199]</div>
+</div>
+<div class="vs-box hit">
+<div class="label">Insurance Certificate</div>
+<div class="value">Expires 2027-08-31</div>
+<div class="meta">confidence 0.99 &middot; page 1 &middot; bbox [38, 210, 290, 42]</div>
+</div>
+</div>
+
+<div style="margin-top:16px;padding:12px 16px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;font-size:.875rem;color:#991b1b">
+<strong>31-day gap</strong> — insurance expires before the service period ends. Both values are high-confidence Nutrient DWS extractions. Together they are unsafe.
+</div>
+
+<div style="margin-top:24px">
+<a href="https://proofdesk-90q.pages.dev" class="btn btn-primary" target="_blank">Run the Live Demo &rarr;</a>
+</div>
+</div>
+</section>
+
+<!-- RESEARCH -->
+<section id="research" style="background:#f8f9fa">
+<div class="section-inner">
+<div class="section-label">The Research</div>
+<div class="section-title">We studied when automation should stop</div>
+<div class="section-desc">Behind the authority gate is a research program in calibrated confidence. Not ad-hoc thresholds — published algorithms applied to document automation.</div>
+
+<table class="algo-table">
+<thead>
+<tr><th>Algorithm</th><th>What it solves</th><th>How</th></tr>
+</thead>
+<tbody>
+<tr><td>Conformal-style risk calibration</td><td>"What threshold gives me bounded false authorization?"</td><td>Tune/certify/test split, quantile of nonconformity scores</td></tr>
+<tr><td>Sheepish transform</td><td>"Overconfident errors are more dangerous than cautious abstentions"</td><td>Asymmetric penalty on confidence that's too high</td></tr>
+<tr><td>Per-field risk budgets</td><td>"A wrong signer name is worse than wrong metadata"</td><td>Signer: 1%, amount: 2%, date: 3%, default: 10%</td></tr>
+<tr><td>Online calibration</td><td>"Human decisions should improve future thresholds"</td><td>MarginOnlineCalibrator updates from feedback labels</td></tr>
+<tr><td>Dual-call verification</td><td>"Does a second extraction agree?"</td><td>Hunter (field-guided) vs Mapper (document-guided)</td></tr>
+</tbody>
+</table>
+
+<div style="margin-top:40px">
+<div class="section-label">The Convergence Loop</div>
+<p style="font-size:.95rem;color:#555;line-height:1.7;max-width:700px">Each time a human resolves an exception, ProofDesk captures the confidence level, the accept/reject decision, and the field involved. This becomes calibration data. The online calibrator updates. Future decisions improve.</p>
+<p style="font-size:.95rem;font-weight:600;margin-top:12px">Human review falls over time while measured false-authorization risk stays bounded.</p>
+</div>
+
+<div style="margin-top:40px">
+<div class="section-label">Calibration Research</div>
+<p style="font-size:.875rem;color:#666;line-height:1.6;max-width:700px;margin-bottom:16px">Threshold tuning validated on held-out splits across heterogeneous classification datasets. Not a document-specific benchmark — these are the datasets used to develop the confidence algorithms.</p>
+<table class="algo-table">
+<thead><tr><th>Dataset</th><th>Records</th><th>Type</th></tr></thead>
+<tbody>
+<tr><td>ColdHearted Fraud</td><td>19,872</td><td>Transaction records</td></tr>
+<tr><td>ContractNER</td><td>3,241</td><td>Contract text</td></tr>
+<tr><td>FATURA</td><td>1,400</td><td>Invoices</td></tr>
+<tr><td>CUAD</td><td>509</td><td>Contract clauses</td></tr>
+<tr><td>InvoiceBenchmark</td><td>200</td><td>Invoices</td></tr>
+</tbody>
+</table>
+<p style="font-size:.875rem;color:#166534;font-weight:500;margin-top:12px">At 1% false-sign rate: 59.8% auto-sign coverage — 2.7x over baseline logistic regression.</p>
+</div>
+</div>
+</section>
+
+<!-- MOAT -->
+<section>
+<div class="section-inner">
+<div class="section-label">The Moat</div>
+<div class="section-title">What's hard to replicate</div>
+
+<div class="card-grid">
+<div class="card">
+<h3>Nutrient source grounding</h3>
+<p>Every fact carries value, confidence, page provenance, and bounding box. Not just text extraction — evidence with location.</p>
+</div>
+<div class="card">
+<h3>Cross-document verification</h3>
+<p>Deterministic checks catch contradictions that per-document extraction misses. The conflict is between documents, not within them.</p>
+</div>
+<div class="card">
+<h3>Calibrated authority gate</h3>
+<p>6 conditions enforced server-side. Thresholds calibrated from research, not hand-tuned. The agent cannot negotiate.</p>
+</div>
+<div class="card">
+<h3>Human-feedback convergence</h3>
+<p>Human decisions become calibration data. The system learns where this organization can safely automate. Competitors can copy the UI; they can't copy three years of calibrated authority decisions.</p>
+</div>
+<div class="card">
+<h3>Tamper-evident execution</h3>
+<p>Hash-chained audit trail with Merkle proofs. Every decision replayable. Content-addressed artifacts. Change one byte and the hash changes.</p>
+</div>
+<div class="card">
+<h3>12 document types</h3>
+<p>Procurement, invoice, contract, insurance, trade, KYC, mortgage, medical — each with specific field schemas, risk budgets, and verification assertions.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- RESULTS -->
+<section style="background:#f8f9fa">
+<div class="section-inner" style="text-align:center">
+<div class="section-label">Results</div>
+<div class="section-title">What we measured</div>
+<div class="metric-grid" style="margin-top:32px">
+<div class="metric"><div class="num">115</div><div class="label">Tests Passing</div></div>
+<div class="metric"><div class="num">13</div><div class="label">PDF Fixtures Tested</div></div>
+<div class="metric"><div class="num">12</div><div class="label">Document Types</div></div>
+<div class="metric"><div class="num">6</div><div class="label">Authority Conditions</div></div>
+</div>
+<div class="metric-grid" style="margin-top:0">
+<div class="metric"><div class="num">15</div><div class="label">Extracted Fields</div></div>
+<div class="metric"><div class="num">6</div><div class="label">Cross-Doc Checks</div></div>
+<div class="metric"><div class="num">31</div><div class="label">Day Gap Detected</div></div>
+<div class="metric"><div class="num">0</div><div class="label">Unsafe Actions</div></div>
+</div>
+</div>
+</section>
+
+<!-- DEMO -->
+<section id="demo">
+<div class="section-inner" style="text-align:center">
+<div class="section-label">Try It</div>
+<div class="section-title">Live interactive demo</div>
+<div class="section-desc" style="margin:0 auto">Click "Run Live" and watch the pipeline execute against the real Nutrient DWS API. Every step is visible.</div>
+<div style="margin-top:32px">
+<a href="https://proofdesk-90q.pages.dev" class="btn btn-primary" target="_blank" style="font-size:1rem;padding:14px 32px">Open Live Demo &rarr;</a>
+</div>
+<p style="font-size:.8rem;color:#999;margin-top:16px">Nutrient DWS: LIVE &middot; 115 tests &middot; Hash-chained audit</p>
+</div>
+</section>
+
+<!-- NUTRIENT LINE -->
+<section style="background:#0a0a0f;color:#fff;text-align:center;padding:60px 2rem">
+<div style="max-width:700px;margin:0 auto">
+<p style="font-size:1.3rem;font-weight:300;line-height:1.7;color:#ccc">"Nutrient DWS performs the core document extraction and source grounding that turns uploaded PDFs into confidence-aware evidence. ProofDesk uses that evidence to determine whether an automated action may proceed or must defer to a human."</p>
+</div>
+</section>
+
+<footer>
+<p><a href="https://github.com/prx0r/proofdesk">GitHub</a> &middot; DevNetwork API+Cloud+AI Hackathon 2026 &middot; Nutrient DWS Track</p>
+</footer>
+
+</body>
+</html>
