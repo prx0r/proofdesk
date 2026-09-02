@@ -69,6 +69,14 @@ footer a{color:#999}
 <h1>proofdesk</h1>
 <p class="sub">Nutrient DWS grounds the facts. ProofDesk decides when the evidence is sufficient to act.</p>
 
+<div class="explain" style="margin-top:1.5rem;border-left-color:#111">
+<b>the problem:</b> two documents can be individually extracted with high confidence and still describe a transaction that should never be approved. extraction accuracy is not execution authority.
+</div>
+
+<div class="explain">
+<b>what we built:</b> nutient dws extracts grounded evidence with confidence, page, and bounding box. proofdesk cross-checks facts across documents, applies a calibrated authority gate, and routes uncertain cases to humans. every decision is audit-trailed with hash chains and merkle proofs. human feedback improves future calibration.
+</div>
+
 <div class="scenario-tabs">
 <button class="scenario-tab on" onclick="scenario(0)">procurement (live)</button>
 <button class="scenario-tab" onclick="scenario(1)">insurance</button>
@@ -146,6 +154,20 @@ footer a{color:#999}
 <!-- RESEARCH -->
 <div class="scenario" id="s4">
 <div class="explain"><b>what's under the hood.</b> behind the authority gate is a research program in calibrated confidence.</div>
+
+<div class="label">how it works</div>
+<table style="width:100%">
+<tr><td style="font-weight:500">1. nutient dws extracts</td><td class="dim">value + confidence + page + bounding box for every field</td></tr>
+<tr><td style="font-weight:500">2. cross-document verify</td><td class="dim">deterministic checks across all extracted facts</td></tr>
+<tr><td style="font-weight:500">3. calibrated authority gate</td><td class="dim">6 conditions enforced server-side — agent cannot negotiate</td></tr>
+<tr><td style="font-weight:500">4. human reviews exact evidence</td><td class="dim">not the entire bundle — the specific failing claim and its source</td></tr>
+<tr><td style="font-weight:500">5. deterministic execution</td><td class="dim">hash-chained audit trail, merkle proofs, content-addressed artifacts</td></tr>
+<tr><td style="font-weight:500">6. convergence loop</td><td class="dim">human decisions become calibration data — future thresholds improve</td></tr>
+</table>
+
+<div class="label">the convergence loop</div>
+<div class="explain">each time a human resolves an exception, proofdesk captures: what confidence level, did they accept or reject, what field. this becomes calibration data. the online calibrator updates. future decisions improve. the trajectory: <b>human review falls over time while measured false-authorization risk stays bounded.</b></div>
+
 <div class="label">confidence algorithms</div>
 <table style="width:100%"><tr><td>conformal-style risk calibration</td><td class="dim">angelopoulos et al., iclr 2024 — selective prediction research</td></tr>
 <tr><td>dual-call confidence</td><td class="dim">extractconf-inspired — hunter + mapper verification</td></tr>
