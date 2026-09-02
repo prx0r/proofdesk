@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProofDesk — Document Processing Dashboard</title>
+<script src="https://cdn.nutrient.io/viewer.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'SF Mono','JetBrains Mono',monospace;background:#0a0e14;color:#c9d1d9;font-size:13px}
+.header{background:#111820;border-bottom:1px solid #21262d;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+.header h1{font-size:18px;color:#e6edf3}.header h1 span{color:#58a6ff}
+.badge{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600}
+.badge-ok{background:#12331d;color:#3fb950}.badge-warn{background:#3b2b12;color:#d29922}.badge-err{background:#3d1214;color:#f85149}.badge-idle{background:#1d2530;color:#8b949e}
+.container{max-width:1400px;margin:0 auto;padding:16px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.full{grid-column:1/-1}
+.card{background:#111820;border:1px solid #21262d;border-radius:8px;padding:16px;margin-bottom:16px}
+.card h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#58a6ff;margin-bottom:12px}
+.drop-zone{border:2px dashed #30363d;border-radius:12px;padding:40px;text-align:center;cursor:pointer;transition:all .2s}
+.drop-zone:hover{border-color:#58a6ff;background:rgba(88,166,255,.04)}
+.drop-zone.dragover{border-color:#3fb950;background:rgba(63,185,80,.06)}
+.drop-icon{font-size:32px;margin-bottom:8px}
+.progress-container{margin-top:12px;display:none}
+.progress-bar{height:6px;background:#21262d;border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#58a6ff,#3fb950);border-radius:3px;transition:width .3s}
+.progress-text{font-size:11px;color:#8b949e;margin-top:6px}
+.mini-log{max-height:120px;overflow-y:auto;margin-top:8px;font-size:11px;color:#8b949e}
+.mini-log .entry{padding:2px 0;border-bottom:1px solid #21262d22}
+.mini-log .ok{color:#3fb950}.mini-log .warn{color:#d29922}.mini-log .err{color:#f85149}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:8px;color:#8b949e;border-bottom:2px solid #21262d;font-weight:600}
+td{padding:8px;border-bottom:1px solid #21262d22}
+tr:hover{background:#161b22}
+.status-auto{color:#3fb950;font-weight:600}
+.status-defer{color:#d29922;font-weight:600}
+.status-reject{color:#f85149;font-weight:600}
+.status-review{color:#58a6ff;font-weight:600}
+.confidence{font-weight:600}
+.conf-high{color:#3fb950}.conf-med{color:#d29922}.conf-low{color:#f85149}
+.btn{background:#21262d;border:1px solid #30363d;color:#c9d1d9;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-family:inherit}
+.btn:hover{background:#30363d}.btn-correct{border-color:#3fb950;color:#3fb950}.btn-wrong{border-color:#f85149;color:#f85149}
+.btn-viewer{border-color:#58a6ff;color:#58a6ff}
+.report-section{margin-top:16px;padding:16px;background:#0d1117;border-radius:8px;border:1px solid #21262d}
+.report-section h3{font-size:12px;color:#58a6ff;margin-bottom:8px}
+.merkle-hash{font-family:monospace;font-size:10px;color:#8b949e;word-break:break-all}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat{background:#0d1117;border-radius:8px;padding:12px;text-align:center;border:1px solid #21262d}
+.stat .value{font-size:24px;font-weight:700;color:#e6edf3}.stat .label{font-size:10px;color:#8b949e;margin-top:4px}
+.fade-in{animation:fadeIn .3s ease-in}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.hidden{display:none}
+.viewer-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;display:flex;align-items:center;justify-content:center}
+.viewer-container{width:90%;height:90%;background:#111820;border-radius:8px;overflow:hidden;position:relative}
+.viewer-close{position:absolute;top:10px;right:10px;z-index:1001;background:#21262d;border:1px solid #30363d;color:#c9d1d9;padding:4px 12px;border-radius:6px;cursor:pointer}
+.viewer-content{width:100%;height:100%}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div><h1><span>Sheepdog</span> — Batch Document Processor</h1></div>
+  <div>
+    <span class="badge badge-idle" id="chain-badge">CHAIN ?</span>
+    <span class="badge badge-idle" id="status-badge">IDLE</span>
+  </div>
+</div>
+
+<div class="container">
+  <!-- Stats -->
+  <div class="stat-grid" id="stats">
+    <div class="stat"><div class="value" id="stat-total">0</div><div class="label">TOTAL FILES</div></div>
+    <div class="stat"><div class="value" id="stat-auto" style="color:#3fb950">0</div><div class="label">AUTO-SIGNED</div></div>
+    <div class="stat"><div class="value" id="stat-defer" style="color:#d29922">0</div><div class="label">DEFERRED</div></div>
+    <div class="stat"><div class="value" id="stat-reject" style="color:#f85149">0</div><div class="label">REJECTED</div></div>
+  </div>
+
+  <!-- Upload Zone -->
+  <div class="card" id="upload-card">
+    <h2>Upload Documents</h2>
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+      <div class="drop-icon">📄</div>
+      <div>Drop PDFs here or click to select</div>
+      <div style="font-size:11px;color:#8b949e;margin-top:8px">Supports: PDF files — invoices, contracts, KYC docs, receipts</div>
+    </div>
+    <input type="file" id="file-input" multiple accept=".pdf" style="display:none">
+    <div class="progress-container" id="progress-container">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      <div class="progress-text" id="progress-text">Processing...</div>
+      <div class="mini-log" id="mini-log"></div>
+    </div>
+  </div>
+
+  <!-- Results Table -->
+  <div class="card hidden" id="results-card">
+    <h2>Processing Results</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>File</th><th>Status</th><th>Doc Type</th><th>Risk</th><th>Confidence</th><th>Decision</th><th>Audit Hash</th><th>Source</th>
+        </tr>
+      </thead>
+      <tbody id="results-body"></tbody>
+    </table>
+  </div>
+
+  <!-- Approval Queue -->
+  <div class="card hidden" id="approval-card">
+    <h2>Human Approval Queue</h2>
+    <div id="approval-list"></div>
+  </div>
+
+  <!-- Report -->
+  <div class="card hidden" id="report-card">
+    <h2>Final Report</h2>
+    <div class="report-section">
+      <h3>Merkle Root</h3>
+      <div class="merkle-hash" id="merkle-root">—</div>
+    </div>
+    <div class="report-section">
+      <h3>Chain Integrity</h3>
+      <div id="chain-status">—</div>
+    </div>
+    <div class="report-section">
+      <h3>Per-File Proofs</h3>
+      <div id="file-proofs"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = '';
+let batchId = null;
+let processing = false;
+
+// Drop zone
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('dragover'); handleFiles(e.dataTransfer.files); });
+fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+async function handleFiles(files) {
+  if (!files.length) return;
+  document.getElementById('upload-card').style.display = 'none';
+  document.getElementById('progress-container').style.display = 'block';
+  document.getElementById('status-badge').textContent = 'UPLOADING';
+  document.getElementById('status-badge').className = 'badge badge-warn';
+
+  const fd = new FormData();
+  for (const f of files) fd.append('files', f);
+
+  try {
+    const res = await fetch(`${API}/v1/batch`, { method: 'POST', body: fd });
+    const data = await res.json();
+    batchId = data.batch_id;
+    document.getElementById('stat-total').textContent = data.total_files;
+    document.getElementById('status-badge').textContent = 'PROCESSING';
+    document.getElementById('progress-text').textContent = `0/${data.total_files} files processed`;
+    await processAll();
+  } catch (e) {
+    document.getElementById('status-badge').textContent = 'ERROR';
+    document.getElementById('status-badge').className = 'badge badge-err';
+    document.getElementById('progress-text').textContent = `Error: ${e.message}`;
+  }
+}
+
+async function processAll() {
+  processing = true;
+  let processed = 0;
+  const total = parseInt(document.getElementById('stat-total').textContent);
+
+  while (processing) {
+    try {
+      const res = await fetch(`${API}/v1/batch/${batchId}/process`, { method: 'POST' });
+      if (res.status === 204) break; // no more pending
+      const file = await res.json();
+      processed++;
+
+      // Update progress
+      const pct = Math.round((processed / total) * 100);
+      document.getElementById('progress-fill').style.width = `${pct}%`;
+      document.getElementById('progress-text').textContent = `${processed}/${total} — ${file.filename} → ${file.decision}`;
+      document.getElementById('stat-auto').textContent = countDecisions('AUTO_SIGN');
+      document.getElementById('stat-defer').textContent = countDecisions('DEFER_TO_HUMAN') + countDecisions('BLOCKED');
+      document.getElementById('stat-reject').textContent = countDecisions('REJECTED');
+
+      // Add to results table
+      addResultRow(file);
+
+      // Add to approval queue if deferred
+      if (file.status === 'DEFERRED') addApprovalItem(file);
+
+      // Add mini-log entry
+      addLogEntry(file);
+
+      await new Promise(r => setTimeout(r, 200)); // small delay for visual effect
+    } catch (e) {
+      console.error(e);
+      break;
+    }
+  }
+
+  // Show results and report
+  document.getElementById('results-card').classList.remove('hidden');
+  document.getElementById('report-card').classList.remove('hidden');
+  document.getElementById('status-badge').textContent = 'COMPLETE';
+  document.getElementById('status-badge').className = 'badge badge-ok';
+
+  await loadReport();
+}
+
+function countDecisions(decision) {
+  const rows = document.querySelectorAll('#results-body tr');
+  let count = 0;
+  rows.forEach(r => { if (r.dataset.decision === decision) count++; });
+  return count;
+}
+
+function addResultRow(file) {
+  const tbody = document.getElementById('results-body');
+  const tr = document.createElement('tr');
+  tr.className = 'fade-in';
+  tr.dataset.decision = file.decision;
+  const confClass = file.confidence >= 0.8 ? 'conf-high' : file.confidence >= 0.5 ? 'conf-med' : 'conf-low';
+  const statusClass = file.decision === 'AUTO_SIGN' ? 'status-auto' :
+                      file.decision === 'DEFER_TO_HUMAN' || file.decision === 'BLOCKED' ? 'status-defer' : 'status-reject';
+  tr.innerHTML = `
+    <td>${tbody.children.length + 1}</td>
+    <td>${file.filename}</td>
+    <td class="${statusClass}">${file.status}</td>
+    <td>${file.doc_type}</td>
+    <td>${file.risk_level}</td>
+    <td class="confidence ${confClass}">${(file.confidence * 100).toFixed(1)}%</td>
+    <td class="${statusClass}">${file.decision}</td>
+    <td class="merkle-hash">${file.audit_hash.slice(0, 20)}…</td>
+    <td><button class="btn btn-viewer" onclick="openViewer('${file.filename}')">View Source</button></td>`;
+  tbody.appendChild(tr);
+}
+
+function addApprovalItem(file) {
+  const card = document.getElementById('approval-card');
+  card.classList.remove('hidden');
+  const list = document.getElementById('approval-list');
+  const div = document.createElement('div');
+  div.className = 'fade-in';
+  div.style.cssText = 'padding:10px;border-bottom:1px solid #21262d;display:flex;justify-content:space-between;align-items:center';
+  div.innerHTML = `
+    <div>
+      <div style="font-weight:600">${file.filename}</div>
+      <div style="font-size:11px;color:#8b949e">${file.doc_type} · confidence ${(file.confidence*100).toFixed(1)}% · ${file.risk_level} risk</div>
+    </div>
+    <div>
+      <button class="btn btn-correct" onclick="resolveFile('${file.file_id}', true, this)">✓ Correct</button>
+      <button class="btn btn-wrong" onclick="resolveFile('${file.file_id}', false, this)">✗ Incorrect</button>
+    </div>`;
+  list.appendChild(div);
+}
+
+async function resolveFile(fileId, correct, btn) {
+  const reason = prompt(`Why is this extraction ${correct ? 'correct' : 'incorrect'}?`);
+  if (reason === null) return;
+
+  try {
+    await fetch(`${API}/v1/batch/${batchId}/resolve/${fileId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ correct, reason }),
+    });
+    btn.parentElement.innerHTML = `<span style="color:${correct ? '#3fb950' : '#f85149'}">${correct ? '✓ Labeled correct' : '✗ Labeled incorrect'}</span>`;
+  } catch (e) {
+    alert(`Error: ${e.message}`);
+  }
+}
+
+function addLogEntry(file) {
+  const log = document.getElementById('mini-log');
+  const cls = file.decision === 'AUTO_SIGN' ? 'ok' : file.decision === 'BLOCKED' ? 'err' : 'warn';
+  const div = document.createElement('div');
+  div.className = `entry ${cls} fade-in`;
+  div.textContent = `${file.filename} → ${file.decision} (${(file.confidence*100).toFixed(0)}% conf)`;
+  log.prepend(div);
+}
+
+async function loadReport() {
+  try {
+    const res = await fetch(`${API}/v1/batch/${batchId}/report`);
+    const report = await res.json();
+
+    // Merkle root
+    document.getElementById('merkle-root').textContent = report.merkle_root || '—';
+
+    // Chain status
+    const chainEl = document.getElementById('chain-status');
+    if (report.chain_valid) {
+      chainEl.innerHTML = '<span style="color:#3fb950">✓ Chain integrity verified</span>';
+      document.getElementById('chain-badge').textContent = 'CHAIN ✓';
+      document.getElementById('chain-badge').className = 'badge badge-ok';
+    } else {
+      chainEl.innerHTML = '<span style="color:#f85149">✗ Chain broken</span>';
+      document.getElementById('chain-badge').textContent = 'CHAIN ✗';
+      document.getElementById('chain-badge').className = 'badge badge-err';
+    }
+
+    // Per-file proofs
+    const proofsEl = document.getElementById('file-proofs');
+    proofsEl.innerHTML = report.file_proofs.map(fp => `
+      <div style="padding:8px 0;border-bottom:1px solid #21262d22">
+        <div style="display:flex;justify-content:space-between">
+          <span style="font-weight:600">${fp.filename}</span>
+          <span class="merkle-hash">${fp.audit_hash.slice(0, 24)}…</span>
+        </div>
+        <div style="font-size:11px;color:#8b949e;margin-top:2px">
+          ${fp.events_count} events · ${fp.doc_type} · ${fp.risk_level} risk · ${fp.decision}
+        </div>
+      </div>
+    `).join('');
+
+    // Update convergence stats
+    const conv = report.convergence || {};
+    document.getElementById('stat-auto').textContent = conv.auto_sign_count || 0;
+    document.getElementById('stat-defer').textContent = conv.deferred_count || 0;
+  } catch (e) {
+    console.error('Report load failed:', e);
+  }
+}
+
+// Check chain on load
+fetch(`${API}/health`).then(r => r.json()).then(data => {
+  const badge = document.getElementById('chain-badge');
+  if (data.audit?.chain_integrity) {
+    badge.textContent = `CHAIN ✓ ${data.audit.total_events} events`;
+    badge.className = 'badge badge-ok';
+  }
+});
+
+// Nutrient Viewer integration
+const NUTRIENT_PUBLISHABLE_KEY = 'pdf_pub_live_5XyMAX7APEG6bj5uxJGrdoproYPYcCOhsFXwfWCy8nJ';
+let viewerInstance = null;
+
+function openViewer(filename, page = 1) {
+  const modal = document.getElementById('viewer-modal');
+  modal.classList.remove('hidden');
+  
+  // Load Nutrient Viewer
+  const container = document.getElementById('nutrient-viewer');
+  container.innerHTML = '';
+  
+  // For demo, show the source PDF with page highlight
+  viewerInstance = NutrientViewer.load({
+    container: container,
+    document: `/api/v1/documents/${filename}/bytes`,
+    session: NUTRIENT_PUBLISHABLE_KEY,
+    page: page,
+  });
+}
+
+function closeViewer() {
+  const modal = document.getElementById('viewer-modal');
+  modal.classList.add('hidden');
+  if (viewerInstance) {
+    viewerInstance = null;
+  }
+}
+
+// Close modal on escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeViewer();
+});
+</script>
+
+<!-- Viewer Modal -->
+<div id="viewer-modal" class="viewer-modal hidden">
+  <button class="viewer-close" onclick="closeViewer()">✕ Close</button>
+  <div class="viewer-container">
+    <div id="nutrient-viewer" class="viewer-content"></div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -481,10 +481,19 @@ STATIC_DIR = os.path.join(os.path.dirname(__file__), "..", "static")
 
 @app.get("/", response_class=HTMLResponse)
 def serve_index():
-    index_path = os.path.join(STATIC_DIR, "dashboard.html")
+    index_path = os.path.join(STATIC_DIR, "landing.html")
     if os.path.exists(index_path):
         return FileResponse(index_path)
-    return HTMLResponse("<h1>ProofDesk</h1><p>Static files not found. Run the demo: python3 demo.py</p>")
+    return HTMLResponse("<h1>ProofDesk</h1><p>Static files not found.</p>")
+
+
+@app.get("/app", response_class=HTMLResponse)
+def serve_app():
+    """Batch processing dashboard — the main product interface."""
+    app_path = os.path.join(STATIC_DIR, "app.html")
+    if os.path.exists(app_path):
+        return FileResponse(app_path)
+    return HTMLResponse("<h1>ProofDesk App</h1><p>app.html not found.</p>")
 
 
 @app.get("/demo", response_class=HTMLResponse)
