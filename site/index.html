@@ -219,6 +219,61 @@ footer a{color:#999}
 </div>
 <div class="gap" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534"><strong>proofdesk catches what extraction misses:</strong> individually correct fields that together describe an unsafe transaction.</div>
 
+<div class="label">document types supported</div>
+<div class="explain"><strong>12 document type schemas</strong> with field-level extraction rules. each type has specific fields, risk budgets, and verification assertions.</div>
+<table style="width:100%">
+<tr><td>procurement</td><td class="dim">vendor, spend, contract dates, insurance coverage</td></tr>
+<tr><td>invoice</td><td class="dim">vendor, total, line items, tax, payment terms</td></tr>
+<tr><td>contract</td><td class="dim">liability, indemnification, termination, renewal, sla</td></tr>
+<tr><td>insurance</td><td class="dim">policyholder, coverage, deductible, sublimit, exclusions</td></tr>
+<tr><td>trade_invoice</td><td class="dim">shipper, consignee, quantity, value, incoterm</td></tr>
+<tr><td>trade_bol</td><td class="dim">B/L number, vessel, port, weight, freight terms</td></tr>
+<tr><td>trade_certificate</td><td class="dim">origin, HS code, exporter, quantity</td></tr>
+<tr><td>kyc_id</td><td class="dim">name, DOB, license number, address</td></tr>
+<tr><td>kyc_address</td><td class="dim">street, city, state, zip, proof type</td></tr>
+<tr><td>kyc_bank</td><td class="dim">account number, routing, bank name, balance</td></tr>
+<tr><td>mortgage</td><td class="dim">appraisal value, LTV, property address, borrower</td></tr>
+<tr><td>medical</td><td class="dim">patient, procedure, diagnosis, provider, billing</td></tr>
+</table>
+
+<div class="label">extraction results</div>
+<div class="explain"><strong>nutrient dws extraction</strong> tested on 13 real PDFs across 6 document types. every field supported with source grounding.</div>
+<table style="width:100%">
+<tr><td style="font-size:.625rem;color:#999">PDF</td><td style="font-size:.625rem;color:#999">TYPE</td><td style="font-size:.625rem;color:#999;text-align:right">RESULT</td></tr>
+<tr><td>procurement_request.pdf</td><td class="dim">procurement</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
+<tr><td>vendor_quote.pdf</td><td class="dim">procurement</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
+<tr><td>insurance_certificate.pdf</td><td class="dim">procurement</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
+<tr><td>security_questionnaire.pdf</td><td class="dim">procurement</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
+<tr><td>kyc_01_drivers_license.pdf</td><td class="dim">kyc</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
+<tr><td>kyc_02_proof_of_address.pdf</td><td class="dim">kyc</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
+<tr><td>kyc_03_bank_statement.pdf</td><td class="dim">kyc</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
+<tr><td>invoice_01_vendor_invoice.pdf</td><td class="dim">invoice</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
+<tr><td>trade_01_invoice.pdf</td><td class="dim">trade</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
+<tr><td>trade_02_bill_of_lading.pdf</td><td class="dim">trade</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
+<tr><td>trade_03_certificate_origin.pdf</td><td class="dim">trade</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
+<tr><td>mortgage_01_appraisal.pdf</td><td class="dim">mortgage</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
+<tr><td>redaction_01_intake_form.pdf</td><td class="dim">medical</td><td class="pass" style="text-align:right">SUPPORTED 100%</td></tr>
+</table>
+<div style="margin-top:.75rem;padding:.75rem 1rem;background:#f0fdf4;border:1px solid #bbf7d0;font-size:.8125rem;color:#166534">
+<strong>result:</strong> 13/13 PDFs extraction supported across procurement, kyc, invoice, trade, mortgage, and medical document types.
+</div>
+
+<div class="label">tamper detection</div>
+<div class="explain"><strong>post-approval tamper detection.</strong> after an artifact is generated, any byte-level modification changes the SHA-256 hash. the signature gate verifies the artifact hash before allowing signing.</div>
+<div class="trace">original artifact: sha256:a3f2d8...<br>gate check: hash matches → PASS<br><br>tamper: append one byte (\x00)<br>recompute: sha256:7b1e4a...<br>gate check: hash mismatch → DENY<br><br>demonstrates: probabilistic evidence + deterministic execution boundary</div>
+
+<div class="label">batch processing</div>
+<div class="explain"><strong>multi-file batch processing.</strong> upload multiple PDFs, process each through the pipeline, aggregate results with per-file Merkle proofs.</div>
+<table style="width:100%">
+<tr><td>endpoint</td><td class="dim">what it does</td></tr>
+<tr><td>POST /v1/batch</td><td class="dim">upload multiple PDFs, create batch job</td></tr>
+<tr><td>GET /v1/batch/{id}/status</td><td class="dim">check processing progress</td></tr>
+<tr><td>POST /v1/batch/{id}/process</td><td class="dim">process next file in batch</td></tr>
+<tr><td>GET /v1/batch/{id}/results</td><td class="dim">get all file results</td></tr>
+<tr><td>POST /v1/batch/{id}/resolve/{file_id}</td><td class="dim">resolve deferred file with human feedback</td></tr>
+<tr><td>GET /v1/batch/{id}/report</td><td class="dim">final report with Merkle proofs per document</td></tr>
+</table>
+
 <div class="label">convergence stats</div>
 <div class="explain"><strong>live feedback data</strong> from the running system. as humans resolve exceptions, the calibrator improves.</div>
 <table style="width:100%">
