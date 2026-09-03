@@ -5,10 +5,35 @@
 [![Hackathon](https://img.shields.io/badge/DevNetwork_API%2BCloud%2BAI_Hackathon-2026-blue)](https://api-cloud-ai-hackathon-2026.devpost.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/Tests-115_passing-brightgreen)](#tests)
+[![Nutrient](https://img.shields.io/badge/Nutrient_DWS-Integrated-blue)](#nutrient-dws-integration)
 
 > Two documents are individually read correctly. Together they describe a transaction that should not happen. The AI refuses to act.
 
-**[Demo Video](ProofDesk-Demo.mp4)** | **[Live Demo](https://proofdesk-90q.pages.dev)** | **[API](#quick-start)**
+**[Watch Demo](https://youtu.be/PLACEHOLDER)** | **[Try Live Demo](https://proofdesk-90q.pages.dev)** | **[View Source](https://github.com/prx0r/proofdesk)**
+
+---
+
+## Judge in 30 Seconds
+
+**Sponsor API:** [Nutrient DWS](https://nutrient.io) — extracts grounded evidence from source PDFs with value, confidence, page, and bounding-box provenance. Not just text — sourced, scored evidence.
+
+**Core workflow:**
+```
+High-confidence fact A (from Nutrient DWS extraction)
+  + High-confidence fact B (from Nutrient DWS extraction)
+  → Cross-document contradiction detected
+  → AUTHORITY BLOCKED
+  → Human examines the exact evidence
+  → Explicit resolution
+  → Approved hashed record
+  → Tamper-evident audit receipt (hash chain + Merkle proofs)
+```
+
+**The magic moment:** Two documents pass extraction individually. But together they describe a transaction that should not happen. ProofDesk detects the contradiction and blocks — then routes the evidence to a human for explicit resolution.
+
+**Live demo:** `https://proofdesk-90q.pages.dev` — upload documents, see extraction, witness the block, watch human review.
+
+**What Nutrient DWS does:** Extracts grounded evidence from PDFs — values, confidence scores, page numbers, and bounding boxes. Every extracted field carries provenance. ProofDesk uses that evidence to determine whether automation may proceed or must defer to a human.
 
 ---
 
@@ -19,17 +44,6 @@ AI can extract data from documents. That does not mean it has enough evidence or
 ## What ProofDesk Does
 
 Nutrient DWS turns source PDFs into grounded evidence — values, confidence, page and bounding-box provenance. ProofDesk uses that evidence to determine whether automation may proceed or must defer to a human.
-
-```
-Source PDFs
-  → Nutrient DWS extraction (value + confidence + page + bbox)
-  → Cross-document verification
-  → A contradiction is found
-  → Authority gate: BLOCKED
-  → Human examines the exact evidence
-  → Human resolves the exception
-  → Authorized artifact with hash chain + Merkle proofs
-```
 
 ---
 
@@ -73,6 +87,19 @@ Source PDFs
               │  Replayable            │
               └────────────────────────┘
 ```
+
+---
+
+## Nutrient DWS Integration
+
+Nutrient DWS provides the core document extraction and source grounding that turns uploaded PDFs into confidence-aware evidence.
+
+| Nutrient Capability | ProofDesk Use |
+|---|---|
+| PDF extraction | Value + confidence + page + bbox for every field |
+| Source grounding | Every fact traced to exact document location |
+| Confidence scoring | Calibrated risk assessment per extraction |
+| Multi-document | Cross-document reconciliation pipeline |
 
 ---
 
@@ -150,10 +177,9 @@ python3 tests/test_learning.py    # 3/3
 
 | Provider | What It Does | Status |
 |----------|--------------|--------|
-| **Nutrient DWS** | Extracts facts with source grounding (value + confidence + page + bbox) | Live API |
+| **Nutrient DWS** | Extracts grounded evidence (value + confidence + page + bbox) | Live API |
 | **Foxit PDF** | Merge/compress documents | Live API |
 | **Foxit eSign** | Signing authority boundary | Simulated |
-| **Doctavian** | Template branching, loops, calculations | Integrated |
 
 ---
 

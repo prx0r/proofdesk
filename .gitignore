@@ -52,3 +52,4 @@ kaggle_kernel/
 .env
 .env.keys
 data/real_datasets/zugferd/
+.env
