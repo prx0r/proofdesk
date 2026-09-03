@@ -15,11 +15,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;l
 .hero p{font-size:.9rem;color:#94a3b8;max-width:480px;margin:10px auto 0}
 .btn{padding:10px 28px;border-radius:8px;font-size:.88rem;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .15s}
 .btn-g{background:#059669;color:#fff}.btn-g:hover{background:#047857}.btn:disabled{opacity:.4;cursor:not-allowed}
-.btn-o{background:transparent;color:#f59e0b;border:1px solid #f59e0b}.btn-o:hover{background:#f59e0b11}
 .btn-r{background:#dc2626;color:#fff}.btn-r:hover{background:#b91c1c}
+.btn-b{background:#2563eb;color:#fff}.btn-b:hover{background:#1d4ed8}
 .spinner{display:inline-block;width:12px;height:12px;border:2px solid #334155;border-top-color:#f59e0b;border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;vertical-align:middle}
 @keyframes spin{to{transform:rotate(360deg)}}
-.log{background:#0a0e14;border:1px solid #1e293b;border-radius:8px;padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.6rem;line-height:1.7;max-height:35vh;overflow-y:auto;white-space:pre-wrap;word-break:break-all;margin-top:.75rem}
+.log{background:#0a0e14;border:1px solid #1e293b;border-radius:8px;padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.6rem;line-height:1.7;max-height:30vh;overflow-y:auto;white-space:pre-wrap;word-break:break-all;margin-top:.75rem}
 .ts{color:#484f58}.info{color:#60a5fa}.ok{color:#34d399}.err{color:#f87171}.warn{color:#fbbf24}.api{color:#a78bfa}.dim{color:#475569}.req{color:#f59e0b}.res{color:#06b6d4}
 .step{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:.9rem 1.1rem;margin-bottom:.6rem;opacity:0;transform:translateY(6px);transition:all .3s}
 .step.active{opacity:1;transform:translateY(0);border-color:#f59e0b}
@@ -31,7 +31,6 @@ body{font-family:'Inter',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;l
 .final{background:linear-gradient(135deg,#064e3b,#065f46);border:2px solid #059669;border-radius:12px;padding:1.5rem;text-align:center;margin-top:1.2rem;animation:fadeIn .4s}
 .final h2{font-size:1.3rem;font-weight:800;color:#a7f3d0;margin-bottom:.4rem}
 .final p{color:#6ee7b7;font-size:.85rem}
-/* The contradiction — the centerpiece */
 .vs{display:grid;grid-template-columns:1fr auto 1fr;gap:0;margin:.75rem 0;align-items:stretch}
 .vs-card{background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:1rem;text-align:center}
 .vs-card .label{font-size:.55rem;text-transform:uppercase;letter-spacing:.8px;color:#64748b;font-weight:600}
@@ -46,9 +45,13 @@ body{font-family:'Inter',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;l
 .gate-box.pass{background:#0a1e0a;border-color:#059669}
 .gate-box h3{font-size:.95rem;font-weight:800;letter-spacing:1px}
 .gate-box.denied{color:#f87171}.gate-box.allowed{color:#34d399}
-.review-box{background:#1e293b;border:2px solid #f59e0b;border-radius:8px;padding:1rem;margin:.6rem 0}
-.review-box h3{font-size:.85rem;font-weight:700;color:#f8fafc;margin-bottom:.6rem}
-.decision-btns{display:flex;gap:.6rem;margin-top:.75rem}
+.timeline{margin-top:.75rem}
+.tl-row{display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-bottom:1px solid #1e293b22;font-size:.7rem}
+.tl-icon{width:18px;text-align:center;font-size:.75rem}
+.tl-text{flex:1;color:#94a3b8}
+.tl-text b{color:#f8fafc;font-weight:600}
+.tl-status{font-size:.6rem;font-weight:600;padding:2px 6px;border-radius:4px}
+.tl-ok{background:#05966922;color:#34d399}.tl-err{background:#dc262622;color:#f87171}.tl-wait{background:#f59e0b22;color:#f59e0b}
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
@@ -66,10 +69,11 @@ body{font-family:'Inter',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;l
 </div>
 </div>
 <script>
-var API='https://talks-maiden-video-acknowledge.trycloudflare.com',L=document.getElementById('log'),CID='';
+var API='https://talks-maiden-video-acknowledge.trycloudflare.com',L=document.getElementById('log'),CID='',STEP=0;
 function ts(){return new Date().toISOString().slice(11,23)}
 function log(c,t){L.innerHTML+='<span class="ts">['+ts()+']</span> <span class="'+c+'">'+t+'</span>\n';L.scrollTop=L.scrollHeight}
 function logSep(){log('dim','────────────────────────────────────────')}
+function ns(){STEP++;return STEP}
 function addStep(n,title,body,done){var d=document.createElement('div');d.className='step '+(done?'done':'active');d.innerHTML='<div class="step-num">Step '+n+'</div><div class="step-title">'+title+'</div><div class="step-body">'+body+'</div>';document.getElementById('steps').appendChild(d);d.scrollIntoView({behavior:'smooth',block:'nearest'});return d}
 function spinStep(n,title){var d=document.createElement('div');d.className='step active';d.id='spin-'+n;d.innerHTML='<div class="step-num">Step '+n+'</div><div class="step-title"><span class="spinner"></span>'+title+'</div><div class="step-body" id="sb-'+n+'">waiting for API...</div>';document.getElementById('steps').appendChild(d);d.scrollIntoView({behavior:'smooth',block:'nearest'});return d}
 function finishSpin(n,title,body){var d=document.getElementById('spin-'+n);if(!d)return;d.className='step done';d.querySelector('.step-title').innerHTML=title;d.querySelector('.step-body').innerHTML=body}
@@ -80,21 +84,20 @@ async function runDemo(){
   document.getElementById('hero').style.display='none';document.getElementById('live').style.display='block';
   document.getElementById('steps').innerHTML='';document.getElementById('final').innerHTML='';L.innerHTML='';
   log('info','<strong>ProofDesk — live Nutrient DWS pipeline</strong>');logSep();
-  var step=0;
   try{
     // 1. Create fixture
-    step++;spinStep(step,'Loading 4 procurement PDFs');
+    var n=ns();spinStep(n,'Loading 4 procurement PDFs');
     log('req','POST /v1/cases/fixture');
     var r=await api('POST','/v1/cases/fixture');
     log('res',r.s+' ('+Math.round(r.ms)+'ms)');
     CID=r.d.case_id;
-    finishSpin(step,'4 PDFs loaded','procurement_request.pdf\nvendor_quote.pdf\ninsurance_certificate.pdf\nsecurity_questionnaire.pdf ('+Math.round(r.ms)+'ms)');
+    finishSpin(n,'4 PDFs loaded','procurement_request.pdf · vendor_quote.pdf · insurance_certificate.pdf · security_questionnaire.pdf ('+Math.round(r.ms)+'ms)');
     logSep();
 
     // 2-5. Extract each document
     var docs=['procurement_request.pdf','vendor_quote.pdf','insurance_certificate.pdf','security_questionnaire.pdf'];
     for(var di=0;di<4;di++){
-      step++;spinStep(step,'Nutrient DWS: '+docs[di]);
+      n=ns();spinStep(n,'Nutrient DWS: '+docs[di]);
       log('req','POST /v1/cases/'+CID+'/extract');
       var er=await api('POST','/v1/cases/'+CID+'/extract');
       log('res',er.s+' ('+Math.round(er.ms)+'ms)');
@@ -103,100 +106,102 @@ async function runDemo(){
         log('ok',ex.facts_extracted+' facts in '+Math.round(ex.duration_ms)+'ms');
         var b='facts: <span class="ok">'+ex.facts_extracted+'</span> in '+Math.round(ex.duration_ms)+'ms\n';
         if(ex.facts)ex.facts.forEach(function(f){var c=f.confidence!==null?(f.confidence*100).toFixed(0)+'%':'?';b+=f.field+': '+f.value+' <span class="dim">(conf '+c+')</span>\n'});
-        finishSpin(step,ex.filename+' → '+ex.facts_extracted+' facts ('+Math.round(ex.duration_ms)+'ms)',b);
-      }else{finishSpin(step,docs[di]+' → <span class="err">ERROR</span>',ex?ex.error:'unknown');log('err','failed: '+(ex?ex.error:''))}
+        finishSpin(n,ex.filename+' → '+ex.facts_extracted+' facts ('+Math.round(ex.duration_ms)+'ms)',b);
+      }else{finishSpin(n,docs[di]+' → <span class="err">ERROR</span>',ex?ex.error:'unknown')}
       logSep();
     }
 
     // 6. Cross-document check
-    step++;spinStep(step,'Cross-document verification');
+    n=ns();spinStep(n,'Cross-document verification');
     log('req','POST /v1/cases/'+CID+'/check');
     var cr=await api('POST','/v1/cases/'+CID+'/check');
     log('res',cr.s+' ('+Math.round(cr.ms)+'ms)');
     var aa=cr.d.assertion_details||[];
     var blocking=aa.filter(function(a){return a.result==='FAIL'&&a.severity==='BLOCKER'});
     var ab='';aa.forEach(function(a){ab+=(a.result==='PASS'?'<span class="ok">✓</span>':'<span class="err">✗</span>')+' '+a.predicate+'\n'});
-    finishSpin(step,aa.length+' checks — '+blocking.length+' blockers ('+Math.round(cr.ms)+'ms)',ab);
+    finishSpin(n,aa.length+' checks — '+blocking.length+' blockers ('+Math.round(cr.ms)+'ms)',ab);
     log('ok',aa.length+' assertions, '+blocking.length+' blockers');
     logSep();
 
-    // 7. THE CONTRADICTION — the centerpiece
+    // 7. THE CONTRADICTION
     var factsResp=await api('GET','/v1/cases/'+CID+'/facts');
     var allFacts=factsResp.d.facts||[];
     var covFact=allFacts.find(function(f){return f.field==='procurement.required_coverage_until'});
     var expFact=allFacts.find(function(f){return f.field==='insurance.expiry_date'});
     var covVal=covFact?covFact.value_normalized:'—';
     var expVal=expFact?expFact.value_normalized:'—';
-
     var vsHtml='<div class="vs">';
-    vsHtml+='<div class="vs-card ok"><div class="label">Required Coverage Until</div><div class="val">'+covVal+'</div><div class="sub">procurement_request.pdf · Nutrient DWS · 95% conf</div></div>';
+    vsHtml+='<div class="vs-card ok"><div class="label">Required Coverage Until</div><div class="val">'+covVal+'</div><div class="sub">procurement_request.pdf · Nutrient DWS · 95%</div></div>';
     vsHtml+='<div class="vs-arrow"><div class="arr">→</div></div>';
-    vsHtml+='<div class="vs-card bad"><div class="label">Insurance Expiry Date</div><div class="val">'+expVal+'</div><div class="sub">insurance_certificate.pdf · Nutrient DWS · 95% conf</div></div>';
+    vsHtml+='<div class="vs-card bad"><div class="label">Insurance Expiry Date</div><div class="val">'+expVal+'</div><div class="sub">insurance_certificate.pdf · Nutrient DWS · 95%</div></div>';
     vsHtml+='</div>';
     vsHtml+='<div style="text-align:center;padding:.5rem;background:#1a0a0a;border:1px solid #7f1d1d;border-radius:6px;margin-bottom:.5rem">';
-    vsHtml+='<span style="color:#f87171;font-weight:700;font-size:.85rem">Insurance expires 31 days before coverage ends</span>';
-    vsHtml+='</div>';
-    vsHtml+='<div style="font-size:.7rem;color:#94a3b8;text-align:center">Both extractions are correct. High confidence. No extraction error. Together they describe an unsafe transaction.</div>';
-    addStep(step,'The Contradiction',vsHtml,true);
+    vsHtml+='<span style="color:#f87171;font-weight:700;font-size:.85rem">Insurance expires 31 days before coverage ends</span></div>';
+    vsHtml+='<div style="font-size:.7rem;color:#94a3b8;text-align:center">Both extractions correct. High confidence. No extraction error. Jointly unsafe.</div>';
+    addStep(ns(),'The Contradiction',vsHtml,true);
     log('warn','CONTRADICTION: '+covVal+' vs '+expVal+' — 31 day gap');
     logSep();
 
     // 8. Authority Gate
-    step++;spinStep(step,'Authority Gate');
+    n=ns();spinStep(n,'Authority Gate');
     log('req','GET /v1/cases/'+CID+'/signature-gate');
     var gr=await api('GET','/v1/cases/'+CID+'/signature-gate');
     log('res',gr.s+' ('+Math.round(gr.ms)+'ms)');
     var g=gr.d;var gt=g.allowed?'EXECUTION AUTHORIZED':'EXECUTION BLOCKED';
     var gb='<div class="gate-box '+(g.allowed?'pass':'')+'"><h3 class="'+(g.allowed?'allowed':'denied')+'">'+gt+'</h3></div>\n';
     if(!g.allowed&&g.reasons)g.reasons.forEach(function(r){if(r.code!=='INVALID_STATE')gb+='<span class="err">  ✗ '+r.code+': '+r.detail+'</span>\n'});
-    finishSpin(step,'Authority Gate: '+gt,gb);
+    finishSpin(n,'Authority Gate: '+gt,gb);
     log(g.allowed?'ok':'err','Gate: '+gt);
     logSep();
 
-    // 9. Human review
+    // 9. Human review with source view
     if(!g.allowed && blocking.length>0){
-      step++;
-      var rh='<div style="font-size:.78rem;color:#94a3b8;margin-bottom:.6rem">The agent cannot proceed. A human must review the evidence and decide.</div>';
+      n++;
+      var rh='<div style="font-size:.78rem;color:#94a3b8;margin-bottom:.6rem">The agent cannot proceed. A human must review the evidence.</div>';
       rh+='<div style="background:#0f172a;border:1px solid #1e293b;border-radius:6px;padding:.6rem;margin-bottom:.6rem">';
       rh+='<div style="font-size:.6rem;color:#f59e0b;font-weight:600;margin-bottom:.3rem">BLOCKED RULE</div>';
       rh+='<div style="font-size:.75rem;color:#f8fafc">'+blocking[0].predicate+'</div>';
-      rh+='<div style="font-size:.65rem;color:#94a3b8;margin-top:.2rem">'+blocking[0].detail+'</div>';
+      rh+='<div style="font-size:.65rem;color:#94a3b8;margin-top:.2rem">'+blocking[0].detail+'</div></div>';
+      // Source view links
+      rh+='<div style="display:flex;gap:.5rem;margin-bottom:.75rem">';
+      rh+='<a href="'+API+'/v1/cases/'+CID+'/documents/doc_procurement_request/file" target="_blank" class="btn btn-b" style="font-size:.7rem;padding:6px 12px;text-decoration:none">View procurement_request.pdf</a>';
+      rh+='<a href="'+API+'/v1/cases/'+CID+'/documents/doc_certificate_insurance/file" target="_blank" class="btn btn-b" style="font-size:.7rem;padding:6px 12px;text-decoration:none">View insurance_certificate.pdf</a>';
       rh+='</div>';
-      rh+='<div style="font-size:.78rem;color:#94a3b8;margin-bottom:.5rem">Your decision as procurement-reviewer:</div>';
-      rh+='<div class="decision-btns">';
+      rh+='<div style="font-size:.78rem;color:#94a3b8;margin-bottom:.5rem">Your decision:</div>';
+      rh+='<div style="display:flex;gap:.6rem">';
       rh+='<button class="btn btn-g" onclick="resolve(\'CONDITIONAL_ACCEPT\',\'Vendor must provide renewed certificate before execution\')">Conditional Accept</button>';
-      rh+='<button class="btn btn-r" onclick="resolve(\'REJECT\',\'Coverage gap — reject transaction\')">Reject</button>';
+      rh+='<button class="btn btn-r" onclick="resolve(\'REJECT\',\'Coverage gap — reject\')">Reject</button>';
       rh+='</div>';
-      addStep(step,'Human Review Required',rh,false);
+      addStep(n,'Human Review Required',rh,false);
       log('info','Waiting for human decision...');
       await new Promise(function(res){window._reviewDone=res});
       logSep();
     }
 
     // 10. Approve
-    step++;spinStep(step,'Sealing approved record');
+    n=ns();spinStep(n,'Sealing approved record');
     log('req','POST /v1/cases/'+CID+'/run');
     await api('POST','/v1/cases/'+CID+'/run',{domain:'procurement'});
     log('req','POST /v1/cases/'+CID+'/approve');
     var ap=await api('POST','/v1/cases/'+CID+'/approve?actor_id=procurement-reviewer');
     log('res',ap.s+' ('+Math.round(ap.ms)+'ms)');
-    finishSpin(step,'Record sealed','record_hash: <span class="ok">'+ap.d.record_hash+'</span> ('+Math.round(ap.ms)+'ms)');
+    finishSpin(n,'Record sealed','record_hash: <span class="ok">'+ap.d.record_hash+'</span> ('+Math.round(ap.ms)+'ms)');
     logSep();
 
     // 11. Generate
-    step++;spinStep(step,'Generating document');
+    n=ns();spinStep(n,'Generating approval memo');
     log('req','POST /v1/cases/'+CID+'/generate');
     var gen=await api('POST','/v1/cases/'+CID+'/generate');
     log('res',gen.s+' ('+Math.round(gen.ms)+'ms)');
     var rcpt=await api('GET','/v1/cases/'+CID+'/receipt');
     var rd=rcpt.d;
-    finishSpin(step,'Document generated','facts: '+rd.facts_extracted+'  assertions: '+rd.assertions_checked+'  resolutions: '+rd.resolutions+'\nrecord: '+rd.record_hash+'\nartifact: '+rd.artifact_hash);
+    finishSpin(n,'Document generated','facts: '+rd.facts_extracted+'  assertions: '+rd.assertions_checked+'  resolutions: '+rd.resolutions+'\nrecord: '+rd.record_hash+'\nartifact: '+rd.artifact_hash);
     logSep();
 
     // 12. Audit
-    step++;spinStep(step,'Verifying audit trail');
+    n=ns();spinStep(n,'Verifying audit trail');
     var chain=await api('GET','/v1/audit/chain');
-    finishSpin(step,'Audit trail verified','<span class="ok">'+chain.d.detail+'</span>\nevents: '+chain.d.stats.total_events);
+    finishSpin(n,'Audit trail verified','<span class="ok">'+chain.d.detail+'</span>\nevents: '+chain.d.stats.total_events);
 
     // Final
     document.getElementById('final').innerHTML='<div class="final"><h2>Extraction correct. Contradiction found. Human resolved. Approved.</h2><p>'+rd.facts_extracted+' Nutrient DWS facts · '+rd.assertions_checked+' checks · '+rd.record_hash+' · '+chain.d.detail+'</p></div>';

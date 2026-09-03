@@ -1,0 +1,27 @@
+name: proofdesk_case_v1
+states:
+  - RECEIVED
+  - INGESTED
+  - EXTRACTED
+  - RECONCILED
+  - CHECKED
+  - REVIEW_REQUIRED
+  - RESOLVED
+  - APPROVABLE
+  - APPROVED
+  - GENERATED
+  - PREPARED
+  - SIGNATURE_AUTHORIZED
+  - SIGNATURE_REQUESTED
+  - SIGNED
+  - ARCHIVED
+hard_invariants:
+  - No unresolved blocking exception may enter APPROVED.
+  - Generation consumes an approved structured_record_hash.
+  - Any structured-record mutation invalidates downstream approval.
+  - Signature requires a prepared artifact whose hash matches the approved artifact hash.
+  - A human performs the signature.
+forbidden_transitions:
+  - [REVIEW_REQUIRED, GENERATED]
+  - [CHECKED, SIGNATURE_REQUESTED]
+  - [GENERATED, SIGNATURE_REQUESTED]

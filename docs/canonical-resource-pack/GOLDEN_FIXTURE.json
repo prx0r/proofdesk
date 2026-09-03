@@ -1,0 +1,41 @@
+{
+  "case": {
+    "name": "Northstar Data Systems vendor onboarding",
+    "prompt": "Prepare Northstar Data Systems for a $42,500 annual software procurement. Reconcile the packet, create the approval memo, and send it for signature if it is safe."
+  },
+  "expected_facts": {
+    "requested_annual_spend": 42500,
+    "contract_start": "2026-10-01",
+    "required_insurance_until": "2027-10-01",
+    "quote_line_items": [
+      {
+        "label": "Platform",
+        "amount": 35000
+      },
+      {
+        "label": "Support",
+        "amount": 7500
+      }
+    ],
+    "quote_total": 42500,
+    "insurance_expiry": "2027-08-31"
+  },
+  "expected_checks": [
+    {
+      "id": "quote_arithmetic",
+      "result": "PASS"
+    },
+    {
+      "id": "legal_name_reconciliation",
+      "result": "PASS_WITH_NORMALIZATION"
+    },
+    {
+      "id": "insurance_coverage_period",
+      "result": "BLOCK"
+    }
+  ],
+  "expected_human_resolution": {
+    "decision": "CONDITIONAL_ACCEPT",
+    "obligation": "Vendor must provide a renewed insurance certificate before the current policy expires."
+  }
+}
