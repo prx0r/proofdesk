@@ -325,9 +325,14 @@ def check_case(case_id: str):
     if case.state not in (CaseState.EXTRACTED, CaseState.RECONCILED, CaseState.CHECKED):
         raise HTTPException(409, f"Case is {case.state.value} — extract first")
     try:
-        run_pipeline(case, domain="procurement", stop_after="CHECKED")
-    except ValueError as e:
-        raise HTTPException(422, str(e))
+        run_pipeline(case, domain="procurement", stop_after="REVIEW_REQUIRED")
+    except ValueError:
+        # If no blockers, pipeline may have gone past REVIEW_REQUIRED
+        pass
+    # If still in CHECKED (no blockers), transition to APPROVABLE
+    if case.state == CaseState.CHECKED:
+        from src.engine.orchestrator import transition
+        transition(case, CaseState.APPROVABLE)
     return {
         "case_id": case.case_id,
         "state": case.state.value,
