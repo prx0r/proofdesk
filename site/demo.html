@@ -59,7 +59,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;l
 <div class="wrap">
 <div class="hero" id="hero">
   <h1>Nutrient reads the docs.<br><span class="hl">ProofDesk decides if it's safe to act.</span></h1>
-  <p>4 real PDFs. Nutrient DWS extracts evidence. Foxit prepares the PDF. The gate blocks. Human resolves. Signed.</p>
+  <p>4 real PDFs. Nutrient DWS extracts evidence with confidence. The insurance expires before the contract ends. The gate blocks. Human resolves.</p>
   <button class="btn btn-g" id="run-btn" onclick="runDemo()" style="margin-top:1.2rem">Run Live Case</button>
 </div>
 <div id="live" style="display:none">
@@ -196,40 +196,7 @@ async function runDemo(){
     finishSpin(n,'Document generated','artifact_id: <span class="ok">'+gen.d.artifact_id+'</span> ('+Math.round(gen.ms)+'ms)');
     logSep();
 
-    // 12. Prepare PDF (Foxit merge/compress)
-    n=ns();spinStep(n,'Foxit PDF: merge + compress');
-    log('req','POST /v1/cases/'+CID+'/prepare');
-    var prep=await api('POST','/v1/cases/'+CID+'/prepare');
-    log('res',prep.s+' ('+Math.round(prep.ms)+'ms)');
-    if(prep.ok){
-      finishSpin(n,'Foxit PDF prepared ('+Math.round(prep.ms)+'ms)','merge + compress complete\nstate: '+prep.d.state);
-    }else{
-      finishSpin(n,'Foxit PDF: <span class="err">'+prep.s+'</span>',prep.d.detail||'preparation failed');
-    }
-    logSep();
-
-    // 13. Signature gate (should pass now)
-    n=ns();spinStep(n,'SignatureGate re-evaluation');
-    log('req','GET /v1/cases/'+CID+'/signature-gate');
-    var gr2=await api('GET','/v1/cases/'+CID+'/signature-gate');
-    log('res',gr2.s+' ('+Math.round(gr2.ms)+'ms)');
-    var g2=gr2.d;var gt2=g2.allowed?'SIGNATURE AUTHORIZED':'SIGNATURE BLOCKED';
-    var gb2='<div class="gate-box '+(g2.allowed?'pass':'')+'"><h3 class="'+(g2.allowed?'allowed':'denied')+'">'+gt2+'</h3></div>';
-    finishSpin(n,'SignatureGate: '+gt2,gb2);
-    log(g2.allowed?'ok':'err','Gate: '+gt2);
-    logSep();
-
-    // 14. Signature request (Foxit eSign)
-    if(g2.allowed){
-      n=ns();spinStep(n,'Foxit eSign: sending signature request');
-      log('req','POST /v1/cases/'+CID+'/signature-request');
-      var sig=await api('POST','/v1/cases/'+CID+'/signature-request',{signer:'cfo@northstar.com'});
-      log('res',sig.s+' ('+Math.round(sig.ms)+'ms)');
-      finishSpin(n,'Foxit eSign sent ('+Math.round(sig.ms)+'ms)','signer: cfo@northstar.com\nstatus: SENT');
-      logSep();
-    }
-
-    // 15. Receipt + audit
+    // 12. Receipt + audit
     var rcpt=await api('GET','/v1/cases/'+CID+'/receipt');
     var rd=rcpt.d;
     n=ns();spinStep(n,'Audit trail verified');
@@ -237,7 +204,7 @@ async function runDemo(){
     finishSpin(n,'Audit trail verified','<span class="ok">'+chain.d.detail+'</span>\nevents: '+chain.d.stats.total_events+'\nrecord: '+rd.record_hash+'\nartifact: '+rd.artifact_hash);
 
     // Final
-    document.getElementById('final').innerHTML='<div class="final"><h2>Nutrient extracted. Contradiction found. Human resolved. Foxit prepared. Signed.</h2><p>'+rd.facts_extracted+' Nutrient DWS facts · '+rd.assertions_checked+' checks · '+rd.record_hash+' · '+chain.d.detail+'</p></div>';
+    document.getElementById('final').innerHTML='<div class="final"><h2>Nutrient extracted. Contradiction found. Human resolved. Approved.</h2><p>'+rd.facts_extracted+' Nutrient DWS facts · '+rd.assertions_checked+' checks · '+rd.record_hash+' · '+chain.d.detail+'</p></div>';
 
   }catch(e){log('err','FATAL: '+e.message)}
   btn.disabled=false;btn.textContent='Run Again';
