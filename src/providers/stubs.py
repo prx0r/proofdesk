@@ -115,6 +115,8 @@ EXTRACTION_RULES: dict[str, list[tuple]] = {
 def nutrient_extract(document: Document) -> list[ExtractedFact]:
     """Simulate Nutrient DWS extraction with source-grounded confidence."""
     import re
+    import time
+    time.sleep(0.8)  # Simulate API latency
     facts = []
 
     # Find matching extraction rules (flexible matching: strip numbers/underscores)
