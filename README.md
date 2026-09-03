@@ -9,7 +9,7 @@
 
 > Two documents are individually read correctly. Together they describe a transaction that should not happen. The AI refuses to act.
 
-**[Watch Demo](https://youtu.be/PLACEHOLDER)** | **[Try Live Demo](https://proofdesk-90q.pages.dev)** | **[View Source](https://github.com/prx0r/proofdesk)**
+**[Watch Demo](https://youtu.be/LWN3qNX-hk4)** | **[Try Live Demo](https://proofdesk-90q.pages.dev)** | **[View Source](https://github.com/prx0r/proofdesk)**
 
 ---
 
