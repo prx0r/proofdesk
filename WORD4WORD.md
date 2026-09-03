@@ -43,15 +43,59 @@ The audit trail is hash-chained with RFC 6962 Merkle proofs. Every fact traces b
 
 ---
 
+## RESEARCH — [scroll to "The Research"]
+
+Behind the authority gate is a research program in calibrated confidence. Not ad-hoc thresholds — published algorithms applied to document automation.
+
+We studied when automation should stop.
+
+Five algorithms. Conformal-style risk calibration gives you a bounded false authorization rate — you pick the risk, the math certifies the threshold. The sheepish transform penalizes overconfidence more than caution — because a wrong signature is worse than a deferred review. Per-field risk budgets mean a wrong signer name gets a tighter threshold than wrong metadata. Online calibration means human decisions improve future thresholds — the system learns. And dual-call verification asks a second extraction to confirm the first.
+
+The convergence loop is the key insight. Each time a human resolves an exception, ProofDesk captures the confidence level, the accept or reject decision, and the field involved. That becomes calibration data. The online calibrator updates. Future decisions improve. Human review falls over time while measured false-authorization risk stays bounded.
+
+We validated this on five datasets — transaction records, contract text, invoices, contract clauses. At a one percent false-sign rate, the system achieves fifty-nine point eight percent auto-sign coverage. Two point seven times over baseline logistic regression.
+
+---
+
+## MOAT — [scroll to "The Moat"]
+
+What's hard to replicate.
+
+Nutrient source grounding — every fact carries value, confidence, page provenance, and bounding box. Not just text extraction. Evidence with location.
+
+Cross-document verification — deterministic checks catch contradictions that per-document extraction misses. The conflict is between documents, not within them.
+
+Calibrated authority gate — six conditions enforced server-side. Thresholds calibrated from research, not hand-tuned. The agent cannot negotiate.
+
+Human-feedback convergence — human decisions become calibration data. The system learns where this organization can safely automate. Competitors can copy the UI. They can't copy three years of calibrated authority decisions.
+
+And tamper-evident execution — hash-chained audit trail with Merkle proofs. Every decision replayable. Content-addressed artifacts. Change one byte and the hash changes.
+
+---
+
 ## NUTRIENT — [scroll to sponsor section]
 
 Nutrient DWS is the extraction layer. Without it, ProofDesk has no facts to cross-check.
 
 Nutrient gives us value plus confidence plus page-level grounding. That's what makes cross-document verification possible — we know exactly where each fact came from in the source document.
 
+Nutrient performs the core document extraction and source grounding that turns uploaded PDFs into confidence-aware evidence. ProofDesk uses that evidence to determine whether an automated action may proceed or must defer to a human.
+
 ---
 
-## DEMO — [click "Try the Live Demo" → /demo → click "Run Live Case"]
+## RESULTS — [scroll to "Results"]
+
+What we measured.
+
+One hundred and fifteen tests passing. Thirteen PDF fixtures tested. Twelve document types supported. Six authority conditions enforced.
+
+Fifteen extracted fields per document bundle. Six cross-document verification checks. A thirty-one day coverage gap detected. Zero unsafe actions.
+
+Ninety-five percent accuracy on CUAD contracts. Five percent false positive rate. Eighty percent correctly deferred to human review. Ten percent auto-signed with high confidence.
+
+---
+
+## DEMO — [click "Run Live Demo" → /demo → click "Run Live Case"]
 
 Let me show you live.
 
@@ -99,6 +143,12 @@ Nutrient reads the documents. ProofDesk decides if it's safe to sign.
 
 The obvious customers: procurement platforms, insurance processors, legal teams, lending institutions. Every document-heavy workflow where a wrong decision has financial consequences.
 
-Nutrient turns PDFs into grounded evidence. ProofDesk turns grounded evidence into accountable authority.
+Here's the question I want you to think about: would you rather have an AI agent that extracts correctly and acts blindly, or one that extracts correctly and knows when to stop?
+
+The answer is obvious. And that's exactly why this matters.
+
+An agent that can read a document is useful. An agent that knows whether it has enough evidence to act on that document is trustworthy. ProofDesk makes the difference between extraction and authority.
+
+Nutrient turns PDFs into grounded evidence. ProofDesk turns grounded evidence into accountable authority. One document at a time. Every fact traceable. Every decision auditable. Every signature justified.
 
 *[End — pause 3 seconds]*
