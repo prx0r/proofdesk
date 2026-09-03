@@ -39,21 +39,27 @@ Cross-document verification runs. Finds the contradiction. SignatureGate blocks 
 
 A human examines the exact evidence. Conditionally approves. The system generates an approval memo with a content-addressed audit trail.
 
-The audit trail is hash-chained with RFC 6962 Merkle proofs. Every fact traces back to the Nutrient extraction. No step can be skipped.
+Every step is recorded in a tamper-evident audit trail. Hash-chained events. Change one fact and the chain breaks. Every decision is replayable.
 
 ---
 
 ## RESEARCH — [scroll to "The Research"]
 
-Behind the authority gate is a research program in calibrated confidence. Not ad-hoc thresholds — published algorithms applied to document automation.
-
 We studied when automation should stop.
 
-Five algorithms. Conformal-style risk calibration gives you a bounded false authorization rate — you pick the risk, the math certifies the threshold. The sheepish transform penalizes overconfidence more than caution — because a wrong signature is worse than a deferred review. Per-field risk budgets mean a wrong signer name gets a tighter threshold than wrong metadata. Online calibration means human decisions improve future thresholds — the system learns. And dual-call verification asks a second extraction to confirm the first.
+The core question: how does the system know when it's safe to auto-sign versus when a human needs to look? Five algorithms answer that.
 
-The convergence loop is the key insight. Each time a human resolves an exception, ProofDesk captures the confidence level, the accept or reject decision, and the field involved. That becomes calibration data. The online calibrator updates. Future decisions improve. Human review falls over time while measured false-authorization risk stays bounded.
+First, risk calibration. You pick a false-sign rate — say one percent. The math certifies the threshold that keeps you there. Not a guess. A guarantee.
 
-We validated this on five datasets — transaction records, contract text, invoices, contract clauses. At a one percent false-sign rate, the system achieves fifty-nine point eight percent auto-sign coverage. Two point seven times over baseline logistic regression.
+Second, asymmetric penalty. Signing when you shouldn't is worse than deferring when you didn't need to. So the system penalizes overconfidence more than caution.
+
+Third, per-field risk budgets. A wrong signer name is worse than wrong date metadata. Each field type gets its own threshold.
+
+Fourth, the system learns from human decisions. Every time a human reviews a case, that feedback improves the next decision. The review rate drops over time. The error rate stays bounded.
+
+Fifth, double-check extraction. Ask the document parser twice — once guided by fields, once guided by the full document. If they agree, confidence goes up.
+
+We validated this across five datasets. At a one percent error rate, the system auto-signs sixty percent of documents without human review. That's two point seven times better than a standard logistic regression baseline.
 
 ---
 
@@ -61,15 +67,13 @@ We validated this on five datasets — transaction records, contract text, invoi
 
 What's hard to replicate.
 
-Nutrient source grounding — every fact carries value, confidence, page provenance, and bounding box. Not just text extraction. Evidence with location.
+Every fact knows where it came from — not just what it says, but which page, which bounding box. That's Nutrient's source grounding.
 
-Cross-document verification — deterministic checks catch contradictions that per-document extraction misses. The conflict is between documents, not within them.
+The contradictions are between documents, not within them. A per-document system misses this entirely.
 
-Calibrated authority gate — six conditions enforced server-side. Thresholds calibrated from research, not hand-tuned. The agent cannot negotiate.
+The gate is server-side. Six conditions. The agent cannot negotiate, cannot override, cannot route around it.
 
-Human-feedback convergence — human decisions become calibration data. The system learns where this organization can safely automate. Competitors can copy the UI. They can't copy three years of calibrated authority decisions.
-
-And tamper-evident execution — hash-chained audit trail with Merkle proofs. Every decision replayable. Content-addressed artifacts. Change one byte and the hash changes.
+And the system gets better with every human review. That calibration data compounds. A competitor can copy the UI. They can't copy three years of learned authority decisions.
 
 ---
 
@@ -77,21 +81,19 @@ And tamper-evident execution — hash-chained audit trail with Merkle proofs. Ev
 
 Nutrient DWS is the extraction layer. Without it, ProofDesk has no facts to cross-check.
 
-Nutrient gives us value plus confidence plus page-level grounding. That's what makes cross-document verification possible — we know exactly where each fact came from in the source document.
-
-Nutrient performs the core document extraction and source grounding that turns uploaded PDFs into confidence-aware evidence. ProofDesk uses that evidence to determine whether an automated action may proceed or must defer to a human.
+Nutrient gives us the value, the confidence, and exactly where in the source document each fact came from. That's what makes the whole system possible — we know the facts are grounded, not hallucinated.
 
 ---
 
 ## RESULTS — [scroll to "Results"]
 
-What we measured.
+What we built and what we measured.
 
-One hundred and fifteen tests passing. Thirteen PDF fixtures tested. Twelve document types supported. Six authority conditions enforced.
+One hundred and fifteen tests. All passing. Twelve document types. Six authority conditions.
 
-Fifteen extracted fields per document bundle. Six cross-document verification checks. A thirty-one day coverage gap detected. Zero unsafe actions.
+Ninety-five percent accuracy on contract processing. Eighty percent correctly sent to human review. Ten percent auto-signed with high confidence. Zero unsafe actions.
 
-Ninety-five percent accuracy on CUAD contracts. Five percent false positive rate. Eighty percent correctly deferred to human review. Ten percent auto-signed with high confidence.
+The system caught a thirty-one day insurance gap that a per-document system would have missed.
 
 ---
 
