@@ -145,7 +145,7 @@ footer{text-align:center;padding:40px 0;color:var(--dim);font-size:12px;border-t
         </div>
         <p>The agent can extract data, generate agreements, merge PDFs, and compress documents.
         But <strong>signing is irreversible</strong> — it creates a legal commitment.</p>
-        <p>ProofDesk inserts a server-side <strong>SignatureGate</strong> between reversible document
+        <p>ProofDesk inserts a server-side <strong>Authority Gate</strong> between reversible document
         work and irreversible signature. The agent can prepare everything. It cannot sign.</p>
         <div class="actions">
           <button class="btn btn-primary" onclick="showStage(1)">See the evidence →</button>
@@ -176,7 +176,7 @@ footer{text-align:center;padding:40px 0;color:var(--dim);font-size:12px;border-t
       <!-- Stage 2: Blocked -->
       <div class="stage-card" id="stage-2">
         <div class="highlight">STAGE 2</div>
-        <h2>SignatureGate BLOCKS the unsafe signature</h2>
+        <h2>Authority Gate BLOCKS the unsafe signature</h2>
         <div class="subtitle">0:40 — Authority Check</div>
         <p>The agent attempts to proceed. Six server-side checks evaluate the case.
         Multiple conditions fail.</p>
@@ -184,7 +184,7 @@ footer{text-align:center;padding:40px 0;color:var(--dim);font-size:12px;border-t
           <h3 class="denied">SIGNATURE DENIED</h3>
           <div id="gate-blocked-reasons"></div>
         </div>
-        <p><strong>No Foxit eSign call was made.</strong> The agent cannot sign.
+        <p><strong>No signing request was made.</strong> The agent cannot sign.
         This is the security boundary — architectural, not a workflow convention.</p>
         <div class="actions">
           <button class="btn btn-secondary" onclick="showStage(1)">← Back</button>
@@ -225,14 +225,14 @@ footer{text-align:center;padding:40px 0;color:var(--dim);font-size:12px;border-t
       <!-- Stage 5: Prepare -->
       <div class="stage-card" id="stage-5">
         <div class="highlight">STAGE 5</div>
-        <h2>Foxit PDF Services prepares the PDF packet</h2>
+        <h2>Document preparation — reversible work</h2>
         <div class="subtitle">1:45 — Reversible work (agent authorized)</div>
         <div class="hash-box" style="color:var(--green);font-family:inherit;font-size:13px;text-align:center;padding:16px">
           REVERSIBLE WORK — AGENT AUTHORIZED
         </div>
-        <p>Foxit PDF Services merges the source evidence with the approval memo, then
+        <p>ProofDesk merges the source evidence with the approval memo, then
         compresses the final packet. These are all <strong>reversible</strong> operations.</p>
-        <div id="foxit-display"></div>
+        <div id="prepare-display"></div>
         <div class="actions">
           <button class="btn btn-secondary" onclick="showStage(4)">← Back</button>
           <button class="btn btn-primary" onclick="showStage(6)">Final authorization →</button>
@@ -242,15 +242,15 @@ footer{text-align:center;padding:40px 0;color:var(--dim);font-size:12px;border-t
       <!-- Stage 6: Sign -->
       <div class="stage-card" id="stage-6">
         <div class="highlight">STAGE 6</div>
-        <h2>SignatureGate passes — signing request sent</h2>
+        <h2>Authority Gate passes — execution authorized</h2>
         <div class="subtitle">2:10 — Final authorization</div>
         <div class="gate-box pass" id="gate-pass">
           <h3 class="allowed">SIGNATURE AUTHORIZED</h3>
           <div id="gate-pass-checks"></div>
         </div>
-        <p>Only after all six checks pass does ProofDesk allow the signing request.
-        In production, this calls <strong>Foxit eSign</strong> to send a real signing link.
-        We currently simulate this step — Foxit eSign credentials pending.</p>
+        <p>Only after all six checks pass does ProofDesk allow the execution.
+        In production, this triggers the signing service to send a real signing link.
+        Signing integration is currently simulated.</p>
         <div id="sign-display"></div>
         <div class="actions">
           <button class="btn btn-secondary" onclick="showStage(5)">← Back</button>
@@ -278,10 +278,9 @@ footer{text-align:center;padding:40px 0;color:var(--dim);font-size:12px;border-t
     <div class="sidebar">
       <div class="info-card">
         <h3>Sponsor Integrations</h3>
-        <div class="sponsor"><div class="dot live"></div><strong>Nutrient DWS</strong>&nbsp;— Evidence extraction</div>
-        <div class="sponsor"><div class="dot live"></div><strong>ProofDesk</strong>&nbsp;— Document generation</div>
-        <div class="sponsor"><div class="dot live"></div><strong>Foxit PDF</strong>&nbsp;— Merge + compress</div>
-        <div class="sponsor"><div class="dot blocked"></div><strong>Foxit eSign</strong>&nbsp;— Signing (simulated)</div>
+        <div class="sponsor"><div class="dot live"></div><strong>Nutrient DWS</strong>&nbsp;— Document intelligence</div>
+        <div class="sponsor"><div class="dot live"></div><strong>Nutrient Viewer</strong>&nbsp;— Human source review</div>
+        <div class="sponsor"><div class="dot live"></div><strong>ProofDesk</strong>&nbsp;— Authority engine + audit</div>
       </div>
       <div class="info-card">
         <h3>Key Idea</h3>
@@ -315,10 +314,10 @@ let trace = []; // live execution trace
 const stageDescriptions = [
   "The agent receives a plain-language instruction. ProofDesk decides whether the evidence justifies executing it.",
   "Nutrient DWS extracts facts with source grounding — value, confidence, page, bounding box.",
-  "Six server-side checks evaluate the case. Multiple conditions fail. Signature denied.",
+  "Six server-side checks evaluate the case. Multiple conditions fail. Execution denied.",
   "A human reviewer inspects the evidence and resolves the blocking exception.",
   "ProofDesk generates a risk-aware approval memo. The template branches on risk state.",
-  "Foxit PDF Services merges and compresses the document packet. Reversible work — agent authorized.",
+  "ProofDesk merges and compresses the document packet. Reversible work — agent authorized.",
   "      All six gate checks pass. The signing request is sent.",
   "Every transition recorded in a hash-chained audit trail with Merkle inclusion proofs."
 ];
@@ -380,7 +379,7 @@ async function runDemo() {
 
     // 5. Fetch gate (should be denied)
     r = await api('GET', '/v1/cases/' + caseId + '/signature-gate');
-    addTrace('SIGNATUREGATE', 'initial check', r.data.allowed ? '✓' : '✗', r.data.reasons?.map(x => x.code).join(', '));
+    addTrace('AUTHORITY_GATE', 'initial check', r.data.allowed ? '✓' : '✗', r.data.reasons?.map(x => x.code).join(', '));
 
     // 6. Fetch provider trace
     r = await api('GET', '/v1/cases/' + caseId + '/trace');
@@ -457,9 +456,9 @@ async function continuePipeline() {
     // Prepare PDF
     r = await api('POST', '/v1/cases/' + caseId + '/prepare');
     if (r.ok) {
-      addTrace('FOXIT PDF', 'merge + compress + download', '✓', r.data.state || '');
+      addTrace('PROOFDESK', 'prepare PDF', r.ok ? '✓' : '✗', r.data.state || '');
     } else {
-      addTrace('FOXIT PDF', 'merge + compress', '✗', r.data.detail || 'failed');
+      addTrace('PROOFDESK', 'prepare PDF', '✗', r.data.detail || 'failed');
     }
 
     // Get updated case
@@ -468,7 +467,7 @@ async function continuePipeline() {
 
     // Get gate (should pass now)
     r = await api('GET', '/v1/cases/' + caseId + '/signature-gate');
-    addTrace('SIGNATUREGATE', 'final check', r.data.allowed ? '✓ ALLOW' : '✗ DENY',
+    addTrace('AUTHORITY_GATE', 'final check', r.data.allowed ? '✓ ALLOW' : '✗ DENY',
       r.data.checks?.join(', ') || r.data.reasons?.map(x => x.code).join(', '));
 
     populateGatePass(r.data);
@@ -476,7 +475,7 @@ async function continuePipeline() {
     // Signature request (only if gate passed)
     if (r.data.allowed) {
       r = await api('POST', '/v1/cases/' + caseId + '/signature-request', {signer: 'cfo@northstar.com'});
-      addTrace('FOXIT eSIGN', 'signature request', r.ok ? '✓ SENT' : '✗ ' + (r.data.detail || r.status),
+      addTrace('SIGNING', 'signature request', r.ok ? '✓ SENT' : '✗ ' + (r.data.detail || r.status),
         'signer: cfo@northstar.com (simulated)');
     }
 
@@ -494,7 +493,7 @@ async function continuePipeline() {
 
     // Populate remaining stages
     populateResolve(blocking || []);
-    populateFoxit(caseData);
+    populatePrepare(caseData);
     populateSign(caseData);
     populateAudit(r.data.events || [], caseData);
 
@@ -576,16 +575,15 @@ function populateMemo(receipt) {
   }
 }
 
-function populateFoxit(caseData) {
-  const el = document.getElementById('foxit-display');
-  // Derive from actual trace data
-  const foxitEntries = trace.filter(t => t.section === 'FOXIT PDF' || t.section === 'FOXIT eSIGN');
-  if (foxitEntries.length) {
+function populatePrepare(caseData) {
+  const el = document.getElementById('prepare-display');
+  const prepareEntries = trace.filter(t => t.section === 'PROOFDESK' && t.op.includes('prepare'));
+  if (prepareEntries.length) {
     el.innerHTML = '<div style="margin:12px 0">' +
-      foxitEntries.map(e => `<div class="gate-reason ${e.status.startsWith('✓') ? 'pass' : 'fail'}"><span class="icon">${e.status.startsWith('✓') ? '✓' : '✗'}</span>${esc(e.op)} — ${esc(e.detail)}</div>`).join('') +
+      prepareEntries.map(e => `<div class="gate-reason ${e.status.startsWith('✓') ? 'pass' : 'fail'}"><span class="icon">${e.status.startsWith('✓') ? '✓' : '✗'}</span>${esc(e.op)} — ${esc(e.detail)}</div>`).join('') +
       '</div>';
   } else {
-    el.innerHTML = '<div style="color:var(--dim);font-size:12px">No Foxit operations recorded</div>';
+    el.innerHTML = '<div style="color:var(--dim);font-size:12px">No preparation operations recorded</div>';
   }
 }
 
@@ -644,7 +642,7 @@ function resetDemo() {
   document.getElementById('gate-pass-checks').innerHTML = '';
   document.getElementById('resolve-display').innerHTML = '';
   document.getElementById('memo-display').textContent = '';
-  document.getElementById('foxit-display').innerHTML = '';
+  document.getElementById('prepare-display').innerHTML = '';
   document.getElementById('sign-display').innerHTML = '';
   document.getElementById('event-chain').innerHTML = '';
   document.getElementById('hash-info').innerHTML = '';

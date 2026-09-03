@@ -28,9 +28,9 @@ from src.engine.feedback import get_loop
 from src.engine.cost_analysis import get_tracker
 from src.providers.classifier import classify_document
 
-# Ensure Nutrient API key is set
+# Nutrient API key must be set in environment or .env
 if not os.environ.get("NUTRIENT_API_KEY"):
-    os.environ["NUTRIENT_API_KEY"] = "pdf_live_hAAUR0ppmrzrIQcOqnPH29ea5z0uioX8pO9SGG6XYmk"
+    raise SystemExit("NUTRIENT_API_KEY not set. Export it or add to .env")
 
 
 def run_benchmark(max_files: int = 500, output_dir: str = "/tmp/proofdesk/benchmark"):
@@ -39,8 +39,8 @@ def run_benchmark(max_files: int = 500, output_dir: str = "/tmp/proofdesk/benchm
     os.makedirs(output_dir, exist_ok=True)
     
     print("="*70)
-    print("  SHEEPDOG FULL BENCHMARK")
-    print("  Real Nutrient API • Real CUAD Contracts • Full Audit Trail")
+    print("  PROOFDESK FULL BENCHMARK")
+    print("  Real Nutrient DWS • Real CUAD Contracts • Full Audit Trail")
     print("="*70)
     print()
     

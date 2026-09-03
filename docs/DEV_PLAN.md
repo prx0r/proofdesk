@@ -2344,9 +2344,9 @@ These are **bonus materials** — if time permits, wiring any of them strengthen
 `tests/test_nutrient_real.py:16` contains a **hardcoded Nutrient API key**:
 
 ```python
-NUTRIENT_API_KEY = os.environ.get(
-    "NUTRIENT_API_KEY", "pdf_live_hAAUR0ppmrzrIQcOqnPH29ea5z0uioX8pO9SGG6XYmk"
-)
+NUTRIENT_API_KEY = os.environ.get("NUTRIENT_API_KEY")
+if not NUTRIENT_API_KEY:
+    raise RuntimeError("NUTRIENT_API_KEY required")
 ```
 
 This should be moved to `.env.keys` and the fallback removed before the repo goes public. The key is also partially visible in `benchmarks/nutrient_ab_test_20260825_042803.json:3`.

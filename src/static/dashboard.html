@@ -122,7 +122,7 @@ button.green { color:#3fb950; border-color:#3fb95066; background:#3fb95022; }
       <div id="checks"><div class="kv"><span class="k">—</span></div></div>
     </div>
     <div class="card">
-      <h2>SignatureGate</h2>
+      <h2>Authority Gate</h2>
       <div id="gate"><span class="chip idle">not evaluated</span></div>
     </div>
     <div class="card" style="flex:1">
@@ -307,7 +307,7 @@ async function verifyChain(){
 
 function renderTrace(calls){
   const log=document.getElementById('apilog');
-  const colors={'Nutrient DWS':'#d2a8ff','Foxit PDF Services':'#79c0ff','Doctavian':'#7ee787'};
+  const colors={'Nutrient DWS':'#d2a8ff','Nutrient DWS (live)':'#3fb950'};
   log.innerHTML=calls.map((c,i)=>{
     const col=colors[c.provider]||'#58a6ff';
     const ok=(c.status||0)<400;
@@ -332,7 +332,7 @@ function renderClassification(cls){
   const rl = cls.risk_level;
   const rlCol = rl==='low'?'#3fb950':rl==='medium'?'#d29922':'#f85149';
   const decCol = cls.decision==='AUTO_SIGN'?'#3fb950':cls.decision==='DEFER_TO_HUMAN'?'#d29922':'#f85149';
-  const engCol = cls.engine==='foxit_lab'?'#bc8cff':'#8b949e';
+  const engCol = cls.engine==='nutrient_dws'?'#3fb950':'#8b949e';
   let html = `
     <div class="kv"><span class="k">doc type</span><span style="color:#58a6ff">${cls.doc_type}</span> <span style="color:#484f58">(${Math.round(cls.type_match*100)}% match)</span></div>
     <div class="kv"><span class="k">risk level</span><span class="chip" style="background:${rlCol}22;color:${rlCol}">${rl.toUpperCase()}</span></div>
@@ -414,7 +414,7 @@ function renderConvergenceProjection(){
 
   card.innerHTML = `
     <div style="color:#c9d1d9;font-size:10px;margin-bottom:6px">
-      <b>CONVERGENCE PATH</b> — projected from foxit lab experimental results · 0% FSR guaranteed by conformal risk control
+      <b>CONVERGENCE PATH</b> — projected from calibration benchmark results · 0% FSR guaranteed by conformal risk control
     </div>
     ${svg}
     <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap">

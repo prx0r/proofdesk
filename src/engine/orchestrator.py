@@ -147,20 +147,24 @@ def run_pipeline(case: Case, domain: str = "procurement", stop_after: str | None
             vtrace.set_current(case.case_id)
             vtrace.drop(case.case_id)
             degraded = []
+            succeeded = []
             _t0 = _t.time()
             _pre = len(case.facts)
             for doc in case.documents:
                 try:
                     # Real Nutrient needs actual PDF bytes — fall back to stubs for text-only docs
                     if _USE_REAL_NUTRIENT and doc.raw_bytes:
-                        case.facts.extend(nutrient_extract(doc))
+                        facts = nutrient_extract(doc)
+                        case.facts.extend(facts)
+                        succeeded.append({"doc_id": doc.doc_id, "facts": len(facts)})
                     elif _USE_REAL_NUTRIENT and not doc.raw_bytes:
                         from ..providers.stubs import nutrient_extract as stub_extract
                         case.facts.extend(stub_extract(doc))
+                        succeeded.append({"doc_id": doc.doc_id, "facts": 0, "note": "stub:text-only"})
                     else:
                         case.facts.extend(nutrient_extract(doc))
+                        succeeded.append({"doc_id": doc.doc_id, "facts": 0, "note": "stub:no-key"})
                 except Exception as e:
-                    # provider failure degrades this doc, never the pipeline
                     degraded.append({"doc_id": doc.doc_id, "error": str(e)[:120]})
             vtrace.record(case.case_id,
                 "Nutrient DWS" if _USE_REAL_NUTRIENT else "stub",
@@ -170,17 +174,42 @@ def run_pipeline(case: Case, domain: str = "procurement", stop_after: str | None
                                  "total_bytes": sum(len(d.raw_bytes or b"") for d in case.documents)},
                 status=200 if not degraded else 207,
                 response_summary={"facts_extracted": len(case.facts) - _pre,
-                                  "degraded": degraded},
+                                  "degraded": degraded,
+                                  "succeeded": succeeded},
                 duration_ms=(_t.time() - _t0) * 1000)
+
+            # Evidence completeness contract
+            evidence_contract = {
+                "expected_documents": len(case.documents),
+                "processed_live": len(succeeded),
+                "failed": len(degraded),
+                "required_evidence_complete": len(degraded) == 0 and len(case.facts) > 0,
+            }
+            from ..models.domain import AuditEvent
+
             if degraded:
-                from ..models.domain import AuditEvent
                 evt = AuditEvent(case_id=case.case_id, event_type="EXTRACTION_DEGRADED",
-                                 actor="system", detail={"docs": degraded})
+                                 actor="system", detail={"docs": degraded, "contract": evidence_contract})
                 evt.compute_hash(case.audit_events[-1].content_hash if case.audit_events else "")
                 case.audit_events.append(evt)
+
+            # Hard-fail when DEMO_REQUIRE_LIVE_PROVIDERS=true and any doc failed
+            if _REQUIRE_LIVE and degraded:
+                evt = AuditEvent(case_id=case.case_id, event_type="EVIDENCE_INCOMPLETE",
+                                 actor="system", detail={
+                                     "reason": "EVIDENCE_INCOMPLETE: required live extraction failed for documents",
+                                     "contract": evidence_contract,
+                                     "degraded": degraded})
+                evt.compute_hash(case.audit_events[-1].content_hash if case.audit_events else "")
+                case.audit_events.append(evt)
+                transition(case, CaseState.REVIEW_REQUIRED, detail={
+                    "reason": "EVIDENCE_INCOMPLETE: live extraction failed for required documents",
+                    "contract": evidence_contract,
+                    "degraded": degraded})
+                return case
+
             # Block if no facts extracted — missing evidence is a blocker
             if len(case.facts) == 0:
-                from ..models.domain import AuditEvent
                 evt = AuditEvent(case_id=case.case_id, event_type="EVIDENCE_INCOMPLETE",
                                  actor="system", detail={"reason": "No facts extracted from any document"})
                 evt.compute_hash(case.audit_events[-1].content_hash if case.audit_events else "")

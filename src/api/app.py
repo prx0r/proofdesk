@@ -97,9 +97,18 @@ class SpotAuditRequest(BaseModel):
 
 @app.get("/v1/providers/status")
 def provider_status():
-    """Show which providers are live vs simulated."""
+    """Show which providers are live vs simulated — verifies API reachability."""
+    import httpx
+    nutrient_key = os.environ.get("NUTRIENT_API_KEY", "")
+    nutrient_status = "UNAVAILABLE"
+    if nutrient_key:
+        try:
+            r = httpx.get("https://api.nutrient.io", timeout=5.0)
+            nutrient_status = "LIVE" if r.status_code < 500 else "ERROR"
+        except Exception:
+            nutrient_status = "UNREACHABLE"
     return {
-        "nutrient_dws": "LIVE" if os.environ.get("NUTRIENT_API_KEY") else "UNAVAILABLE",
+        "nutrient_dws": nutrient_status,
         "authority_engine": "LOCAL",
         "audit_ledger": "VALID",
     }

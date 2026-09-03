@@ -35,7 +35,7 @@
 - foxit/README.md now labeled as "RESEARCH LABORATORY"
 
 ### 6. Nutrient DWS Wiring
-- Server starts with `NUTRIENT_API_KEY=pdf_live_hAAUR0ppmrzrIQcOqnPH29ea5z0uioX8pO9SGG6XYmk`
+- Server starts with `NUTRIENT_API_KEY` from `.env`
 - `src/engine/orchestrator.py` updated: real Nutrient for PDFs, stubs for text-only docs
 - Provider status shows `nutrient: LIVE`
 - **Result:** 15 facts extracted from real Nutrient DWS with confidence, page, bbox
