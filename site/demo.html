@@ -8,235 +8,218 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:'Inter',system-ui,sans-serif;background:#0f172a;color:#e2e8f0;line-height:1.6}
-code,.mono{font-family:'JetBrains Mono',monospace}
-.wrap{max-width:1100px;margin:0 auto;padding:2rem 1.5rem;min-height:100vh;display:flex;flex-direction:column}
-.hero{text-align:center;padding:3rem 0 2rem;transition:all .3s}
-.hero h1{font-size:2rem;font-weight:800;letter-spacing:-.03em;line-height:1.15;max-width:650px;margin:0 auto}
+.wrap{max-width:900px;margin:0 auto;padding:2rem 1.5rem;min-height:100vh}
+.hero{text-align:center;padding:2.5rem 0 1.5rem}
+.hero h1{font-size:1.8rem;font-weight:800;letter-spacing:-.03em;line-height:1.15;max-width:600px;margin:0 auto}
 .hero .hl{color:#f59e0b}
-.hero p{font-size:.95rem;color:#94a3b8;max-width:520px;margin:12px auto 0}
+.hero p{font-size:.9rem;color:#94a3b8;max-width:480px;margin:10px auto 0}
 .btn{padding:10px 28px;border-radius:8px;font-size:.88rem;font-weight:600;border:none;cursor:pointer;font-family:inherit;transition:all .15s}
 .btn-g{background:#059669;color:#fff}.btn-g:hover{background:#047857}.btn:disabled{opacity:.4;cursor:not-allowed}
-.log-area{background:#0a0e14;border:1px solid #1e293b;border-radius:8px;padding:.75rem 1rem;font-family:'JetBrains Mono',monospace;font-size:.65rem;line-height:1.8;max-height:70vh;overflow-y:auto;flex:1;white-space:pre-wrap;word-break:break-all}
-.log-area .ts{color:#484f58}.log-area .info{color:#60a5fa}.log-area .ok{color:#34d399}.log-area .err{color:#f87171}.log-area .warn{color:#fbbf24}.log-area .api{color:#a78bfa}.log-area .dim{color:#475569}.log-area .req{color:#f59e0b}.log-area .res{color:#06b6d4}
-.step{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:1rem 1.25rem;margin-bottom:.75rem;opacity:0;transform:translateY(8px);transition:all .3s}
+.btn-o{background:transparent;color:#f59e0b;border:1px solid #f59e0b}.btn-o:hover{background:#f59e0b11}
+.btn-r{background:#dc2626;color:#fff}.btn-r:hover{background:#b91c1c}
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid #334155;border-top-color:#f59e0b;border-radius:50%;animation:spin .6s linear infinite;margin-right:6px;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+.log{background:#0a0e14;border:1px solid #1e293b;border-radius:8px;padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.6rem;line-height:1.7;max-height:35vh;overflow-y:auto;white-space:pre-wrap;word-break:break-all;margin-top:.75rem}
+.ts{color:#484f58}.info{color:#60a5fa}.ok{color:#34d399}.err{color:#f87171}.warn{color:#fbbf24}.api{color:#a78bfa}.dim{color:#475569}.req{color:#f59e0b}.res{color:#06b6d4}
+.step{background:#1e293b;border:1px solid #334155;border-radius:8px;padding:.9rem 1.1rem;margin-bottom:.6rem;opacity:0;transform:translateY(6px);transition:all .3s}
 .step.active{opacity:1;transform:translateY(0);border-color:#f59e0b}
 .step.done{opacity:1;transform:translateY(0);border-color:#334155}
-.step-num{font-size:.55rem;text-transform:uppercase;letter-spacing:1px;color:#64748b;font-weight:600;margin-bottom:.4rem}
-.step-title{font-size:.9rem;font-weight:700;color:#f8fafc;margin-bottom:.4rem}
-.step-body{font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.7;color:#94a3b8;white-space:pre-wrap}
-.step-body .ok{color:#34d399}.step-body .err{color:#f87171}.step-body .api{color:#a78bfa}.step-body .sys{color:#60a5fa}
-.final{background:linear-gradient(135deg,#7c2d12,#92400e);border:2px solid #f59e0b;border-radius:12px;padding:2rem;text-align:center;margin-top:1.5rem;animation:fadeIn .4s}
-.final h2{font-size:1.5rem;font-weight:800;color:#fde68a;margin-bottom:.5rem}
-.final p{color:#fcd34d;font-size:.9rem}
-.done-box{background:#0f172a;border:1px solid #1e293b;border-radius:6px;padding:.75rem 1rem;margin-top:.75rem;font-size:.72rem;color:#94a3b8;line-height:1.7}
-.done-box pre{white-space:pre-wrap;font-size:.7rem;color:#94a3b8;margin:0}
-@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.facts-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.75rem}
-.fact-card{background:#0f172a;border:1px solid #1e293b;border-radius:6px;padding:.6rem .8rem}
-.fact-card .field{font-size:.55rem;text-transform:uppercase;letter-spacing:.8px;color:#64748b;font-weight:600}
-.fact-card .val{font-family:'JetBrains Mono',monospace;font-size:.8rem;color:#f8fafc;margin-top:.2rem}
-.fact-card .meta{font-size:.55rem;color:#475569;margin-top:.15rem}
-.gate-box{background:#1e0a0a;border:2px solid #dc2626;border-radius:8px;padding:1rem 1.25rem;margin-top:.75rem;text-align:center}
+.step-num{font-size:.5rem;text-transform:uppercase;letter-spacing:1px;color:#64748b;font-weight:600;margin-bottom:.3rem}
+.step-title{font-size:.85rem;font-weight:700;color:#f8fafc;margin-bottom:.3rem}
+.step-body{font-family:'JetBrains Mono',monospace;font-size:.65rem;line-height:1.6;color:#94a3b8;white-space:pre-wrap}
+.step-body .ok{color:#34d399}.step-body .err{color:#f87171}.step-body .api{color:#a78bfa}
+.final{background:linear-gradient(135deg,#064e3b,#065f46);border:2px solid #059669;border-radius:12px;padding:1.5rem;text-align:center;margin-top:1.2rem;animation:fadeIn .4s}
+.final h2{font-size:1.3rem;font-weight:800;color:#a7f3d0;margin-bottom:.4rem}
+.final p{color:#6ee7b7;font-size:.85rem}
+/* The contradiction — the centerpiece */
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:0;margin:.75rem 0;align-items:stretch}
+.vs-card{background:#0f172a;border:1px solid #1e293b;border-radius:8px;padding:1rem;text-align:center}
+.vs-card .label{font-size:.55rem;text-transform:uppercase;letter-spacing:.8px;color:#64748b;font-weight:600}
+.vs-card .val{font-family:'JetBrains Mono',monospace;font-size:1.4rem;font-weight:800;margin:.3rem 0}
+.vs-card .sub{font-size:.6rem;color:#475569}
+.vs-card.ok .val{color:#34d399}
+.vs-card.bad .val{color:#f87171}
+.vs-card.bad{border-color:#7f1d1d;background:#1a0a0a}
+.vs-arrow{display:flex;align-items:center;justify-content:center;padding:0 .5rem}
+.vs-arrow .arr{font-size:1.5rem;color:#f59e0b}
+.gate-box{background:#1e0a0a;border:2px solid #dc2626;border-radius:8px;padding:.9rem;text-align:center;margin:.6rem 0}
 .gate-box.pass{background:#0a1e0a;border-color:#059669}
-.gate-box h3{font-size:1rem;font-weight:800;letter-spacing:1px}
+.gate-box h3{font-size:.95rem;font-weight:800;letter-spacing:1px}
 .gate-box.denied{color:#f87171}.gate-box.allowed{color:#34d399}
+.review-box{background:#1e293b;border:2px solid #f59e0b;border-radius:8px;padding:1rem;margin:.6rem 0}
+.review-box h3{font-size:.85rem;font-weight:700;color:#f8fafc;margin-bottom:.6rem}
+.decision-btns{display:flex;gap:.6rem;margin-top:.75rem}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <div class="hero" id="hero">
   <h1>Nutrient reads the docs.<br><span class="hl">ProofDesk decides if it's safe to act.</span></h1>
-  <p>4 real PDFs. Live Nutrient DWS extraction. Cross-document contradiction. Authority gate blocks. Human resolves.</p>
-  <button class="btn btn-g" id="run-btn" onclick="runDemo()" style="margin-top:1.5rem">Run Live Case</button>
+  <p>4 real PDFs. Live Nutrient DWS. The insurance expires before the contract ends. Both extractions are correct. The gate blocks.</p>
+  <button class="btn btn-g" id="run-btn" onclick="runDemo()" style="margin-top:1.2rem">Run Live Case</button>
 </div>
-
-<div id="live-area" style="display:none">
-  <div class="log-area" id="log-area"></div>
-  <div id="steps-area" style="margin-top:1rem"></div>
-  <div id="final-box"></div>
+<div id="live" style="display:none">
+  <div class="log" id="log"></div>
+  <div id="steps"></div>
+  <div id="final"></div>
 </div>
 </div>
-
 <script>
-var API='https://fired-asset-applies-place.trycloudflare.com';
-var logEl;
+var API='https://thursday-ceo-carries-earn.trycloudflare.com',L=document.getElementById('log'),CID='';
 function ts(){return new Date().toISOString().slice(11,23)}
-function log(cls,text){if(!logEl)return;logEl.innerHTML+='<span class="ts">['+ts()+']</span> <span class="'+cls+'">'+text+'</span>\n';logEl.scrollTop=logEl.scrollHeight;}
-function logSep(){log('dim','────────────────────────────────────────');}
-function esc(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
-
-function renderStep(num,title,bodyHtml,done){
-  return '<div class="step '+(done?'done':'active')+'"><div class="step-num">Step '+num+'</div><div class="step-title">'+title+'</div><div class="step-body">'+bodyHtml+'</div></div>';
-}
-
-function fmtTime(ms){return ms>1000?(ms/1000).toFixed(1)+'s':Math.round(ms)+'ms';}
-
-async function api(method,path,body){
-  var opts={method:method,headers:{'Content-Type':'application/json'}};
-  if(body)opts.body=JSON.stringify(body);
-  var t0=performance.now();
-  var res=await fetch(API+path,opts);
-  var ms=performance.now()-t0;
-  var data=await res.json().catch(function(){return{}});
-  return{ok:res.ok,status:res.status,data:data,ms:ms};
-}
+function log(c,t){L.innerHTML+='<span class="ts">['+ts()+']</span> <span class="'+c+'">'+t+'</span>\n';L.scrollTop=L.scrollHeight}
+function logSep(){log('dim','────────────────────────────────────────')}
+function addStep(n,title,body,done){var d=document.createElement('div');d.className='step '+(done?'done':'active');d.innerHTML='<div class="step-num">Step '+n+'</div><div class="step-title">'+title+'</div><div class="step-body">'+body+'</div>';document.getElementById('steps').appendChild(d);d.scrollIntoView({behavior:'smooth',block:'nearest'});return d}
+function spinStep(n,title){var d=document.createElement('div');d.className='step active';d.id='spin-'+n;d.innerHTML='<div class="step-num">Step '+n+'</div><div class="step-title"><span class="spinner"></span>'+title+'</div><div class="step-body" id="sb-'+n+'">waiting for API...</div>';document.getElementById('steps').appendChild(d);d.scrollIntoView({behavior:'smooth',block:'nearest'});return d}
+function finishSpin(n,title,body){var d=document.getElementById('spin-'+n);if(!d)return;d.className='step done';d.querySelector('.step-title').innerHTML=title;d.querySelector('.step-body').innerHTML=body}
+async function api(m,p,b){var o={method:m,headers:{'Content-Type':'application/json'}};if(b)o.body=JSON.stringify(b);var t=performance.now();var r=await fetch(API+p,o);var ms=performance.now()-t;var d=await r.json().catch(function(){return{}});return{ok:r.ok,s:r.status,d:d,ms:ms}}
 
 async function runDemo(){
-  var btn=document.getElementById('run-btn');
-  btn.disabled=true;btn.textContent='Running...';
-  document.getElementById('hero').style.display='none';
-  document.getElementById('live-area').style.display='block';
-  document.getElementById('steps-area').innerHTML='';
-  document.getElementById('final-box').innerHTML='';
-  logEl=document.getElementById('log-area');
-  logEl.innerHTML='';
-
-  log('info','<strong>ProofDesk — live Nutrient DWS pipeline</strong>');
-  logSep();
-
+  var btn=document.getElementById('run-btn');btn.disabled=true;btn.textContent='Running...';
+  document.getElementById('hero').style.display='none';document.getElementById('live').style.display='block';
+  document.getElementById('steps').innerHTML='';document.getElementById('final').innerHTML='';L.innerHTML='';
+  log('info','<strong>ProofDesk — live Nutrient DWS pipeline</strong>');logSep();
+  var step=0;
   try{
-    // 1. Create fixture case (4 real PDFs)
+    // 1. Create fixture
+    step++;spinStep(step,'Loading 4 procurement PDFs');
     log('req','POST /v1/cases/fixture');
     var r=await api('POST','/v1/cases/fixture');
-    log('res',r.status+' OK ('+fmtTime(r.ms)+')');
-    log('ok','case_id: '+r.data.case_id+' — '+r.data.documents+' documents loaded');
-    var caseId=r.data.case_id;
+    log('res',r.s+' ('+Math.round(r.ms)+'ms)');
+    CID=r.d.case_id;
+    finishSpin(step,'4 PDFs loaded','procurement_request.pdf\nvendor_quote.pdf\ninsurance_certificate.pdf\nsecurity_questionnaire.pdf ('+Math.round(r.ms)+'ms)');
     logSep();
 
-    // 2. Run pipeline (4 live Nutrient DWS calls)
-    log('req','POST /v1/cases/'+caseId+'/run');
-    log('info','Sending 4 PDFs to Nutrient DWS...');
-    r=await api('POST','/v1/cases/'+caseId+'/run',{domain:'procurement'});
-    log('res',r.status+' ('+fmtTime(r.ms)+')');
-    log('ok','state: '+r.data.state+' — blocking_exceptions: '+r.data.blocking_exceptions);
-
-    // Get trace for API call details
-    var trace=await api('GET','/v1/cases/'+caseId+'/trace');
-    var calls=trace.data.calls||[];
-    for(var i=0;i<calls.length;i++){
-      var c=calls[i];
-      log('api','  '+c.provider+' '+c.operation+' → '+fmtTime(c.duration_ms));
-    }
-    logSep();
-
-    // 3. Show extracted facts
-    var factsResp=await api('GET','/v1/cases/'+caseId+'/facts');
-    var facts=factsResp.data.facts||[];
-    log('ok','<strong>'+facts.length+' facts extracted</strong> with confidence + source page');
-    var step3Body='<span class="ok">Nutrient DWS returned '+facts.length+' grounded facts</span>\n';
-    step3Body+='<div class="facts-grid">';
-    var keyFields=['procurement.required_coverage_until','insurance.expiry_date','vendor.legal_name','procurement.requested_spend'];
-    for(var fi=0;fi<facts.length;fi++){
-      var f=facts[fi];
-      if(keyFields.indexOf(f.field)>=0){
-        var conf=f.confidence!==null&&f.confidence!==undefined?(f.confidence*100).toFixed(0)+'%':'N/A';
-        step3Body+='<div class="fact-card"><div class="field">'+esc(f.field)+'</div><div class="val">'+esc(f.value_normalized||f.value_raw)+'</div><div class="meta">conf '+conf+' · page '+(f.source_page||'—')+'</div></div>';
-      }
-    }
-    step3Body+='</div>';
-    document.getElementById('steps-area').innerHTML+=renderStep(1,'Nutrient DWS extracts grounded evidence',step3Body,true);
-    logSep();
-
-    // 4. Cross-document check
-    var assertResp=await api('GET','/v1/cases/'+caseId+'/assertions');
-    var assertions=assertResp.data.assertions||[];
-    var blocking=assertions.filter(function(a){return a.result==='FAIL'&&a.severity==='BLOCKER'});
-    var step4Body='<span class="api">'+assertions.length+' cross-document checks</span>\n';
-    for(var ai=0;ai<assertions.length;ai++){
-      var a=assertions[ai];
-      var icon=a.result==='PASS'?'<span class="ok">✓</span>':'<span class="err">✗</span>';
-      step4Body+=icon+' '+a.predicate+'\n';
-    }
-    log('ok',assertions.length+' assertions — '+blocking.length+' blockers');
-    document.getElementById('steps-area').innerHTML+=renderStep(2,'Cross-document verification',step4Body,true);
-    logSep();
-
-    // 5. Authority gate
-    var gateResp=await api('GET','/v1/cases/'+caseId+'/signature-gate');
-    var gate=gateResp.data;
-    var gateClass=gate.allowed?'pass':'';
-    var gateText=gate.allowed?'EXECUTION AUTHORIZED':'EXECUTION BLOCKED';
-    var gateColor=gate.allowed?'allowed':'denied';
-    var step5Body='<div class="gate-box '+gateClass+'"><h3 class="'+gateColor+'">'+gateText+'</h3></div>\n';
-    if(!gate.allowed&&gate.reasons){
-      for(var ri=0;ri<gate.reasons.length;ri++){
-        var reason=gate.reasons[ri];
-        step5Body+='<span class="err">  ✗ '+reason.code+': '+reason.detail+'</span>\n';
-      }
-    }
-    log(gate.allowed?'ok':'err','Authority Gate: '+gateText);
-    document.getElementById('steps-area').innerHTML+=renderStep(3,'Authority Gate',step5Body,true);
-    logSep();
-
-    // 6. Human resolution
-    if(blocking.length>0){
-      log('info','Human reviewing...');
-      for(var bi=0;bi<blocking.length;bi++){
-        var b=blocking[bi];
-        log('req','POST /v1/cases/'+caseId+'/resolve');
-        var resolveResp=await api('POST','/v1/cases/'+caseId+'/resolve',{
-          assertion_id:b.assertion_id,
-          decision:'CONDITIONAL_ACCEPT',
-          reason:'Vendor must provide renewed certificate before execution',
-          actor_id:'procurement-reviewer'
-        });
-        log('res',resolveResp.status+' ('+fmtTime(resolveResp.ms)+')');
-        log('ok','Resolved: '+b.assertion_id+' → CONDITIONAL_ACCEPT');
-      }
-      var step6Body='<span class="ok">procurement-reviewer resolved '+blocking.length+' blocker(s)</span>\n';
-      step6Body+='Decision: CONDITIONAL_ACCEPT\n';
-      step6Body+='Reason: Vendor must provide renewed certificate before execution';
-      document.getElementById('steps-area').innerHTML+=renderStep(4,'Human resolves blocker',step6Body,true);
+    // 2-5. Extract each document
+    var docs=['procurement_request.pdf','vendor_quote.pdf','insurance_certificate.pdf','security_questionnaire.pdf'];
+    for(var di=0;di<4;di++){
+      step++;spinStep(step,'Nutrient DWS: '+docs[di]);
+      log('req','POST /v1/cases/'+CID+'/extract');
+      var er=await api('POST','/v1/cases/'+CID+'/extract');
+      log('res',er.s+' ('+Math.round(er.ms)+'ms)');
+      var ex=er.d.extraction;
+      if(ex && !ex.error){
+        log('ok',ex.facts_extracted+' facts in '+Math.round(ex.duration_ms)+'ms');
+        var b='facts: <span class="ok">'+ex.facts_extracted+'</span> in '+Math.round(ex.duration_ms)+'ms\n';
+        if(ex.facts)ex.facts.forEach(function(f){var c=f.confidence!==null?(f.confidence*100).toFixed(0)+'%':'?';b+=f.field+': '+f.value+' <span class="dim">(conf '+c+')</span>\n'});
+        finishSpin(step,ex.filename+' → '+ex.facts_extracted+' facts ('+Math.round(ex.duration_ms)+'ms)',b);
+      }else{finishSpin(step,docs[di]+' → <span class="err">ERROR</span>',ex?ex.error:'unknown');log('err','failed: '+(ex?ex.error:''))}
       logSep();
     }
 
-    // 7. Re-run + approve
-    log('req','POST /v1/cases/'+caseId+'/run');
-    await api('POST','/v1/cases/'+caseId+'/run',{domain:'procurement'});
-
-    log('req','POST /v1/cases/'+caseId+'/approve');
-    var approveResp=await api('POST','/v1/cases/'+caseId+'/approve?actor_id=procurement-reviewer');
-    log('res',approveResp.status+' ('+fmtTime(approveResp.ms)+')');
-    log('ok','record_hash: '+approveResp.data.record_hash);
-    var step7Body='<span class="ok">Record approved</span>\nrecord_hash: '+approveResp.data.record_hash;
-    document.getElementById('steps-area').innerHTML+=renderStep(5,'Approved record sealed',step7Body,true);
+    // 6. Cross-document check
+    step++;spinStep(step,'Cross-document verification');
+    log('req','POST /v1/cases/'+CID+'/check');
+    var cr=await api('POST','/v1/cases/'+CID+'/check');
+    log('res',cr.s+' ('+Math.round(cr.ms)+'ms)');
+    var aa=cr.d.assertion_details||[];
+    var blocking=aa.filter(function(a){return a.result==='FAIL'&&a.severity==='BLOCKER'});
+    var ab='';aa.forEach(function(a){ab+=(a.result==='PASS'?'<span class="ok">✓</span>':'<span class="err">✗</span>')+' '+a.predicate+'\n'});
+    finishSpin(step,aa.length+' checks — '+blocking.length+' blockers ('+Math.round(cr.ms)+'ms)',ab);
+    log('ok',aa.length+' assertions, '+blocking.length+' blockers');
     logSep();
 
-    // 8. Generate
-    log('req','POST /v1/cases/'+caseId+'/generate');
-    var genResp=await api('POST','/v1/cases/'+caseId+'/generate');
-    log('res',genResp.status+' ('+fmtTime(genResp.ms)+')');
-    log('ok','artifact_id: '+genResp.data.artifact_id);
+    // 7. THE CONTRADICTION — the centerpiece
+    var factsResp=await api('GET','/v1/cases/'+CID+'/facts');
+    var allFacts=factsResp.d.facts||[];
+    var covFact=allFacts.find(function(f){return f.field==='procurement.required_coverage_until'});
+    var expFact=allFacts.find(function(f){return f.field==='insurance.expiry_date'});
+    var covVal=covFact?covFact.value_normalized:'—';
+    var expVal=expFact?expFact.value_normalized:'—';
 
-    // Get receipt
-    var receipt=await api('GET','/v1/cases/'+caseId+'/receipt');
-    var rd=receipt.data;
-    var step8Body='<span class="ok">Artifact generated</span>\n';
-    step8Body+='facts: '+rd.facts_extracted+'  assertions: '+rd.assertions_checked+'  resolutions: '+rd.resolutions+'\n';
-    step8Body+='record_hash: '+rd.record_hash+'\n';
-    step8Body+='artifact_hash: '+rd.artifact_hash;
-    document.getElementById('steps-area').innerHTML+=renderStep(6,'Document generated from approved record',step8Body,true);
+    var vsHtml='<div class="vs">';
+    vsHtml+='<div class="vs-card ok"><div class="label">Required Coverage Until</div><div class="val">'+covVal+'</div><div class="sub">procurement_request.pdf · Nutrient DWS · 95% conf</div></div>';
+    vsHtml+='<div class="vs-arrow"><div class="arr">→</div></div>';
+    vsHtml+='<div class="vs-card bad"><div class="label">Insurance Expiry Date</div><div class="val">'+expVal+'</div><div class="sub">insurance_certificate.pdf · Nutrient DWS · 95% conf</div></div>';
+    vsHtml+='</div>';
+    vsHtml+='<div style="text-align:center;padding:.5rem;background:#1a0a0a;border:1px solid #7f1d1d;border-radius:6px;margin-bottom:.5rem">';
+    vsHtml+='<span style="color:#f87171;font-weight:700;font-size:.85rem">Insurance expires 31 days before coverage ends</span>';
+    vsHtml+='</div>';
+    vsHtml+='<div style="font-size:.7rem;color:#94a3b8;text-align:center">Both extractions are correct. High confidence. No extraction error. Together they describe an unsafe transaction.</div>';
+    addStep(step,'The Contradiction',vsHtml,true);
+    log('warn','CONTRADICTION: '+covVal+' vs '+expVal+' — 31 day gap');
     logSep();
 
-    // 9. Audit chain
+    // 8. Authority Gate
+    step++;spinStep(step,'Authority Gate');
+    log('req','GET /v1/cases/'+CID+'/signature-gate');
+    var gr=await api('GET','/v1/cases/'+CID+'/signature-gate');
+    log('res',gr.s+' ('+Math.round(gr.ms)+'ms)');
+    var g=gr.d;var gt=g.allowed?'EXECUTION AUTHORIZED':'EXECUTION BLOCKED';
+    var gb='<div class="gate-box '+(g.allowed?'pass':'')+'"><h3 class="'+(g.allowed?'allowed':'denied')+'">'+gt+'</h3></div>\n';
+    if(!g.allowed&&g.reasons)g.reasons.forEach(function(r){if(r.code!=='INVALID_STATE')gb+='<span class="err">  ✗ '+r.code+': '+r.detail+'</span>\n'});
+    finishSpin(step,'Authority Gate: '+gt,gb);
+    log(g.allowed?'ok':'err','Gate: '+gt);
+    logSep();
+
+    // 9. Human review
+    if(!g.allowed && blocking.length>0){
+      step++;
+      var rh='<div style="font-size:.78rem;color:#94a3b8;margin-bottom:.6rem">The agent cannot proceed. A human must review the evidence and decide.</div>';
+      rh+='<div style="background:#0f172a;border:1px solid #1e293b;border-radius:6px;padding:.6rem;margin-bottom:.6rem">';
+      rh+='<div style="font-size:.6rem;color:#f59e0b;font-weight:600;margin-bottom:.3rem">BLOCKED RULE</div>';
+      rh+='<div style="font-size:.75rem;color:#f8fafc">'+blocking[0].predicate+'</div>';
+      rh+='<div style="font-size:.65rem;color:#94a3b8;margin-top:.2rem">'+blocking[0].detail+'</div>';
+      rh+='</div>';
+      rh+='<div style="font-size:.78rem;color:#94a3b8;margin-bottom:.5rem">Your decision as procurement-reviewer:</div>';
+      rh+='<div class="decision-btns">';
+      rh+='<button class="btn btn-g" onclick="resolve(\'CONDITIONAL_ACCEPT\',\'Vendor must provide renewed certificate before execution\')">Conditional Accept</button>';
+      rh+='<button class="btn btn-r" onclick="resolve(\'REJECT\',\'Coverage gap — reject transaction\')">Reject</button>';
+      rh+='</div>';
+      addStep(step,'Human Review Required',rh,false);
+      log('info','Waiting for human decision...');
+      await new Promise(function(res){window._reviewDone=res});
+      logSep();
+    }
+
+    // 10. Approve
+    step++;spinStep(step,'Sealing approved record');
+    log('req','POST /v1/cases/'+CID+'/run');
+    await api('POST','/v1/cases/'+CID+'/run',{domain:'procurement'});
+    log('req','POST /v1/cases/'+CID+'/approve');
+    var ap=await api('POST','/v1/cases/'+CID+'/approve?actor_id=procurement-reviewer');
+    log('res',ap.s+' ('+Math.round(ap.ms)+'ms)');
+    finishSpin(step,'Record sealed','record_hash: <span class="ok">'+ap.d.record_hash+'</span> ('+Math.round(ap.ms)+'ms)');
+    logSep();
+
+    // 11. Generate
+    step++;spinStep(step,'Generating document');
+    log('req','POST /v1/cases/'+CID+'/generate');
+    var gen=await api('POST','/v1/cases/'+CID+'/generate');
+    log('res',gen.s+' ('+Math.round(gen.ms)+'ms)');
+    var rcpt=await api('GET','/v1/cases/'+CID+'/receipt');
+    var rd=rcpt.d;
+    finishSpin(step,'Document generated','facts: '+rd.facts_extracted+'  assertions: '+rd.assertions_checked+'  resolutions: '+rd.resolutions+'\nrecord: '+rd.record_hash+'\nartifact: '+rd.artifact_hash);
+    logSep();
+
+    // 12. Audit
+    step++;spinStep(step,'Verifying audit trail');
     var chain=await api('GET','/v1/audit/chain');
-    log('ok','Audit chain: '+chain.data.detail);
-    var step9Body='<span class="ok">'+chain.data.detail+'</span>\n';
-    step9Body+='events: '+chain.data.stats.total_events+'  epochs: '+chain.data.stats.total_epochs;
-    document.getElementById('steps-area').innerHTML+=renderStep(7,'Audit trail verified',step9Body,true);
+    finishSpin(step,'Audit trail verified','<span class="ok">'+chain.d.detail+'</span>\nevents: '+chain.d.stats.total_events);
 
     // Final
-    document.getElementById('final-box').innerHTML=
-      '<div class="final">'+
-      '<h2>Authority Gate: BLOCKED → Human Resolved → Approved</h2>'+
-      '<p>'+facts.length+' Nutrient DWS facts · '+assertions.length+' assertions · '+rd.record_hash+' · '+chain.data.detail+'</p>'+
-      '</div>';
+    document.getElementById('final').innerHTML='<div class="final"><h2>Extraction correct. Contradiction found. Human resolved. Approved.</h2><p>'+rd.facts_extracted+' Nutrient DWS facts · '+rd.assertions_checked+' checks · '+rd.record_hash+' · '+chain.d.detail+'</p></div>';
 
-  }catch(e){
-    log('err','FATAL: '+e.message);
-    document.getElementById('steps-area').innerHTML=renderStep(1,'Error','<span class="err">'+e.message+'</span>',false);
-  }
+  }catch(e){log('err','FATAL: '+e.message)}
   btn.disabled=false;btn.textContent='Run Again';
+}
+
+function resolve(decision,reason){
+  log('req','POST /v1/cases/'+CID+'/resolve');
+  fetch(API+'/v1/cases/'+CID+'/resolve',{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({assertion_id:'assert_coverage',decision:decision,reason:reason,actor_id:'procurement-reviewer'})
+  }).then(function(r){return r.json()}).then(function(d){
+    log('res','200 ('+d.state+')');
+    log('ok','Resolved: '+decision);
+    var steps=document.getElementById('steps').children;
+    for(var i=0;i<steps.length;i++){var t=steps[i].querySelector('.step-title');if(t&&t.textContent.indexOf('Human Review')>=0){
+      steps[i].className='step done';
+      t.innerHTML='Human resolved → <span class="ok">'+decision+'</span>';
+      steps[i].querySelector('.step-body').innerHTML='Decision: '+decision+'\nReason: '+reason+'\nActor: procurement-reviewer';
+    }}
+    if(window._reviewDone)window._reviewDone();
+  });
 }
 </script>
 </body>

@@ -150,6 +150,84 @@ def create_case(req: CreateCaseRequest):
     return {"case_id": case.case_id, "state": case.state.value}
 
 
+@app.get("/v1/cases")
+def list_cases():
+    """List all cases — the human review queue."""
+    result = []
+    for c in cases.values():
+        result.append({
+            "case_id": c.case_id,
+            "prompt": c.prompt,
+            "state": c.state.value,
+            "documents": len(c.documents),
+            "facts": len(c.facts),
+            "blocking_exceptions": c.blocking_exceptions,
+            "created_at": c.created_at,
+        })
+    return {"cases": result}
+
+
+@app.post("/v1/cases/{case_id}/extract")
+def extract_one(case_id: str):
+    """Extract facts from the next unprocessed document — one at a time for live progress."""
+    import time as _t
+    from src.providers import trace as vtrace
+    case = cases.get(case_id)
+    if not case:
+        raise HTTPException(404, "Case not found")
+    if case.state not in (CaseState.RECEIVED, CaseState.INGESTED, CaseState.EXTRACTED):
+        raise HTTPException(409, f"Case is {case.state.value} — cannot extract")
+
+    # Find next unprocessed doc
+    processed = {e.detail.get("doc_id") for e in case.audit_events if e.event_type == "DOC_EXTRACTED"}
+    next_doc = None
+    for d in case.documents:
+        if d.doc_id not in processed and d.raw_bytes:
+            next_doc = d
+            break
+    if not next_doc:
+        # All done — transition to EXTRACTED
+        if case.state == CaseState.INGESTED:
+            from src.engine.orchestrator import transition
+            transition(case, CaseState.EXTRACTED)
+        return {"case_id": case_id, "state": case.state.value, "extraction": None, "message": "All documents processed"}
+
+    # Extract one document
+    vtrace.set_current(case_id)
+    t0 = _t.time()
+    try:
+        from src.providers.nutrient import extract_from_document_sync
+        facts = extract_from_document_sync(next_doc)
+        case.facts.extend(facts)
+        elapsed = (_t.time() - t0) * 1000
+        # Record this doc as extracted
+        from src.models.domain import AuditEvent
+        evt = AuditEvent(case_id=case_id, event_type="DOC_EXTRACTED", actor="nutrient_dws",
+                         detail={"doc_id": next_doc.doc_id, "filename": next_doc.filename,
+                                 "facts": len(facts), "duration_ms": round(elapsed)})
+        evt.compute_hash(case.audit_events[-1].content_hash if case.audit_events else "")
+        case.audit_events.append(evt)
+        if case.state == CaseState.RECEIVED:
+            from src.engine.orchestrator import transition
+            transition(case, CaseState.INGESTED)
+        return {
+            "case_id": case_id,
+            "state": case.state.value,
+            "extraction": {
+                "doc_id": next_doc.doc_id,
+                "filename": next_doc.filename,
+                "facts_extracted": len(facts),
+                "duration_ms": round(elapsed),
+                "facts": [{"field": f.field_name, "value": f.value_raw, "confidence": f.confidence, "page": f.source_page} for f in facts],
+            },
+        }
+    except Exception as e:
+        elapsed = (_t.time() - t0) * 1000
+        return {"case_id": case_id, "state": case.state.value,
+                "extraction": {"doc_id": next_doc.doc_id, "filename": next_doc.filename,
+                               "error": str(e)[:200], "duration_ms": round(elapsed)}}
+
+
 @app.post("/v1/cases/use-case/{use_case_id}")
 def create_use_case(use_case_id: str):
     """Create a case pre-loaded with a specific use case's documents."""
@@ -236,6 +314,28 @@ def create_fixture_case():
     
     cases[case.case_id] = case
     return {"case_id": case.case_id, "state": case.state.value, "documents": len(case.documents)}
+
+
+@app.post("/v1/cases/{case_id}/check")
+def check_case(case_id: str):
+    """Run cross-document verification and classification — after extraction."""
+    case = cases.get(case_id)
+    if not case:
+        raise HTTPException(404, "Case not found")
+    if case.state not in (CaseState.EXTRACTED, CaseState.RECONCILED, CaseState.CHECKED):
+        raise HTTPException(409, f"Case is {case.state.value} — extract first")
+    try:
+        run_pipeline(case, domain="procurement", stop_after="CHECKED")
+    except ValueError as e:
+        raise HTTPException(422, str(e))
+    return {
+        "case_id": case.case_id,
+        "state": case.state.value,
+        "facts": len(case.facts),
+        "assertions": len(case.assertions),
+        "blocking_exceptions": case.blocking_exceptions,
+        "assertion_details": [a.to_dict() for a in case.assertions],
+    }
 
 
 @app.post("/v1/cases/{case_id}/run")
