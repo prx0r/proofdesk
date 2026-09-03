@@ -495,19 +495,9 @@ def serve_index():
     return HTMLResponse("<h1>ProofDesk</h1><p>Static files not found.</p>")
 
 
-@app.get("/app", response_class=HTMLResponse)
-@app.get("/app.html", response_class=HTMLResponse)
-def serve_app():
-    """Batch processing dashboard — the main product interface."""
-    app_path = os.path.join(STATIC_DIR, "app.html")
-    if os.path.exists(app_path):
-        return FileResponse(app_path)
-    return HTMLResponse("<h1>ProofDesk App</h1><p>app.html not found.</p>")
-
-
 @app.get("/demo", response_class=HTMLResponse)
 def serve_demo():
-    """Interactive demo page for judges — click through the 8-stage transaction."""
+    """Live demo — real Nutrient DWS API calls."""
     demo_path = os.path.join(STATIC_DIR, "demo.html")
     if os.path.exists(demo_path):
         return FileResponse(demo_path)
@@ -660,15 +650,6 @@ def batch_report(batch_id: str):
     if "error" in report:
         raise HTTPException(404, report["error"])
     return report
-
-
-@app.get("/batch", response_class=HTMLResponse)
-def serve_batch_dashboard():
-    """Serve the batch processing dashboard."""
-    batch_path = os.path.join(STATIC_DIR, "batch.html")
-    if os.path.exists(batch_path):
-        return FileResponse(batch_path)
-    return HTMLResponse("<h1>Batch Dashboard</h1><p>Not found</p>")
 
 
 # --- Demo tamper endpoints ---
